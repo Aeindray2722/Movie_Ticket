@@ -1,0 +1,1249 @@
+/* General Body Styling */
+body {
+     overflow-y: scroll;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0; /* Very light grey background */
+}
+
+/* --- Enhance Active Nav Link Visibility --- */
+.navbar-nav .nav-item .nav-link.active {
+    background-color: #8c72cf; /* Your purple active color */
+    color: white !important; /* Make text white for contrast */
+    border-radius: 5px; /* Slightly rounded corners for a button-like feel */
+    padding: 8px 15px; /* Add some padding to make it a clearer button area */
+    font-weight: bold; /* Already bold by Bootstrap, but good to ensure */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for depth */
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+/* Ensure hover state is different from active state, or at least visible */
+.navbar-nav .nav-item .nav-link:hover {
+    color: #f0f0f0 !important; /* Lighter color on hover for inactive links */
+
+}
+
+.navbar-nav .nav-item .nav-link.active:hover {
+    background-color: #7a60b9; /* A slightly darker purple on hover for active link */
+    color: white !important;
+}
+
+/* Adjust padding for non-active nav links if you add padding to active one */
+.navbar-nav .nav-item .nav-link:not(.active) {
+    padding: 8px 15px; /* Match padding of active link for consistent height */
+    margin: 0 5px; /* Match margin */
+}
+
+/* Adjust default Bootstrap active styles if they conflict */
+.navbar-light .navbar-nav .nav-link.active {
+    color: white; /* Ensure text is white even with Bootstrap's default */
+}
+
+/* Navbar Customization */
+.navbar {
+    background-color: #928785;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Main Movie Carousel Section */
+.main-movie-carousel {
+    background-color: #e8e8e8; /* Light grey background for this section */
+    min-height: 400px; /* Adjust as needed */
+    display: flex;
+    align-items: center;
+}
+
+.main-movie-carousel .carousel-item .row {
+    align-items: center;
+}
+
+.main-movie-carousel .movie-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.main-movie-carousel .movie-type {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Movie Sections (Now Showing, Coming Soon, Movie Trailer) */
+.movie-section {
+    background-color: #f8f8f8; /* Slightly darker grey for content sections */
+    padding: 30px 0;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.movie-card {
+    border: none; /* Remove default Bootstrap card border */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow */
+    transition: transform 0.2s ease-in-out;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 225px; /* Fixed height for consistent image size */
+    object-fit: cover; /* Ensure images cover the area */
+}
+
+/* Footer Styling */
+.footer {
+    background: linear-gradient(to right, #008080, #dc3545); /* Teal to Red gradient */
+    color: white;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    position: relative; /* For the triangle elements */
+    overflow: hidden; /* Hide overflow of triangles */
+}
+
+.footer h4 {
+    color: white;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.footer p {
+    margin-bottom: 5px;
+}
+
+.footer .form-control {
+    background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+}
+
+.footer .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer .btn-send {
+    background-color: #A126B7; /* Red color for send button */
+    border-color: #A126B7;
+    color: white;
+    padding: 8px 30px;
+    border-radius: 20px;
+    font-weight: bold;
+    float: right; /* Align to right as in the image */
+}
+
+.social-icons a {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    margin-right: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+/* Custom Triangles for Footer (More advanced CSS) */
+.footer::before,
+.footer::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+/* Example for the left triangle (needs careful positioning) */
+.footer::before {
+    border-width: 0 0 100px 100px; /* Adjust size */
+    border-color: transparent transparent #dc3545 transparent; /* Red border */
+    left: 40%; /* Adjust position */
+    transform: translateX(-50%);
+    z-index: 1; /* Ensure it's above the background */
+}
+
+/* Example for the right triangle (needs careful positioning) */
+.footer::after {
+    border-width: 0 100px 100px 0; /* Adjust size */
+    border-color: transparent #008080 transparent transparent; /* Teal border */
+    right: 40%; /* Adjust position */
+    transform: translateX(50%);
+    z-index: 1;
+}
+
+
+
+/* Example for background shapes if you add HTML elements for them */
+.footer-background-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Important */
+    z-index: 0; /* Behind content */
+}
+
+.footer-background-shapes .shape-1 {
+    position: absolute;
+    bottom: -50px; /* Adjust to move outside */
+    left: 20%; /* Adjust position */
+    width: 200px; /* Size of the shape */
+    height: 200px;
+    background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+    transform: rotate(45deg); /* Rotate for diamond/square shape */
+}
+
+.footer-background-shapes .shape-2 {
+    position: absolute;
+    top: -30px; /* Adjust to move outside */
+    right: 10%; /* Adjust position */
+    width: 150px;
+    height: 150px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 50%; /* Circle shape */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-movie-carousel .carousel-item .row {
+        flex-direction: column;
+    }
+    .main-movie-carousel .col-md-4, .main-movie-carousel .col-md-8 {
+        text-align: center !important;
+    }
+    .main-movie-carousel .movie-title {
+        font-size: 1.8rem;
+    }
+    .main-movie-carousel .movie-type {
+        font-size: 1rem;
+    }
+    .footer .meet-us-col, .footer .contact-us-col {
+        margin-bottom: 30px;
+    }
+}
+
+/* --- New Styles for "Now Showing" Page Content (Screenshot 242) --- */
+
+.now-showing-page-content {
+    background-color: #f8f8f8; /* A consistent background for the main content area */
+    padding-top: 20px;
+    padding-bottom: 40px; /* More padding at the bottom before footer */
+}
+
+.section-heading {
+    font-size: 2.5rem; /* Larger font for "Now Showing" */
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0;
+}
+
+.section-subheading {
+    font-size: 1.5rem; /* For "Today" */
+    font-weight: bold;
+    color: #8c72cf; /* Purple color for "Today" */
+    margin-top: -5px; /* Adjust proximity to "Now Showing" */
+}
+
+.search-bar-on-page .form-control {
+    border-radius: 20px; /* Rounded search input */
+    padding-left: 15px;
+    padding-right: 15px;
+    min-width: 200px; /* Ensure it's wide enough */
+}
+
+.search-bar-on-page .btn-outline-secondary {
+    border-radius: 50%; /* Circle button for search icon */
+    width: 38px; /* Fixed width */
+    height: 38px; /* Fixed height */
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-color: #ccc; /* Lighter border color */
+    color: #666; /* Icon color */
+}
+.search-bar-on-page .btn-outline-secondary:hover {
+    background-color: #f0f0f0; /* Light hover effect */
+}
+
+/* Filter Buttons */
+.filter-buttons .btn-filter {
+    background-color: #e0e0e0; /* Light grey background */
+    border: none;
+    border-radius: 20px; /* Rounded pills */
+    padding: 8px 20px;
+    margin-right: 10px;
+    margin-bottom: 10px; /* For wrapping */
+    color: #555;
+    font-weight: 600;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.filter-buttons .btn-filter:hover {
+    background-color: #d0d0d0;
+    color: #333;
+}
+
+.filter-buttons .btn-filter.active {
+    background-color: #8c72cf; /* Purple for active state */
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Subtle shadow for active */
+}
+/* Larger Movie Cards (Now Showing Grid) */
+.movie-card-lg {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out;
+    /* Ensure the entire card's row is a flex container for consistent height distribution */
+    /* This rule assumes your HTML structure has .row.g-0 directly inside .movie-card-lg */
+    /* If not, add display: flex; to .movie-card-lg itself */
+}
+
+.movie-card-lg:hover {
+    transform: translateY(-5px);
+}
+
+/* Add this new rule for the column containing the image */
+.movie-card-lg .col-md-4, /* Keep if you're using this column size for the image */
+.movie-card-lg .col-md-3, /* Adjust if you've changed the image column to col-md-3 */
+.movie-card-lg .col-md-2 { /* Adjust if you've changed the image column to col-md-2 */
+    /* This ensures the image container itself is square */
+    aspect-ratio: 1 / 1; /* This is the key: forces a 1:1 aspect ratio (square) */
+    overflow: hidden; /* Crucial to clip any part of the image or content that extends beyond the square */
+    display: flex; /* Use flexbox to center the image if it doesn't perfectly fill */
+    align-items: center; /* Vertically center the image within the square */
+    justify-content: center; /* Horizontally center the image within the square */
+}
+
+.movie-card-lg .movie-poster-lg {
+    border-radius: 10px 0 0 10px; /* Rounded corners only on the left side */
+    object-fit: cover; /* Ensures the image fills the square container, cropping if necessary */
+    height: 100%; /* Image fills the height of its parent (the square col-md-X) */
+    width: 100%; /* Image fills the width of its parent (the square col-md-X) */
+}
+
+.movie-card-lg .card-body {
+    padding: 15px;
+    /* Ensure card-body is a flex column to manage its content vertically */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space to push button to bottom */
+    height: 100%; /* Important: Make card-body take full height of its column for alignment */
+}
+
+.movie-card-lg .card-title-lg {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.movie-card-lg .card-text-lg {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: auto; /* Pushes the button to the bottom */
+}
+
+.movie-card-lg .btn-view-detail {
+    background-color: #8c72cf; /* Purple button */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    margin-top: auto; /* Ensures button sticks to the bottom */
+}
+
+.movie-card-lg .btn-view-detail:hover {
+    background-color: #7a60b9;
+}
+/* Pagination Styling */
+.pagination .page-item .page-link {
+    border-radius: 50% !important; /* Circular pagination links */
+    width: 38px; /* Fixed width */
+    height: 38px; /* Fixed height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 5px; /* Spacing between circles */
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #8c72cf; /* Purple active state */
+    border-color: #8c72cf;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #bbb;
+    background-color: #f8f8f8;
+    border-color: #eee;
+}
+
+/* Old movie card styles (if still used elsewhere for smaller cards, keep them) */
+.movie-card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+}
+
+.movie-card img {
+    width: 100%;
+    height: 225px;
+    object-fit: cover;
+}
+/* --- Movie Detail Page Styles (inspired by Screenshot 245.png) --- */
+
+.btn-back-to-list {
+    background-color: transparent;
+    border: none;
+    color: #8c72cf; /* Your purple color */
+    font-weight: bold;
+    font-size: 1.5rem;
+    transition: color 0.2s ease;
+}
+.btn-back-to-list:hover {
+    color: #6a57a0;
+}
+
+.movie-detail-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.movie-detail-poster-col {
+    /* Fixed width/height for the image container, or aspect-ratio */
+    /* To match screenshot, a portrait aspect ratio is ideal */
+    aspect-ratio: 1 / 1; /* Example for a common movie poster ratio */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa; /* Light background if image doesn't fill */
+}
+
+.movie-detail-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures poster fills the container, cropping if necessary */
+    border-radius: 10px 0 0 10px;
+}
+
+.movie-detail-body {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 400px; /* Ensure a minimum height for consistent layout */
+    /* Adjust this min-height to match the height of your movie-detail-poster-col */
+}
+
+.movie-detail-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.movie-detail-type,
+.movie-detail-actors {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.movie-detail-description {
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    max-height: 150px; /* Limit height if description can be very long */
+    overflow-y: auto; /* Add scroll if description is too long */
+}
+
+.movie-detail-rating .fas {
+    font-size: 1.5rem;
+    margin-right: 2px;
+}
+
+.btn-book-now {
+    background-color: #8c72cf; /* Your purple color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+.btn-book-now:hover {
+    background-color: #7a60b9;
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 40px;
+}
+
+.comments-heading {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.comment-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.comment-avatar {
+    font-size: 2.5rem;
+    color: #8c72cf; /* Purple avatar icon */
+}
+
+.comment-username {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 2px;
+}
+
+.comment-text {
+    color: #777;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.comment-input-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.comment-textarea {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    resize: vertical; /* Allow vertical resizing */
+}
+.comment-textarea:focus {
+    border-color: #8c72cf;
+    box-shadow: 0 0 0 0.25rem rgba(140, 114, 207, 0.25);
+    outline: none;
+}
+
+.btn-send-comment {
+    background-color: #8c72cf;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+.btn-send-comment:hover {
+    background-color: #7a60b9;
+}
+
+/*booking
+
+/* Date and Time Selection Styles */
+.selection-section {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn-date,
+.btn-time {
+    background-color: #f0f0f0;
+    color: #555;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    min-width: 80px; /* Ensure buttons have a minimum width */
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.btn-date.active,
+.btn-time.active,
+.btn-date:hover,
+.btn-time:hover {
+    background-color: #8c72cf; /* Your purple color */
+    color: white;
+    border-color: #8c72cf;
+}
+
+/* Cost Info Cards */
+.cost-info {
+    border: 1px solid #eee;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+.cost-info p {
+    margin-bottom: 0;
+}
+
+/* Seating Chart Styles */
+.seating-chart-container {
+    padding: 20px 0;
+}
+
+.seating-legend {
+    margin-bottom: 25px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.legend-color-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    margin-right: 8px;
+    border: 1px solid rgba(0,0,0,0.1); /* Subtle border for all boxes */
+}
+
+/* Specific background colors for legend and seats */
+.bg-danger { background-color: #dc3545 !important; } /* Not Available */
+.bg-success { background-color: #28a745 !important; } /* Selected */
+.bg-light-green { background-color: #d4edda !important; } /* Available (lighter green for subtle contrast) */
+
+
+.seat-layout {
+    background-color: #f4f4f4; /* Light grey background for the overall seat layout block */
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 30px 20px; /* More padding inside the seat layout box */
+    display: inline-flex; /* Keep it compact */
+    flex-wrap: nowrap; /* Prevent sections from wrapping */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* Inner shadow for depth */
+}
+
+.seat-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between rows */
+}
+
+.seat-row {
+    display: flex;
+    align-items: center;
+}
+
+.row-label {
+    font-weight: bold;
+    color: #333;
+    width: 20px; /* Fixed width for labels to align seats */
+    text-align: right;
+    margin-right: 5px;
+}
+
+.seat-cluster {
+    display: flex;
+    gap: 5px; /* Space between individual seats */
+}
+
+.seat {
+    width: 25px; /* Size of individual seat squares */
+    height: 25px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+}
+
+.seat-available {
+    background-color: #e9ecef; /* Light grey, or your preferred available color */
+    border-color: #ced4da;
+}
+.seat-available:hover {
+    background-color: #cce5ff; /* Light blue on hover */
+    border-color: #a3d9ff;
+}
+
+.seat-selected {
+    background-color: #28a745; /* Green for selected seats */
+    border-color: #218838;
+    color: white; /* If you add numbers/icons */
+}
+
+.seat-not-available {
+    background-color: #dc3545; /* Red for not available seats */
+    border-color: #c82333;
+    cursor: not-allowed;
+    opacity: 0.7; /* Slightly faded */
+}
+
+
+/* General button styling for Book now */
+
+
+/* General body background for the payment page */
+
+
+.payment-page-content {
+    background-color: #e0e0e0; /* A slightly darker grey for the section background */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    min-height: calc(100vh - var(--navbar-height) - var(--footer-height)); /* Adjust based on your nav/footer height */
+}
+
+/* Card styling */
+.payment-method-card,
+.payment-info-card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff; /* White card background */
+}
+
+.payment-method-title,
+.payment-info-title {
+    color: #343a40; /* Darker text for titles */
+    font-weight: bold;
+}
+
+.payment-method-item .method-name {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 0.2rem;
+}
+
+.payment-method-item .method-number {
+    color: #777;
+    font-size: 0.95rem;
+}
+
+/* Form input styling */
+.form-control,
+.form-select {
+    border-radius: 0.3rem;
+    border-color: #ced4da;
+    padding: 0.75rem 1rem;
+    background-color: #f0f0f0; /* Light grey input background */
+    color: #333;
+}
+
+.form-control::placeholder {
+    color: #888;
+}
+
+.total-amount-display {
+    background-color: #f0f0f0;
+    padding: 1rem;
+    border-radius: 0.3rem;
+    text-align: center;
+    color: #343a40;
+}
+
+/* Book Now Button */
+/* General body background for the history page */
+
+.history-page-content {
+    background-color: #e0e0e0; /* A slightly darker grey for the section background */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    min-height: calc(100vh - var(--navbar-height) - var(--footer-height)); /* Adjust based on your nav/footer height */
+}
+
+/* Card styling for the table container */
+.history-table-card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff; /* White card background */
+}
+
+/* Table styling */
+.history-table {
+    margin-bottom: 0; /* Remove default table bottom margin if within a card-body */
+}
+
+
+.history-table th {
+    background-color: #f0f0f0; /* Light grey background for table headers */
+    color: #343a40; /* Darker text for headers */
+    font-weight: bold;
+    border-bottom: 2px solid #dee2e6; /* Stronger bottom border for headers */
+}
+
+.history-table td {
+    vertical-align: middle; /* Vertically align cell content */
+    padding: 1rem 0.75rem; /* Adjust padding for cells */
+}
+
+/* Status Badges */
+.history-status-pending {
+    background-color: #ffc107 !important; /* Bootstrap yellow for warning */
+    color: #212529 !important; /* Dark text for yellow badge */
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+    border-radius: 0.25rem;
+}
+
+.history-status-reject {
+    background-color: #dc3545 !important; /* Bootstrap red for danger */
+    color: #fff !important;
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+    border-radius: 0.25rem;
+}
+
+.history-status-success {
+    background-color: #28a745 !important; /* Bootstrap green for success */
+    color: #fff !important;
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+    border-radius: 0.25rem;
+}
+
+/* Add more badge styles if you have other statuses */
+.history-status-processing {
+    background-color: #17a2b8 !important; /* Bootstrap info blue */
+    color: #fff !important;
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+    border-radius: 0.25rem;
+}
+
+.history-status-cancelled {
+    background-color: #6c757d !important; /* Bootstrap secondary grey */
+    color: #fff !important;
+    font-weight: bold;
+    padding: 0.5em 0.8em;
+    border-radius: 0.25rem;
+}
+
+/* General body background for the about us page */
+
+.about-us-page-content {
+    background-color: #e0e0e0; /* A slightly darker grey for the section background */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    min-height: calc(100vh - var(--navbar-height) - var(--footer-height)); /* Adjust based on your nav/footer height */
+}
+
+/* Card styling for sections */
+.about-us-card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff; /* White card background */
+}
+
+.about-us-section-title {
+    color: #343a40; /* Darker text for titles */
+    font-weight: bold;
+    margin-bottom: 1.5rem; /* More space below titles */
+}
+
+.about-us-text {
+    color: #555;
+    line-height: 1.6;
+}
+
+.about-us-image {
+    max-height: 250px; /* Adjust as needed */
+    object-fit: cover;
+    width: 100%; /* Ensure it fills its column */
+}
+/* Team Member Styling */
+.team-member {
+    padding: 1rem;
+}
+
+.team-member img { /* Target the img directly inside .team-member */
+    width: 60px; /* Make it smaller, adjust as needed */
+    height: 60px; /* Make it smaller, adjust as needed */
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+    border-radius: 50%; /* Makes the image circular if it's square */
+    display: block; /* Ensures it takes full width and centers */
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0.5rem; /* Add some space below the image */
+    border: 2px solid #ddd; /* Optional: Add a subtle border */
+}
+
+/* If you are using font-awesome icons for some members, keep this: */
+.team-member-avatar { /* This targets the Font Awesome icon for avatar */
+    font-size: 3rem; /* Slightly smaller icon size to match smaller images */
+    color: #888; /* Grey color for placeholder avatar */
+    display: block; /* Ensure it takes full width and centers */
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0.5rem; /* Consistent spacing with images */
+}
+
+
+.team-member-name {
+    font-weight: bold;
+    color: #343a40;
+    margin-top: 0.5rem;
+    margin-bottom: 0.2rem;
+}
+
+.team-member-role {
+    color: #777;
+    font-size: 0.9rem;
+}
+
+/* Custom Bootstrap column for 5 items in a row (for team section) */
+/* This handles 5 columns on large screens */
+@media (min-width: 992px) {
+    .col-lg-2-4 {
+        flex: 0 0 auto;
+        width: 20%; /* 100% / 5 = 20% */
+    }
+}
+
+
+/* Main Content Area */
+.main-content-container {
+    padding-left: 1.5rem; /* Add some left padding to separate from sidebar */
+}
+
+.profile-title {
+    color: #343a40;
+    font-weight: bold;
+    margin-bottom: 0; /* Align with header user info */
+}
+
+.user-info-header {
+    display: flex;
+    align-items: center;
+    color: #343a40;
+    font-weight: bold;
+}
+
+.user-avatar-header {
+    font-size: 2.5rem; /* Large avatar icon for header */
+    color: #888; /* Grey color for placeholder avatar */
+}
+
+.username-header {
+    font-size: 1.2rem;
+}
+
+/* Account Info Card */
+.account-info-card {
+    margin-left: 250px;
+    
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    background-color: #fff; /* White card background */
+}
+
+.account-info-title {
+    color: #343a40;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem !important; /* Ensure spacing below title */
+}
+
+.role-text {
+    color: #dc3545; /* Red color for (Role) as in image */
+    font-size: 0.9em;
+    font-weight: normal;
+}
+
+.profile-avatar-large {
+    font-size: 6rem; /* Very large avatar icon */
+    color: #888; /* Grey color for placeholder avatar */
+    display: block;
+    margin: 0 auto;
+}
+
+.profile-details p {
+    margin-bottom: 0.8rem;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.profile-details strong {
+    color: #000;
+}
+
+/* Buttons */
+.btn-change-password,
+.btn-edit-profile {
+    background-color: #8c72cf; /* Matching the brown/red theme */
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.3rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-change-password:hover,
+.btn-edit-profile:hover {
+    background-color: #7a60b9; /* Darker on hover */
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) { /* On small screens, stack sidebar and content */
+    .sidebar-container {
+        padding-right: 15px; /* Re-add default padding */
+        margin-bottom: 1.5rem; /* Space below sidebar */
+    }
+    .main-content-container {
+        padding-left: 15px; /* Re-add default padding */
+    }
+    .sidebar-nav.card {
+        height: auto; /* Allow sidebar to collapse height */
+        min-height: auto;
+    }
+    .profile-avatar-large {
+        font-size: 5rem; /* Slightly smaller avatar on mobile */
+    }
+}
+
+.change-password-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between password input fields */
+    padding: 20px; /* Add some padding inside the form content */
+}
+
+.change-password-form-content .form-group {
+    margin-bottom: 0; /* Remove default form-group margin if present */
+}
+
+.change-password-form-content .form-control {
+    width: 100%; /* Make inputs take full width */
+    max-width: 400px; /* Limit input width as seen in the image */
+    padding: 12px 15px; /* Slightly larger padding for inputs */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #f8f9fa;
+    color: #343a40;
+    box-sizing: border-box; /* Include padding and border in element's total width/height */
+}
+
+.change-password-form-content .form-control::placeholder {
+    color: #6c757d; /* Placeholder color */
+}
+
+.change-password-form-content .form-control:focus {
+    border-color: #A126B7;
+    box-shadow: 0 0 0 0.2rem rgba(161, 38, 183, 0.25);
+    outline: none;
+}
+.profile-card-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px; /* Increased max-width to make the card bigger */
+    margin: 40px auto;
+    border: 1px solid #ced4da;
+}
+.btn-change-password-submit {
+    background-color: #8c72cf; /* Purple color from your theme */
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    align-self: flex-start; /* Align button to the left */
+    margin-top: 10px; /* Space from last input field */
+}
+
+.btn-change-password-submit:hover {
+    background-color: #7a60b9; /* Darker purple on hover */
+}
+
+.profile-header-text {
+    background-color: #f1eaea;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    margin: -30px -30px 20px -30px;
+}
+
+.profile-header-text h4 {
+    color: #343a40;
+    margin-bottom: 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.profile-header-text .role-text {
+    color: #dc3545;
+    font-size: 0.8em;
+    margin-left: 8px;
+    font-weight: normal;
+}
+
+.profile-content {
+    display: flex;
+    align-items: flex-start; /* Changed to flex-start to align top, not center */
+    margin-bottom: 0; /* Remove bottom margin here, it will be on the inner div */
+}
+
+.profile-image-wrapper {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex; /* Kept display flex to center content if it's an icon, but img will just fill */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-right: 30px;
+    border: 1px solid #ced4da;
+}
+
+.profile-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-edit-form {
+    flex-grow: 1; /* Allow the form to take remaining space */
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between form groups */
+}
+
+.form-group-inline {
+    display: flex;
+    gap: 15px; /* Space between name and email inputs */
+}
+
+.form-group-inline .form-control {
+    flex: 1; /* Allow inputs to grow and share space */
+}
+
+.form-group .form-control,
+.form-group-inline .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 1em;
+    color: #343a40;
+    background-color: #f8f9fa; /* Light background for inputs */
+}
+
+.form-group .form-control:focus,
+.form-group-inline .form-control:focus {
+    border-color: #A126B7; /* Highlight on focus */
+    box-shadow: 0 0 0 0.2rem rgba(161, 38, 183, 0.25);
+    outline: none;
+}
+
+.profile-image-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the image and choose file section */
+    flex-shrink: 0;
+    margin-right: 30px; /* Space between image section and form */
+}
+
+
+
+.choose-file-section {
+    display: flex;
+    align-items: center;
+    margin-top: 15px; /* Space between image and file input */
+    font-size: 0.9em;
+}
+
+.custom-file-upload {
+    border: 1px solid #ced4da;
+    display: inline-block;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    color: #343a40;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.custom-file-upload:hover {
+    background-color: #e2e6ea;
+}
+
+.choose-file-section input[type="file"] {
+    display: none; /* Hide the default file input */
+}
+
+.file-name-display {
+    margin-left: 10px;
+    color: #6c757d;
+    white-space: nowrap; /* Prevent file name from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis for long names */
+    max-width: 120px; /* Limit width of file name display */
+}
+.content-area {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+         .back-arrow-container {
+            margin-bottom: 20px;
+            /* Space between back arrow and the card */
+            padding-left: 10px;
+            /* Small padding to align with the card content */
+        }
+
+        .back-arrow-container a {
+            color: #333;
+            text-decoration: none;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-arrow-container i {
+            font-size: 24px;
+            color: #555;
+        }

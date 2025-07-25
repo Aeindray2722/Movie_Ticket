@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMax - Premium Movie Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 30%, #16213e 70%, #0f3460 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(10px) rotate(-1deg); }
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .nav-logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: logoGlow 3s ease-in-out infinite alternate;
+            cursor: pointer;
+        }
+
+        @keyframes logoGlow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(69, 183, 209, 0.5)); }
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link:hover {
+            background: rgba(78, 205, 196, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(78, 205, 196, 0.3));
+            border: 1px solid rgba(78, 205, 196, 0.5);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - 160px);
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: heroGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroGlow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.4)); }
+            to { filter: drop-shadow(0 0 40px rgba(69, 183, 209, 0.6)); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 25px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .step:hover::before {
+            left: 100%;
+        }
+
+        .step.active {
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(78, 205, 196, 0.3));
+            transform: scale(1.05);
+            border: 1px solid rgba(78, 205, 196, 0.5);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.2);
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.3), rgba(78, 205, 196, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .section {
+            display: none;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .movie-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 25px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .movie-card:hover::before {
+            opacity: 1;
+        }
+
+        .movie-card.selected {
+            border: 2px solid #4ecdc4;
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(78, 205, 196, 0.3);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .movie-poster::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: posterShine 4s infinite;
+        }
+
+        @keyframes posterShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .movie-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .movie-details {
+            color: #b0b0b0;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .movie-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Cinema Hall Styles */
+        .cinema-hall {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .screen {
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            height: 12px;
+            border-radius: 60px;
+            margin: 0 auto 60px;
+            width: 85%;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.4);
+            animation: screenGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes screenGlow {
+            from { box-shadow: 0 15px 30px rgba(78, 205, 196, 0.4); }
+            to { box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4); }
+        }
+
+        .screen::after {
+            content: 'SCREEN';
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #a0a0a0;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        .seats-container {
+            margin-bottom: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 18px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .row-label {
+            width: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0a0a0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .seat {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .seat.available {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #a0a0a0;
+        }
+
+        .seat.available:hover {
+            background: rgba(78, 205, 196, 0.6);
+            transform: scale(1.15);
+            color: white;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .seat.selected {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.6);
+            color: white;
+        }
+
+        .seat.occupied {
+            background: linear-gradient(45deg, #ff6b6b, #e55353);
+            cursor: not-allowed;
+            color: white;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-seat {
+            width: 25px;
+            height: 25px;
+            border-radius: 6px;
+        }
+
+        .summary {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            padding: 40px;
+            border-radius: 25px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.1rem;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            padding: 18px 45px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .confirmation {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .success-icon {
+            font-size: 6rem;
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            animation: successBounce 1.5s ease-in-out;
+        }
+
+        @keyframes successBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-40px); }
+            60% { transform: translateY(-20px); }
+        }
+
+        .confirmation h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ticket {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            border-radius: 25px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 2px dashed #4ecdc4;
+            position: relative;
+            backdrop-filter: blur(20px);
+        }
+
+        .ticket::before,
+        .ticket::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #0f0f23;
+        }
+
+        .ticket::before { left: -12px; }
+        .ticket::after { right: -12px; }
+
+        .ticket h3 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #4ecdc4;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95), rgba(26, 26, 46, 0.95));
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 60px 0 30px;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #b0b0b0;
+            text-decoration: none;
+            line-height: 1.8;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #4ecdc4;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(15, 15, 35, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 30px 0;
+                transition: top 0.3s ease;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .nav-menu.active {
+                top: 100%;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            .movies-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .step-indicator {
+                gap: 15px;
+            }
+
+            .step {
+                padding: 12px 20px;
+            }
+
+            .seat {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .legend {
+                gap: 20px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">🎬 CineMax</div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item"><a href="#" class="nav-link active">🎪 Book Tickets</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">🎬 Movies</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">🎭 Theaters</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">🎫 My Bookings</a></li>
+                <li class="nav-item"><a href="#" class="nav-link">👤 Profile</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="hero-section">
+                <h1 class="hero-title">Premium Cinema Experience</h1>
+                <p class="hero-subtitle">Book your favorite movies with the ultimate comfort</p>
+                
+                <div class="step-indicator">
+                    <div class="step active" id="step1">
+                        <div class="step-number">1</div>
+                        <span>Select Movie</span>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-number">2</div>
+                        <span>Choose Seats</span>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-number">3</div>
+                        <span>Confirmation</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1: Movie Selection -->
+            <div class="section active" id="movieSection">
+                <div class="movies-grid">
+                    <div class="movie-card" data-movie="avengers" data-price="15">
+                        <div class="movie-poster">🦸‍♂️</div>
+                        <div class="movie-title">Avengers: Endgame</div>
+                        <div class="movie-details">Action • Adventure • Drama<br>3h 1m • PG-13<br>📅 Today 7:00 PM - 10:01 PM</div>
+                        <div class="movie-price">$15.00</div>
+                    </div>
+                    
+                    <div class="movie-card" data-movie="inception" data-price="12">
+                        <div class="movie-poster">🌀</div>
+                        <div class="movie-title">Inception</div>
+                        <div class="movie-details">Sci-Fi • Thriller • Mystery<br>2h 28m • PG-13<br>📅 Today 8:30 PM - 10:58 PM</div>
+                        <div class="movie-price">$12.00</div>
+                    </div>
+                    
+                    <div class="movie-card" data-movie="joker" data-price="14">
+                        <div class="movie-poster">🃏</div>
+                        <div class="movie-title">Joker</div>
+                        <div class="movie-details">Crime • Drama • Thriller<br>2h 2m • R<br>📅 Today 9:15 PM - 11:17 PM</div>
+                        <div class="movie-price">$14.00</div>
+                    </div>
+                    
+                    <div class="movie-card" data-movie="dune" data-price="16">
+                        <div class="movie-poster">🏜️</div>
+                        <div class="movie-title">Dune</div>
+                        <div class="movie-details">Sci-Fi • Adventure • Drama<br>2h 35m • PG-13<br>📅 Today 7:45 PM - 10:20 PM</div>
+                        <div class="movie-price">$16.00</div>
+                    </div>
+
+                    <div class="movie-card" data-movie="spider" data-price="13">
+                        <div class="movie-poster">🕷️</div>
+                        <div class="movie-title">Spider-Man: No Way Home</div>
+                        <div class="movie-details">Action • Adventure • Fantasy<br>2h 28m • PG-13<br>📅 Today 6:30 PM - 8:58 PM</div>
+                        <div class="movie-price">$13.00</div>
+                    </div>
+
+                    <div class="movie-card" data-movie="batman" data-price="17">
+                        <div class="movie-poster">🦇</div>
+                        <div class="movie-title">The Batman</div>
+                        <div class="movie-details">Action • Crime • Drama<br>2h 56m • PG-13<br>📅 Today 8:00 PM - 10:56 PM</div>
+                        <div class="movie-price">$17.00</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn" onclick="goToSeats()" id="selectMovieBtn" disabled>
+                        Continue to Seat Selection
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Seat Selection -->
+            <div class="section" id="seatSection">
+                <div class="cinema-hall">
+                    <div class="screen"></div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-seat available" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);"></div>
+                            <span>Available</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-seat selected" style="background: linear-gradient(45deg, #4ecdc4, #45b7d1);"></div>
+                            <span>Selected</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-seat occupied" style="background: linear-gradient(45deg, #ff6b6b, #e55353);"></div>
+                            <span>Occupied</span>
+                        </div>
+                    </div>
+                    
+                    <div class="seats-container" id="seatsContainer">
+                        <!-- Seats will be generated dynamically -->
+                    </div>
+                </div>
+                
+                <div class="summary" id="summary" style="display: none;">
+                    <div class="summary-row">
+                        <span>🎬 Movie:</span>
+                        <span id="selectedMovie">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>🪑 Seats:</span>
+                        <span id="selectedSeats">-</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>💰 Price per ticket:</span>
+                        <span id="ticketPrice">$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>💳 Total:</span>
+                        <span id="totalPrice">$0.00</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="goBackToMovies()">← Back</button>
+                    <button class="btn" onclick="bookTickets()" id="bookBtn" disabled>Book Tickets 🎫</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div class="section" id="confirmationSection">
+                <div class="confirmation">
+                    <div class="success-icon">🎉</div>
+                    <h1>Booking Confirmed!</h1>
+                    <p>Your tickets have been successfully booked. Enjoy your movie!</p>
+                    
+                    <div class="ticket">
+                        <h3>🎫 Your Digital Ticket</h3>
+                        <div class="summary-row">
+                            <span>🎬 Movie:</span>
+                            <span id="confirmedMovie">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>🪑 Seats:</span>
+                            <span id="confirmedSeats">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>⏰ Show Time:</span>
+                            <span id="confirmedTime">-</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>🏢 Theater:</span>
+                            <span>CineMax IMAX Theater 1</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>💳 Total Paid:</span>
+                            <span id="confirmedTotal">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>🎟️ Booking ID:</span>
+                            <span id="bookingId">-</span>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="downloadTicket()">📱 Download Ticket</button>
+                        <button class="btn" onclick="startOver()">🎬 Book Another Movie</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🎬 CineMax</h3>
+                <p>Experience movies like never before with our premium theaters, cutting-edge technology, and unmatched comfort.</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon">📘</a>
+                    <a href="#" class="social-icon">🐦</a>
+                    <a href="#" class="social-icon">📷</a>
+                    <a href="#" class="social-icon">🎵</a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#">🎪 Book Tickets</a></li>
+                    <li><a href="#">🎬 Now Showing</a></li>
+                    <li><a href="#">🔜 Coming Soon</a></li>
+                    <li><a href="#">🎭 Theaters</a></li>
+                    <li><a href="#">💰 Offers</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#">❓ Help Center</a></li>
+                    <li><a href="#">📞 Contact Us</a></li>
+                    <li><a href="#">🎫 My Bookings</a></li>
+                    <li><a href="#">💳 Refund Policy</a></li>
+                    <li><a href="#">🛡️ Privacy Policy</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <p>📍 123 Cinema Street<br>Hollywood, CA 90028</p>
+                <p>📞 +1 (555) 123-CINE</p>
+                <p>✉️ info@cinemax.com</p>
+                <p>⏰ Open 24/7</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 CineMax. All rights reserved. | Designed with ❤️ for movie lovers</p>
+        </div>
+    </footer>
+
+    <script>
+        let selectedMovie = null;
+        let selectedSeats = [];
+        let movieData = {
+            'avengers': { name: 'Avengers: Endgame', price: 15, time: '7:00 PM - 10:01 PM' },
+            'inception': { name: 'Inception', price: 12, time: '8:30 PM - 10:58 PM' },
+            'joker': { name: 'Joker', price: 14, time: '9:15 PM - 11:17 PM' },
+            'dune': { name: 'Dune', price: 16, time: '7:45 PM - 10:20 PM' },
+            'spider': { name: 'Spider-Man: No Way Home', price: 13, time: '6:30 PM - 8:58 PM' },
+            'batman': { name: 'The Batman', price: 17, time: '8:00 PM - 10:56 PM' }
+        };
+
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Movie selection
+        document.querySelectorAll('.movie-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.movie-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedMovie = this.dataset.movie;
+                document.getElementById('selectMovieBtn').disabled = false;
+            });
+        });
+
+        function goToSeats() {
+            if (!selectedMovie) return;
+            
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('seatSection').classList.add('active');
+            
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step2').classList.add('active');
+            
+            generateSeats();
+            updateSummary();
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function generateSeats() {
+            const container = document.getElementById('seatsContainer');
+            container.innerHTML = '';
+            
+            const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+            const seatsPerRow = 14;
+            
+            // Randomly occupied seats for realistic experience
+            const occupiedSeats = [];
+            for (let i = 0; i < 25; i++) {
+                const row = rows[Math.floor(Math.random() * rows.length)];
+                const seat = Math.floor(Math.random() * seatsPerRow) + 1;
+                const seatId = `${row}${seat}`;
+                if (!occupiedSeats.includes(seatId)) {
+                    occupiedSeats.push(seatId);
+                }
+            }
+            
+            rows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                
+                const label = document.createElement('div');
+                label.className = 'row-label';
+                label.textContent = row;
+                rowDiv.appendChild(label);
+                
+                for (let i = 1; i <= seatsPerRow; i++) {
+                    const seat = document.createElement('button');
+                    seat.className = 'seat';
+                    seat.dataset.seat = `${row}${i}`;
+                    seat.textContent = i;
+                    
+                    if (occupiedSeats.includes(`${row}${i}`)) {
+                        seat.classList.add('occupied');
+                    } else {
+                        seat.classList.add('available');
+                        seat.addEventListener('click', toggleSeat);
+                    }
+                    
+                    rowDiv.appendChild(seat);
+                    
+                    // Add gap in the middle for aisle
+                    if (i === 7) {
+                        const gap = document.createElement('div');
+                        gap.style.width = '50px';
+                        rowDiv.appendChild(gap);
+                    }
+                }
+                
+                container.appendChild(rowDiv);
+            });
+        }
+
+        function toggleSeat() {
+            const seatId = this.dataset.seat;
+            
+            if (this.classList.contains('selected')) {
+                this.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(s => s !== seatId);
+            } else {
+                // Limit to 8 seats maximum
+                if (selectedSeats.length < 8) {
+                    this.classList.add('selected');
+                    selectedSeats.push(seatId);
+                } else {
+                    alert('🎫 Maximum 8 seats can be selected at once!');
+                    return;
+                }
+            }
+            
+            updateSummary();
+            document.getElementById('bookBtn').disabled = selectedSeats.length === 0;
+        }
+
+        function updateSummary() {
+            if (selectedSeats.length > 0) {
+                document.getElementById('summary').style.display = 'block';
+                document.getElementById('selectedMovie').textContent = movieData[selectedMovie].name;
+                document.getElementById('selectedSeats').textContent = selectedSeats.sort().join(', ');
+                document.getElementById('ticketPrice').textContent = `${movieData[selectedMovie].price}.00`;
+                document.getElementById('totalPrice').textContent = `${(movieData[selectedMovie].price * selectedSeats.length)}.00`;
+            } else {
+                document.getElementById('summary').style.display = 'none';
+            }
+        }
+
+        function bookTickets() {
+            if (selectedSeats.length === 0) return;
+            
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('confirmationSection').classList.add('active');
+            
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step3').classList.add('active');
+            
+            // Fill confirmation details
+            document.getElementById('confirmedMovie').textContent = movieData[selectedMovie].name;
+            document.getElementById('confirmedSeats').textContent = selectedSeats.sort().join(', ');
+            document.getElementById('confirmedTime').textContent = movieData[selectedMovie].time;
+            document.getElementById('confirmedTotal').textContent = `${(movieData[selectedMovie].price * selectedSeats.length)}.00`;
+            document.getElementById('bookingId').textContent = 'CM' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Confetti effect (simple version)
+            setTimeout(() => {
+                for (let i = 0; i < 50; i++) {
+                    createConfetti();
+                }
+            }, 500);
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.background = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'][Math.floor(Math.random() * 4)];
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.top = '-10px';
+            confetti.style.zIndex = '1000';
+            confetti.style.borderRadius = '50%';
+            confetti.style.pointerEvents = 'none';
+            
+            document.body.appendChild(confetti);
+            
+            const animation = confetti.animate([
+                { transform: 'translateY(0px) rotate(0deg)', opacity: 1 },
+                { transform: `translateY(${window.innerHeight + 100}px) rotate(360deg)`, opacity: 0 }
+            ], {
+                duration: 3000,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            });
+            
+            animation.onfinish = () => confetti.remove();
+        }
+
+        function downloadTicket() {
+            alert('🎫 Ticket downloaded successfully! Check your downloads folder.');
+        }
+
+        function goBackToMovies() {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('movieSection').classList.add('active');
+            
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step1').classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startOver() {
+            selectedMovie = null;
+            selectedSeats = [];
+            
+            document.querySelectorAll('.movie-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('selectMovieBtn').disabled = true;
+            document.getElementById('bookBtn').disabled = true;
+            
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('movieSection').classList.add('active');
+            
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step1').classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Navbar scroll effect
+        let lastScrollTop = 0;
+        const navbar = document.querySelector('.navbar');
+
+        window.addEventListener('scroll', function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                navbar.style.transform = 'translateY(-100%)';
+            } else {
+                navbar.style.transform = 'translateY(0)';
+            }
+            
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        });
+
+        // Add smooth scrolling for all internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

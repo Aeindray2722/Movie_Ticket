@@ -1,0 +1,1113 @@
+body {
+    display: flex; /* This is correct for side-by-side layout */
+    min-height: 100vh;
+    margin: 0; /* Ensures no default body margin is pushing things */
+    background-color: #f0f2f5;
+}
+
+#sidebar {
+    width: 250px;
+    background-color: #eae5e4;
+    color: #000;
+    flex-shrink: 0; /* Prevents sidebar from shrinking */
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    /* Ensure no right margin pushing content away */
+    margin-right: 0; /* Explicitly set to 0 if unsure */
+}
+
+#sidebar .nav {
+    flex-grow: 1;
+}
+
+#sidebar .nav-item.mt-auto {
+    margin-top: auto !important;
+}
+
+#sidebar .nav-link {
+    color: #000;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+}
+
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+    color: white;
+    /* Text color for active/hover state */
+    background-color: #928785;
+    /* A darker shade of the sidebar color for contrast */
+    border-left: 5px solid white;
+    /* White highlight for active link */
+}
+
+#sidebar .nav-link i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+
+.main-content-wrapper {
+    flex-grow: 1; /* Allows it to take up remaining space */
+    display: flex;
+    flex-direction: column;
+    /* Ensure no left margin pulling it away */
+    margin-left: 0; /* Explicitly set to 0 if unsure */
+}
+
+.main-content-wrap {
+    flex-grow: 1; /* Allows it to take up remaining space */
+    display: flex;
+    flex-direction: column;
+    /* Ensure no left margin pulling it away */
+    margin-left: 20px; /* Explicitly set to 0 if unsure */
+}
+
+#content {
+    flex-grow: 1;
+    padding: 20px;
+    /* If you want more space on the left for form-card, use padding-left here */
+    /* padding-left: 40px; */ /* Example for Option 1 discussed previously */
+    overflow-y: auto;
+}
+
+.navbar-admin {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px 30px;
+    width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* DOUBLE CHECK: Ensure no margin-bottom is here if you still see a gap */
+    /* margin-bottom: 0; */
+}
+
+/* This is the class we need to adjust */
+.dashboard-content {
+    padding: 30px; /* Padding for the entire content area */
+    flex-grow: 1; /* Allows dashboard content to fill remaining space below navbar */
+    overflow-y: auto; /* Enable scrolling for dashboard content if it overflows */
+}
+
+
+.dashboard-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.dashboard-card h5 {
+    color: #7d6c76;
+    font-size: 1em;
+    margin-bottom: 10px;
+}
+
+.dashboard-card h3 {
+    color: #343a40;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+
+.recent-bookings-table {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+
+.table thead th {
+    background-color: #B0A6A4;
+    color: black;
+}
+/* .table {
+  border: 0px ;
+} */
+
+.table tbody tr:hover {
+    background-color: #f8f9fa; /* Keeping your original hover color */
+}
+
+.table th,
+.table td {
+    vertical-align: middle; /* Align text vertically in table cells */
+}
+
+/* Custom CSS to shift the dropdown menu to the left */
+.custom-dropdown-left-shift {
+    right: auto;
+    /* Ensure it doesn't stick to the right edge */
+    left: 0;
+    /* Align with the left edge of the dropdown toggle */
+    transform: translateX(-50px);
+    /* Adjust this value to shift it left. Experiment! */
+    /* -50px is a starting point, you might need more or less. */
+}
+
+.dropdown-menu {
+    z-index: 1050; /* Bootstrap default, ensures above navbar */
+}
+
+
+/* Adjustments for the logout button within the dropdown */
+.dropdown-menu .dropdown-item .btn-dark {
+    background-color: #dc3545;
+    /* Bootstrap danger color for logout */
+    border-color: #dc3545;
+    color: white !important;
+    /* Ensure text is white */
+}
+
+.dropdown-menu .dropdown-item .btn-dark:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.form-card {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    /* Add margin-left to push it further from the left edge */
+    flex-grow: 1;
+    /* Allows dashboard content to fill remaining space below navbar */
+    overflow-y: auto;
+    /* This margin will be in addition to the #content's padding */
+}
+
+/* ... all your other CSS remains the same ... */
+.profile-header {
+    background-color: #f1eaea; /* Lighter background for header */
+    padding: 15px 30px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end; /* Align to the right */
+    align-items: center;
+}
+
+.profile-header .admin-info {
+    display: flex;
+    align-items: center;
+}
+
+.profile-header .admin-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.image-placeholder {
+    width: 150px;
+    height: 150px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+    color: #6c757d;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    overflow: hidden;
+    /* For actual image */
+}
+
+.image-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.choose-file-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.choose-file-section input[type="file"] {
+    display: none;
+    /* Hide default file input */
+}
+
+.custom-file-upload {
+    border: 1px solid #ced4da;
+    display: inline-block;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+}
+
+.file-name-display {
+    margin-left: 10px;
+    color: #6c757d;
+}
+
+.movie-button .btn-add-movie {
+    background-color: #A126B7;
+    /* Color from the image */
+    color: white;
+    border: none;
+    padding: 7px 25px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.movie-button .btn-add-movie:hover {
+    background-color: #8B1F9E;
+}
+
+/* --- Specific styles for the "Movie Type" section (added from above) --- */
+.dashboard-content {
+    padding: 30px;
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: #f0f2f5;
+            /* Matches the main background from the image */
+    }
+
+        /* --- Specific styles for the "Movie Type" section (added from above) --- */
+        .movie-type-container {
+            display: flex;
+            gap: 30px;
+        }
+
+/* This is the specific class causing the gap with the navbar-admin */
+
+
+.movie-type-form-card,
+.movie-type-list-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+}
+
+.movie-type-form-card {
+    flex: 0 0 350px;
+    max-width: 350px;
+    flex-grow: 1;
+    /* Allows dashboard content to fill remaining space below navbar */
+    overflow-y: auto;
+}
+
+.movie-type-list-card {
+    flex-grow: 1;
+}
+
+.movie-type-form-card h4,
+.movie-type-list-card h4 {
+    color: #343a40;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+
+.movie-type-form-card .form-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 10px 15px;
+    font-size: 1em;
+
+}
+
+.movie-type-form-card .btn-add-movie-type {
+    background-color: #A126B7;
+    /* Color from the image */
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+
+}
+
+.movie-type-form-card .btn-add-movie-type:hover {
+    background-color: #8B1F9E;
+}
+
+.movie-type-list-card .table thead th {
+    background-color: #B0A6A4;
+    color: black;
+}
+
+.movie-type-list-card .table tbody td {
+    vertical-align: middle;
+}
+
+.movie-type-list-card .table .btn-action {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin: 0 5px;
+    padding: 0;
+}
+
+.movie-type-list-card .table .btn-action.edit {
+    color: #007bff;
+}
+
+.movie-type-list-card .table .btn-action.delete {
+    color: #dc3545;
+}
+.movie-list-container {
+            margin-left: 20px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .table img.movie-thumb {
+            width: 50px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        
+
+        .movie-list-container .btn-movie-add {
+            background-color: #A126B7;
+            /* Color from the image */
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .movie-list-container .btn-movie-add:hover {
+            background-color: #8B1F9E;
+        }
+        .list-content-wrapper{
+             flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+        .type-content-wrapper{
+                flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+        .trailer-content-wrapper{
+             flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+         .trailer-form-card {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ced4da;
+            height: fit-content;
+            width: 40%;
+            /* Adjust width as needed */
+            min-width: 350px;
+        }
+        .trailer-content-section {
+            display: flex;
+            gap: 20px;
+            padding: 20px; /* This padding creates the space from the sidebar */
+            width: 100%; /* Ensure it fills the width */
+            box-sizing: border-box; /* Include padding in the element's total width and height */
+        }
+    .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+        }
+        
+        .video-placeholder {
+            width: 150px;
+            height: 100px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            color: #6c757d;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .choose-file-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .choose-file-section input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            border: 1px solid #ced4da;
+            display: inline-block;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+
+        .file-name-display {
+            margin-left: 10px;
+            color: #6c757d;
+        }
+
+        
+
+        .btn-add-trailer {
+            background-color: #A126B7;
+            color: white;
+            border: none;
+            padding: 7px 25px;
+        }
+
+        .btn-add-trailer:hover {
+            background-color: #8B1F9E;
+            color: white;
+        }
+       
+        .seat-content-section {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .seat-form-card {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ced4da;
+            height: fit-content;
+            width: 40%;
+            min-width: 350px;
+        }
+
+        .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+        }
+
+        
+  
+        .seat-content-wrapper{
+                flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+         .payment-content-wrapper{
+                flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+        
+        .payment-content-section {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .payment-form-card {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ced4da;
+            height: fit-content;
+            width: 40%;
+            min-width: 350px;
+        }
+
+        
+        .btn-add-payment {
+            background-color: #A126B7;
+            color: white;
+            border: none;
+            padding: 7px 25px;
+        }
+
+        .btn-add-payment:hover {
+            background-color: #8B1F9E;
+            color: white;
+        }
+        .booking-list-container {
+            margin-left: 20px;
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+       .booking-content-wrapper{
+             flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+        .detail-content-wrapper{
+             flex-grow: 1;
+            /* Allows dashboard content to fill remaining space below navbar */
+            overflow-y: auto;
+            /* This margin will be in addition to the #content's padding */
+        }
+        .content-card-main {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
+            /* Ensure it fills available space */
+        }
+
+        .content-card-main .btn-movie-add {
+            /* Adjusted selector for the button within the card */
+            background-color: #A126B7;
+            /* Color from the image */
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .content-card-main .btn-movie-add:hover {
+            /* Adjusted selector */
+            background-color: #8B1F9E;
+        }
+
+        /* Styles for the content-area based on the image */
+        .content-area {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .back-arrow-container {
+            margin-bottom: 20px;
+            /* Space between back arrow and the card */
+            padding-left: 10px;
+            /* Small padding to align with the card content */
+        }
+
+        .back-arrow-container a {
+            color: #333;
+            text-decoration: none;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-arrow-container i {
+            font-size: 24px;
+            color: #555;
+        }
+
+        .detail-card-container {
+    background-color: #f1eaea;
+    padding: 30px 50px; /* Increased padding (top/bottom to 30px, left/right to 50px) for a slightly larger card */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    max-width: 900px; /* Increased max-width to make the card more "huge" */
+    margin: 20px auto; /* Added a bit of top/bottom margin for separation from other content */
+}
+
+.detail-image-wrapper {
+    flex-shrink: 0;
+    width: 180px; /* Increased image width */
+    height: 280px; /* Increased image height */
+    margin-right: 60px; /* Increased right margin to make it "more far" from the text */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.detail-text-content {
+    flex-grow: 1;
+    color: #333;
+    font-size: 1.1em;
+    line-height: 1.8;
+}
+
+.detail-text-content p {
+    margin-bottom: 10px; /* Slightly increased margin between paragraphs for better readability */
+}
+
+.detail-text-content strong {
+    font-weight: 600;
+}
+/* Styles for the Profile section */
+.profile-card-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px; /* Increased max-width to make the card bigger */
+    margin: 40px auto;
+    border: 1px solid #ced4da;
+}
+
+.profile-header-text {
+    background-color: #f1eaea;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    margin: -30px -30px 20px -30px;
+}
+
+.profile-header-text h4 {
+    color: #343a40;
+    margin-bottom: 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.profile-header-text .role-text {
+    color: #dc3545;
+    font-size: 0.8em;
+    margin-left: 8px;
+    font-weight: normal;
+}
+
+.profile-content {
+    display: flex;
+    align-items: flex-start; /* Changed to flex-start to align top, not center */
+    margin-bottom: 0; /* Remove bottom margin here, it will be on the inner div */
+}
+
+.profile-image-wrapper {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex; /* Kept display flex to center content if it's an icon, but img will just fill */
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin-right: 30px;
+    border: 1px solid #ced4da;
+}
+
+.profile-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.profile-details-and-buttons { /* NEW CONTAINER for text and buttons */
+    flex-grow: 1; /* Allow this container to take remaining space */
+}
+
+.profile-details-text p {
+    margin-bottom: 8px;
+    margin-left: 20px; /* Keep this margin as specified for text indentation */
+    font-size: 1.1em;
+    color: #343a40;
+}
+
+.profile-details-text strong {
+    font-weight: 600;
+}
+
+.profile-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 15px;
+    margin-top: 20px; /* Add margin-top to separate from text details */
+    margin-left: 20px; /* Align buttons with the text details */
+}
+
+.btn-change-password,
+.btn-edit-profile {
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    border: none;
+    color: white;
+}
+
+.btn-change-password {
+    background-color: #A126B7;
+    /* margin-left: 5px; Removed as gap handles spacing and profile-buttons handles overall left alignment */
+}
+
+.btn-change-password:hover {
+    background-color: #8B1F9E;
+}
+
+.btn-edit-profile {
+    background-color: #464242;
+    /* margin-left: 5px; Removed */
+}
+
+.btn-edit-profile:hover {
+    background-color: #928785;
+}
+
+.profile-image-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the image and choose file section */
+    flex-shrink: 0;
+    margin-right: 30px; /* Space between image section and form */
+}
+
+
+
+.choose-file-section {
+    display: flex;
+    align-items: center;
+    margin-top: 15px; /* Space between image and file input */
+    font-size: 0.9em;
+}
+
+.custom-file-upload {
+    border: 1px solid #ced4da;
+    display: inline-block;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    color: #343a40;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.custom-file-upload:hover {
+    background-color: #e2e6ea;
+}
+
+.choose-file-section input[type="file"] {
+    display: none; /* Hide the default file input */
+}
+
+.file-name-display {
+    margin-left: 10px;
+    color: #6c757d;
+    white-space: nowrap; /* Prevent file name from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis for long names */
+    max-width: 120px; /* Limit width of file name display */
+}
+
+.profile-edit-form {
+    flex-grow: 1; /* Allow the form to take remaining space */
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Space between form groups */
+}
+
+.form-group-inline {
+    display: flex;
+    gap: 15px; /* Space between name and email inputs */
+}
+
+.form-group-inline .form-control {
+    flex: 1; /* Allow inputs to grow and share space */
+}
+
+.form-group .form-control,
+.form-group-inline .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 1em;
+    color: #343a40;
+    background-color: #f8f9fa; /* Light background for inputs */
+}
+
+.form-group .form-control:focus,
+.form-group-inline .form-control:focus {
+    border-color: #A126B7; /* Highlight on focus */
+    box-shadow: 0 0 0 0.2rem rgba(161, 38, 183, 0.25);
+    outline: none;
+}
+
+.btn-update-profile {
+    background-color: #A126B7; /* Purple color from your theme */
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    align-self: flex-start; /* Align button to the left, under the form */
+    margin-top: 10px; /* Space from phone input */
+}
+
+.btn-update-profile:hover {
+    background-color: #8B1F9E; /* Darker purple on hover */
+}
+/* --- Styles for Change Password Page (Screenshot 223) --- */
+
+/* Re-using .profile-card-container for the main card */
+/* Re-using .profile-header-text for the header, just adjust the text */
+
+.change-password-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between password input fields */
+    padding: 20px; /* Add some padding inside the form content */
+}
+
+.change-password-form-content .form-group {
+    margin-bottom: 0; /* Remove default form-group margin if present */
+}
+
+.change-password-form-content .form-control {
+    width: 100%; /* Make inputs take full width */
+    max-width: 400px; /* Limit input width as seen in the image */
+    padding: 12px 15px; /* Slightly larger padding for inputs */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #f8f9fa;
+    color: #343a40;
+    box-sizing: border-box; /* Include padding and border in element's total width/height */
+}
+
+.change-password-form-content .form-control::placeholder {
+    color: #6c757d; /* Placeholder color */
+}
+
+.change-password-form-content .form-control:focus {
+    border-color: #A126B7;
+    box-shadow: 0 0 0 0.2rem rgba(161, 38, 183, 0.25);
+    outline: none;
+}
+
+.btn-change-password-submit {
+    background-color: #A126B7; /* Purple color from your theme */
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    align-self: flex-start; /* Align button to the left */
+    margin-top: 10px; /* Space from last input field */
+}
+
+.btn-change-password-submit:hover {
+    background-color: #8B1F9E; /* Darker purple on hover */
+}
+/* --- Styles for Staff List Page (Screenshot 224) --- */
+
+.list-title {
+    color: #343a40;
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-right: auto; /* Pushes search and add button to the right */
+}
+
+.btn-staff-add {
+    background-color: #A126B7; /* Purple color matching your theme */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-left: 20px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-staff-add:hover {
+    background-color: #8B1F9E; /* Darker purple on hover */
+}
+
+
+.table .btn-sm .fas {
+    font-size: 0.9em; /* Adjust icon size in action buttons */
+}
+
+.btn-staff-list {
+    background-color: #A126B7; /* Purple color matching your theme */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-left: 20px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-staff-list:hover {
+    background-color: #8B1F9E; /* Darker purple on hover */
+}
+
+
+.btn-staff-list {
+    background-color: #B0A6A4; /* Grayish color from your theme */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    margin-right: 20px; /* Space between search button and this button */
+}
+
+.btn-staff-list:hover {
+    background-color: #928785; /* Darker grayish on hover */
+}
+
+.create-staff-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between input fields */
+    padding: 20px; /* Padding inside the form card */
+}
+
+.create-staff-form-content .form-group {
+    margin-bottom: 0; /* Remove default margin */
+}
+
+.create-staff-form-content .form-control {
+    width: 100%;
+    max-width: 450px; /* Adjust max-width of inputs to match image */
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #f8f9fa;
+    color: #343a40;
+    box-sizing: border-box;
+}
+
+.create-staff-form-content .form-control::placeholder {
+    color: #6c757d;
+}
+
+.create-staff-form-content .form-control:focus {
+    border-color: #A126B7;
+    box-shadow: 0 0 0 0.2rem rgba(161, 38, 183, 0.25);
+    outline: none;
+}
+
+.btn-create-staff-submit {
+    background-color: #A126B7; /* Purple color for the submit button */
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    align-self: flex-start; /* Align button to the left */
+    margin-top: 10px; /* Space from last input field */
+}
+
+.btn-create-staff-submit:hover {
+    background-color: #8B1F9E; /* Darker purple on hover */
+}
+
+
+
+
+.create-staff-form-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Slightly reduced gap between inputs for more compactness */
+    padding: 0; /* Remove padding if added here, it's already on .profile-card-container */
+}
+
+.create-staff-form-content .form-group {
+    margin-bottom: 0;
+}
+
+.create-staff-form-content .form-control {
+    width: 100%;
+    max-width: 100%; /* Make inputs fill the new smaller container width */
+    padding: 10px 15px; /* Slightly reduced vertical padding for compactness */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #f8f9fa;
+    color: #343a40;
+    box-sizing: border-box;
+}
+
+.create-staff-form-content .form-control::placeholder {
+    color: #6c757d;
+}
+
+.create-staff-form-content .form-control:focus {
+    border-color: #A126B7;
+    box-shadow: 0 0 0 0.2rem rgba(161, 38, 183, 0.25);
+    outline: none;
+}
+
+.btn-create-staff-submit {
+    background-color: #A126B7;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 5px;
+    font-size: 1em; /* Slightly reduced font size for compactness */
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    align-self: flex-start;
+    margin-top: 10px;
+}
+
+.btn-create-staff-submit:hover {
+    background-color: #8B1F9E;
+}
+
+/* 
+//pagination */
+
+
