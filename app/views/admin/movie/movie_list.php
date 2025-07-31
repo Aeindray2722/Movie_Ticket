@@ -1,46 +1,20 @@
-<?php
+<?php extract($data); ?>
+<?php require_once __DIR__ . '/../layout/sidebar.php'; ?>
 
-
-
-// PHP for handling search (very basic example)
-$search_query = '';
-if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $search_query = htmlspecialchars($_GET['search']);
-    $filtered_movies = [];
-    foreach ($movies as $movie) {
-        // Simple search by name, type, or actor/actress
-        if (
-            stripos($movie['name'], $search_query) !== false ||
-            stripos($movie['type'], $search_query) !== false ||
-            stripos($movie['actor_actress'], $search_query) !== false
-        ) {
-            $filtered_movies[] = $movie;
-        }
-    }
-    $movies = $filtered_movies; // Use filtered list
-}
-
-?>
-
-<?php
-require_once __DIR__ . '/../layout/sidebar.php';
-?>
 <div class="list-content-wrapper">
-    <?php
-    require_once __DIR__ . '/../layout/nav.php';
-    ?>
-    <div class="movie-list-container">
+    <?php require_once __DIR__ . '/../layout/nav.php'; ?>
 
+    <div class="movie-list-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <form class="d-flex" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get">
-                <input class="form-control me-2" type="search" placeholder="search" aria-label="Search" name="search"
-                    value="">
+            <form class="d-flex" action="<?= URLROOT ?>/movie/index" method="get">
+                <input class="form-control me-2" type="search" placeholder="Search" name="search"
+                    value="<?= htmlspecialchars($search ?? '') ?>">
                 <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
             </form>
-            <a href="<?php echo URLROOT; ?>/movie/create">
+
+            <a href="<?= URLROOT ?>/movie/create">
                 <button class="btn btn-movie-add">Add Movie</button>
             </a>
-
         </div>
 
         <div class="table-responsive">
@@ -53,94 +27,61 @@ require_once __DIR__ . '/../layout/sidebar.php';
                         <th>Start date</th>
                         <th>End date</th>
                         <th>Show time</th>
-                        <th>Actor/ Actress</th>
-
+                        <th>Actor/Actress</th>
                         <th>Genre</th>
-                        <th></th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-
-                    <?php
-                    if (empty($data['movies'])): ?>
+                    <?php if (empty($movies)): ?>
                         <tr>
-                            <td colspan="10" class="text-center">No movies found.</td>
+                            <td colspan="9" class="text-center">No movies found.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($data['movies'] as $movie): ?>
+                        <?php foreach ($movies as $movie): ?>
                             <tr>
                                 <td>
-                                    <img src="<?php echo URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']); ?>"
-                                        alt="<?php echo htmlspecialchars($movie['movie_name']); ?>" class="movie-thumb">
-
+                                    <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
+                                        alt="<?= htmlspecialchars($movie['movie_name']) ?>" class="movie-thumb">
                                 </td>
-                                <?php
-                                // Create a map from type_id to type name
-                                $typeMap = [];
-                                foreach ($data['types'] as $type) {
-                                    $typeMap[$type['id']] = $type['name'];
-                                }
-
-                                // Create a map from show_time_id to show_time name
-                                $showTimeMap = [];
-                                foreach ($data['show_times'] as $showTime) {
-                                    $showTimeMap[$showTime['id']] = $showTime['show_time'];
-                                }
-                                ?>
-
-                                <td><?php echo htmlspecialchars($movie['movie_name']); ?></td>
-                                <td><?php echo isset($typeMap[$movie['type_id']]) ? htmlspecialchars($typeMap[$movie['type_id']]) : 'Unknown'; ?>
-                                </td>
-                                <td><?php echo htmlspecialchars($movie['start_date']); ?></td>
-                                <td><?php echo htmlspecialchars($movie['end_date']); ?></td>
-                                <td><?php $showTimeIds = json_decode($movie['show_time'], true);
-                                if (is_array($showTimeIds)) {
-                                    $names = [];
-                                    foreach ($showTimeIds as $stid) {
-                                        if (isset($showTimeMap[$stid])) {
-                                            $names[] = $showTimeMap[$stid];
-                                        }
-                                    }
-                                    echo htmlspecialchars(implode(', ', $names));
-                                } else {
-                                    echo 'N/A';
-                                } ?></td>
-                                <td><?php echo htmlspecialchars($movie['actor_name']); ?></td>
-
-                                <td><?php echo htmlspecialchars($movie['genre']); ?></td>
-
-                                <td class="text-center"> <a href="<?php echo URLROOT . '/movie/edit/' . $movie['id']; ?>"
+                                <td><?= htmlspecialchars($movie['movie_name']) ?></td>
+                                <td><?= htmlspecialchars($movie['type_name']) ?></td>
+                                <td><?= htmlspecialchars($movie['start_date']) ?></td>
+                                <td><?= htmlspecialchars($movie['end_date']) ?></td>
+                                <td><?= htmlspecialchars($movie['show_time_list']) ?></td>
+                                <td><?= htmlspecialchars($movie['actor_name']) ?></td>
+                                <td><?= htmlspecialchars($movie['genre']) ?></td>
+                                <td class="text-center">
+                                    <a href="<?= URLROOT . '/movie/edit/' . $movie['id'] ?>"
                                         class="btn btn-sm btn-outline-primary me-1" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-
-                                    <button class="btn-action btn btn-sm btn-outline-danger"
-                                        onclick="deleteMovie('<?php echo base64_encode($movie['id']); ?>')">
+                                    <button class="btn btn-sm btn-outline-danger btn-action"
+                                        onclick="deleteMovie('<?= base64_encode($movie['id']) ?>')">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
-
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
-            <!-- pagination -->
-            <?php if ($data['totalPages'] > 1): ?>
-                <nav aria-label="Page navigation ">
-                    <ul class="pagination justify-content-end ">
-                        <?php for ($p = 1; $p <= $data['totalPages']; $p++): ?>
-                            <li class="page-item <?= ($p == $data['page']) ? 'active' : '' ?>">
-                                <a class="page-link " href="?page=<?= $p ?>"><?= $p ?></a>
+
+            <?php if ($totalPages > 1): ?>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-end">
+                        <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                            <li class="page-item <?= ($p == $page) ? 'active' : '' ?>">
+                                <a class="page-link" href="?search=<?= urlencode($search ?? '') ?>&page=<?= $p ?>"><?= $p ?></a>
                             </li>
                         <?php endfor; ?>
                     </ul>
                 </nav>
             <?php endif; ?>
-
         </div>
     </div>
 </div>
+
 <script>
     function deleteMovie(encodedId) {
         Swal.fire({
@@ -153,9 +94,24 @@ require_once __DIR__ . '/../layout/sidebar.php';
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '<?php echo URLROOT; ?>/movie/destroy/' + encodedId;
+                window.location.href = '<?= URLROOT ?>/movie/destroy/' + encodedId;
             }
         });
     }
-
 </script>
+
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<?= $_SESSION['success'] ?>',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+
+

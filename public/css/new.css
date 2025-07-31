@@ -1,88 +1,305 @@
-/* General Body/HTML Resets */
-        body, html {
-            height: 100%;
-            margin: 0;
-            background-color: #f5f5f5; /* This will be overridden by dashboard-content-area background */
-            font-family: Arial, sans-serif;
-        }
+       /* Basic Reset & Font Imports */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        /* Main Wrapper */
-        .main-dashboard-wrapper {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fcfcfc; /* Very light background */
+    overflow-x: hidden; /* Prevent horizontal scroll from absolute positioning */
+}
 
-        /* Public Navigation Bar (Horizontal) */
-        .public-navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 50px;
-            background-color: rgba(187, 139, 170, 0.6);
-            color: white;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 10;
-            box-sizing: border-box;
-        }
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
 
-        .navbar-left .logo-text {
-            margin: 0;
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #A126B7; /* Purple color for the logo text */
-            letter-spacing: 1px;
-        }
+/* Header Styles */
+.header {
+    background-color: #f2e6f2;
+    padding: 20px 0;
+    height: 70px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
-        .navbar-right {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-        }
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    align-items: center;
+}
 
-        .nav-links {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            gap: 25px;
-        }
+.logo {
+    font-size: 2em;
+    font-weight: 700;
+    color: #da56dc; /* Orange color from inspiration */
+    display: flex;
+    text-align: center;
 
-        .nav-links li a {
-            text-decoration: none;
-            color: white;
-            padding: 8px 0;
-            transition: color 0.3s ease, border-bottom 0.3s ease;
-            font-weight: bold;
-            position: relative;
-        }
+}
 
-        .nav-links li a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: #A126B7; /* Purple underline */
-            transition: width 0.3s ease;
-        }
 
-        .nav-links li a:hover::after {
-            width: 100%;
-        }
+.nav ul {
+    list-style: none;
+    display: flex;
+    text-align: center;
+}
 
-        /* Dashboard Content Area - Now centers the login form */
-        .dashboard-content-area {
+.nav ul li {
+    margin-left: 35px;
+}
+
+.nav ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav ul li a:hover {
+    color: #da56dc;
+}
+
+.header-icon i {
+    font-size: 1.5em;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+
+
+/* Hero Section Styles */
+.hero-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 80px); /* Adjust based on header height */
+    padding: 50px 0;
+}
+
+.hero-section .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.hero-content {
+    flex: 1;
+    min-width: 300px; /* Ensures content doesn't get too squished */
+    padding-right: 20px;
+}
+
+
+
+h1 {
+    font-size: 3.2em;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #222;
+    margin-bottom: 20px;
+}
+
+.description {
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 30px;
+    max-width: 500px;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: #861188; /* Orange from inspiration */
+    color: #fff;
+    padding: 15px 35px;
+    border-radius: 30px; /* More rounded like the inspiration button */
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 5px 15px rgba(255, 92, 0, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: #ea4cdd; /* Slightly darker orange */
+}
+
+.hero-graphic {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 400px; /* Minimum width for the graphic area */
+    height: 500px; /* Fixed height to contain blob and carousel */
+}
+
+.orange-blob {
+    position: absolute;
+    top: 55%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 700px; /* Adjust size as needed */
+    height: 700px; /* Adjust size as needed */
+    background-color: #FFECD0; /* Lighter orange for the blob */
+    border-radius: 50%;
+    z-index: 1; /* Behind the movie posters */
+    overflow: hidden; /* To keep the curve smooth */
+    clip-path: ellipse(70% 50% at 100% 50%); /* Create the curved shape */
+}
+
+
+.movie-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2; /* On top of the blob */
+}
+
+.main-movie-poster {
+    width: 280px; /* Size of the main movie poster */
+    height: 400px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #eee; /* Placeholder background */
+}
+
+.main-movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.small-movie-posters {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    pointer-events: none; /* Allow clicks through */
+}
+
+.small-movie-posters img {
+    width: 80px; /* Size of small posters */
+    height: 120px;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    position: absolute; /* Positioning them around the main image */
+}
+
+/* Positioning for small posters (approximate from food layout) */
+.small-movie-posters img:nth-child(1) { top: 5%; left: 10%; }
+.small-movie-posters img:nth-child(2) { top: 15%; right: 10%; }
+.small-movie-posters img:nth-child(3) { top: 50%; right: 5%; }
+.small-movie-posters img:nth-child(4) { bottom: 10%; right: 20%; }
+.small-movie-posters img:nth-child(5) { bottom: 5%; left: 20%; }
+.small-movie-posters img:nth-child(6) { top: 60%; left: 5%; }
+
+
+
+
+
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    h1 {
+        font-size: 2.8em;
+    }
+    .hero-graphic {
+        min-width: 350px;
+        height: 450px;
+    }
+    .main-movie-poster {
+        width: 250px;
+        height: 360px;
+    }
+    .orange-blob {
+        width: 600px;
+        height: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header .container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .nav ul li {
+        margin: 5px 15px;
+    }
+    .hero-section .container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .hero-content {
+        padding-right: 0;
+        margin-bottom: 50px;
+    }
+    .hero-graphic {
+        width: 100%;
+        min-width: unset;
+    }
+    .orange-blob {
+        width: 100%;
+        height: 500px; /* Adjust height for mobile */
+        clip-path: ellipse(80% 50% at 50% 100%); /* Adjust shape for mobile */
+        top: unset;
+        bottom: 0;
+        right: unset;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .small-movie-posters img {
+        display: none; /* Hide small posters on small screens for simplicity */
+    }
+    .carousel-arrows {
+        bottom: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2em;
+    }
+    .btn-primary {
+        padding: 12px 25px;
+    }
+    .main-movie-poster {
+        width: 200px;
+        height: 300px;
+    }
+}
+.dashboard-content-area {
             flex-grow: 1;
             position: relative;
-            background-image: url('../images/layout/bg2.jpg'); /* Placeholder for your background image */
+            /* Placeholder for your background image */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            background-color: #fff;
             display: flex;
             align-items: center; /* Vertically center the login box */
             justify-content: center; /* Horizontally center the login box */
@@ -92,7 +309,6 @@
             min-height: 100vh;
             box-sizing: border-box;
         }
-
         .background-overlay {
             position: absolute;
             top: 0;
@@ -103,112 +319,11 @@
             z-index: 1;
         }
 
-        .content-container {
-            display: flex;
-            justify-content: flex-end; /* Ensure content is pushed to the right within its container */
-            align-items: flex-start; /* Align items to the top of the container */
-            width: 100%;
-            max-width: 1200px; /* Max width for the content inside */
-            margin: 0 auto; /* Center the content container, but flex-end takes precedence */
-            position: relative;
-            z-index: 2;
-            gap: 40px; /* Space between the two content blocks */
-        }
-
-        .text-content-right { /* Renamed class for clarity */
-            flex: none; /* Do not allow it to grow/shrink based on flex properties */
-            width: 550px; /* Fixed width for the text block */
-            text-align: right; /* Align text to the right inside the block */
-            /* Removed padding-right as it's now controlled by parent's padding */
-            margin-left: auto; /* Push the block itself to the right within content-container */
-        }
-
-        .movie-tagline {
-            font-size: 3.5em; /* Larger tagline */
-            margin-bottom: 20px;
-            line-height: 1.1;
-        }
-
-        .movie-description {
-            font-size: 1.1em;
-            margin-bottom: 30px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 992px) {
-            .content-container {
-                flex-direction: column; /* Stack content blocks vertically on smaller screens */
-                align-items: center;
-                gap: 30px;
-            }
-
-            .text-content-right { /* Apply to the renamed class */
-                width: 90%; /* Adjust width for stacked elements */
-                padding: 0; /* Remove specific padding for better centering */
-                text-align: center; /* Center text when stacked */
-                margin-left: 0; /* Remove auto-margin when stacked */
-            }
-
-            .public-navbar {
-                padding: 15px 20px;
-            }
-
-            .nav-links {
-                gap: 15px;
-            }
-
-            .navbar-right {
-                gap: 15px;
-            }
-
-            .movie-tagline {
-                font-size: 2.5em;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .public-navbar {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 15px;
-            }
-
-            .navbar-right {
-                margin-top: 15px;
-                flex-direction: column;
-                align-items: flex-start;
-                width: 100%;
-            }
-
-            .nav-links {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .nav-links li {
-                width: 100%;
-            }
-
-            .nav-links li a {
-                width: calc(100% - 20px); /* Adjust for padding */
-                text-align: center;
-                padding: 10px;
-            }
-
-            .dashboard-content-area {
-                padding: 80px 20px 20px;
-            }
-
-            .movie-tagline {
-                font-size: 2em;
-            }
-        }
-
-        /* Login Box (formerly register-box) - Placed directly here */
+/* Login Box (formerly register-box) - Placed directly here */
         .login-box { /* Renamed from .register-box for clarity as it's a login form */
             display: flex;
             flex-direction: row;
-            background-color: #ffffff;
+            background-color: #f4ceef;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             max-width: 700px; /* Kept your max-width */
@@ -256,18 +371,21 @@
             }
         }
 
-        .btn-register { /* Keeping your class name for consistency with your provided code */
-            background-color: #a4706c;
-            color: white;
-            font-weight: bold;
-            border: none; /* Added to ensure no default button border */
-            padding: 10px 15px; /* Added some padding for better button look */
-            border-radius: 5px; /* Added slight border-radius */
-        }
+        .btn-register {
+    background-color: #7f00ff;
+    background-image: linear-gradient(to right, #7f00ff, #e100ff);
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: 0.3s ease;
+}
 
-        .btn-register:hover {
-            background-color: #8b5a57;
-        }
+.btn-register:hover {
+    opacity: 0.9;
+}
+
 
         /* Minor adjustments for consistency if form elements lack styling */
         .form-control {
@@ -281,7 +399,7 @@
         .register-box { /* Renamed from .register-box for clarity as it's a login form */
             display: flex;
             flex-direction: row;
-            background-color: #ffffff;
+            background-color: #f4ceef;
             border-radius: 15px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             max-width: 900px; /* Kept your max-width */

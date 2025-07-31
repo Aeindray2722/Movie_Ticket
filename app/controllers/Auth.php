@@ -46,13 +46,14 @@ class Auth extends Controller
                     $name = $_POST['name'];
                     $email = $_POST['email'];
                     $password = $_POST['password'];
-                    $phone=$_POST['phone'];
+                    $phone = $_POST['phone'];
 
                     $profile_img = 'default_profile.jpg';
                     $provider_token = bin2hex(random_bytes(50));
 
                     //Hash Password before saving
-                    $password = base64_encode($password);
+                    // $password = base64_encode($password);
+                    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
 
                     $user = new UserModel();
@@ -112,19 +113,34 @@ class Auth extends Controller
 
     public function login()
     {
-       
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (isset($_POST['email']) && isset($_POST['password'])) {
                 $email = $_POST['email'];
-                $password = base64_encode($_POST['password']);
-
+                $password = $_POST['password']; // ✅ plain password
                 $isLogin = $this->db->loginCheck($email, $password);
 
                 if ($isLogin) {
+                    $user = $isLogin; // Already a single row
+
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['role']=$user['role'];
+                    $_SESSION['profile_img'] = $user['profile_img'];
+                    // $_SESSION['user_id'] = base64_encode($user['id']);
+                    $_SESSION['user_id'] = (int)$user['id']; // ✅ integer
+
                     setMessage('id', base64_encode($isLogin['id']));
                     $id = $isLogin['id'];
                     $setLogin = $this->db->setLogin($id);
-                    redirect('pages/home');
+                    if ($isLogin['role'] == 0) {
+                        redirect('movie/dashboard');
+                    } elseif ($isLogin['role'] == 1) {
+                        redirect('pages/home');
+                    } else {
+                        // Optional fallback if role is unknown
+                        setMessage('error', 'Unknown role.');
+                        redirect('pages/login');
+                    }
                 } else {
                     setMessage('error', 'Login Fail!');
                     redirect('pages/login');
@@ -134,13 +150,31 @@ class Auth extends Controller
         }
     }
 
-    function logout($id)
-    {
-        // session_start();
-        // $this->db->unsetLogin(base64_decode($_SESSION['id']));
+    // function logout($id)
+    // {
+    //     // session_start();
+    //     // $this->db->unsetLogin(base64_decode($_SESSION['id']));
 
-        //$this->db->unsetLogin($this->auth->getAuthId());
-        $this->db->unsetLogin($id);
+    //     //$this->db->unsetLogin($this->auth->getAuthId());
+    //     $this->db->unsetLogin($id);
+    //     redirect('pages/login');
+    // }
+
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (isset($_SESSION['user_id'])) {
+            $id = base64_decode($_SESSION['user_id']);
+            $this->db->unsetLogin($id);
+        }
+
+        session_unset();
+        session_destroy();
+
         redirect('pages/login');
     }
+
 }

@@ -82,9 +82,21 @@ require_once __DIR__ . '/../layout/sidebar.php';
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '<?php echo URLROOT; ?>/trailer/destroy/' + encodedId;
+                window.location.href = '<?php echo URLROOT; ?>/type/destroy/' + encodedId;
             }
         });
     }
 
 </script>
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<?= $_SESSION['success'] ?>',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>

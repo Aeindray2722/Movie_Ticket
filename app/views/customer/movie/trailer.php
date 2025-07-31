@@ -1,5 +1,5 @@
 <?php
-    require_once __DIR__ . '/../layout/nav.php';
+require_once __DIR__ . '/../layout/nav.php';
 ?>
 
 <section class="now-showing-page-content py-4">
@@ -7,7 +7,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h2 class="section-heading mb-4">Movie Trailer</h2>
-                
+
             </div>
             <div class="search-bar-on-page">
                 <form class="d-flex">
@@ -18,102 +18,63 @@
         </div>
 
         <div class="filter-buttons mb-4 me-3">
-            <button class="btn btn-filter active">All</button>
-            <button class="btn btn-filter">English</button>
-            <button class="btn btn-filter">Myanmar</button>
-            <button class="btn btn-filter">Korea</button>
-            <button class="btn btn-filter">India</button>
-            <button class="btn btn-filter">Cartoon</button>
-            <button class="btn btn-filter">Japan</button>
-        </div>
+            <a href="<?= URLROOT ?>/trailer/trailer"
+                class="btn btn-filter <?= empty($_GET['type']) ? 'active' : '' ?>">All</a>
 
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2 g-4 mb-4">
-            <div class="col">
-                <div class="card movie-card-lg">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="../../public/image/index4.avif" class="img-fluid rounded-start movie-poster-lg" alt="Tangled">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h5 class="card-title-lg">Movie Name</h5>
-                                <p class="card-text-lg">Movie Type</p>
-                                <a href="<?php echo URLROOT; ?>/movie/trailerWatch" ><button class="btn btn-view-detail">Watch</button></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card movie-card-lg">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="https://via.placeholder.com/180x250?text=Cargo" class="img-fluid rounded-start movie-poster-lg" alt="Cargo">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h5 class="card-title-lg">Movie Name</h5>
-                                <p class="card-text-lg">Movie Type</p>
-                                <a href="<?php echo URLROOT; ?>/movie/trailerWatch"><button class="btn btn-view-detail">Watch</button></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card movie-card-lg">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="../../public/image/login.jpg" class="img-fluid rounded-start movie-poster-lg" alt="Movie 3">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h5 class="card-title-lg">Movie Name</h5>
-                                <p class="card-text-lg">Movie Type</p>
-                                <a href="<?php echo URLROOT; ?>/movie/trailerWatch"><button class="btn btn-view-detail">Watch</button></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="card movie-card-lg">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="https://via.placeholder.com/180x250?text=Movie+4" class="img-fluid rounded-start movie-poster-lg" alt="Movie 4">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h5 class="card-title-lg">Movie Name</h5>
-                                <p class="card-text-lg">Movie Type</p>
-                                <a href="<?php echo URLROOT; ?>/movie/trailerWatch"><button class="btn btn-view-detail">Watch</button></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-           
+            <?php foreach ($data['types'] as $t): ?>
+                <a href="<?= URLROOT ?>/trailer/trailer?type=<?= strtolower($t['name']) ?>"
+                    class="btn btn-filter <?= ($_GET['type'] ?? '') === strtolower($t['name']) ? 'active' : '' ?>">
+                    <?= ucfirst($t['name']) ?>
+                </a>
+            <?php endforeach; ?>
         </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2 gy-5 mb-4">
+            <?php foreach ($data['trailers'] as $trailer): ?>
+                <div class="col ">
+                    <div class="card movie-card-lg shadow-sm">
+                        <div class="row g-0 ">
+                            <div class="col-md-4">
+                                <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"
+                                    class="img-fluid rounded-start movie-poster-lg shadow-sm"
+                                    alt="<?= $trailer['movie_name']; ?>">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <p class="card-text-lg"><strong style="color : black">Title:</strong>
+                                        <?= htmlspecialchars($trailer['movie_name'] ?? 'N/A'); ?></p>
+                                    <p class="card-text-lg"><strong style="color : black">Type:</strong>
+                                        <?= htmlspecialchars($trailer['type_name'] ?? 'N/A'); ?></p>
+                                    <p class="card-text-lg"><strong style="color : black">Actor:</strong>
+                                        <?= htmlspecialchars($trailer['actor_name'] ?? 'N/A'); ?></p>
+                                    <a href="<?= URLROOT; ?>/trailer/movieDetail/<?= $trailer['movie_id'] ?>">
+                                        <button class="btn btn-view-detail">View Detail</button>
+                                    </a>
+                                </div>
+                            </div>
 
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&lt;</span>
-                    </a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&gt;</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?> <!-- ✅ close foreach here -->
+        </div> <!-- ✅ close row after the loop -->
+        <?php if (!empty($_GET['type']) && empty($data['now_showing_movies'])): ?>
+            <div class="alert alert-warning text-center">No <?= htmlspecialchars($_GET['type']) ?> movies .</div>
+        <?php endif; ?>
+
+        <?php if ($data['totalPages'] > 1): ?>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                    <?php for ($p = 1; $p <= $data['totalPages']; $p++): ?>
+                        <li class="page-item <?= ($p == $data['page']) ? 'active' : '' ?>">
+                            <a class="page-link" href="?type=<?= urlencode($data['type'] ?? '') ?>&page=<?= $p ?>"><?= $p ?></a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </div>
 </section>
 
 <?php
-    require_once __DIR__ . '/../layout/footer.php';
+require_once __DIR__ . '/../layout/footer.php';
 ?>

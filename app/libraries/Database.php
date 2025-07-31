@@ -7,8 +7,8 @@ class Database
     private $pass = DB_PASS;
     private $dbname = DB_NAME;
 
-    private $pdo;
-    private $stmt;
+    public $pdo;
+    public $stmt;
     private $error;
 
     public function __construct()
@@ -20,7 +20,7 @@ class Database
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false // For General Error
+            PDO::ATTR_EMULATE_PREPARES => false // For General Error
         );
 
         try {
@@ -64,44 +64,44 @@ class Database
     // }
 
     public function create($table, $data)
-{
-    try {
-        $column = array_keys($data);
-        $columnSql = implode(', ', $column);
-        $bindingSql = ':' . implode(',:', $column);
+    {
+        try {
+            $column = array_keys($data);
+            $columnSql = implode(', ', $column);
+            $bindingSql = ':' . implode(',:', $column);
 
-        $sql = "INSERT INTO $table ($columnSql) VALUES ($bindingSql)";
-        $stm = $this->pdo->prepare($sql);
+            $sql = "INSERT INTO $table ($columnSql) VALUES ($bindingSql)";
+            $stm = $this->pdo->prepare($sql);
 
-        foreach ($data as $key => $value) {
-            // echo "Binding :$key => $value<br>";
-            // exit();
-            $stm->bindValue(':' . $key, $value);
-        }
+            foreach ($data as $key => $value) {
+                // echo "Binding :$key => $value<br>";
+                // exit();
+                $stm->bindValue(':' . $key, $value);
+            }
 
-        $status = $stm->execute();
+            $status = $stm->execute();
 
-        if (!$status) {
-            $errorInfo = $stm->errorInfo();
-            echo "SQLSTATE error code: " . $errorInfo[0] . "<br>";
-            echo "Driver-specific error code: " . $errorInfo[1] . "<br>";
-            echo "Driver-specific error message: " . $errorInfo[2] . "<br>";
+            if (!$status) {
+                $errorInfo = $stm->errorInfo();
+                echo "SQLSTATE error code: " . $errorInfo[0] . "<br>";
+                echo "Driver-specific error code: " . $errorInfo[1] . "<br>";
+                echo "Driver-specific error message: " . $errorInfo[2] . "<br>";
+                return false;
+            }
+
+            // echo "Insert successful. Last Insert ID: " . $this->pdo->lastInsertId() . "<br>";
+            return $this->pdo->lastInsertId();
+
+        } catch (PDOException $e) {
+            echo "PDOException: " . $e->getMessage();
+            exit;
             return false;
         }
-
-        // echo "Insert successful. Last Insert ID: " . $this->pdo->lastInsertId() . "<br>";
-        return $this->pdo->lastInsertId();
-
-    } catch (PDOException $e) {
-        echo "PDOException: " . $e->getMessage();
-        exit;
-        return false;
     }
-}
 
     // Update Query
     public function update($table, $id, $data)
-    {   
+    {
         // First, we don't want id from category table
         if (isset($data['id'])) {
             unset($data['id']);
@@ -109,17 +109,18 @@ class Database
 
         try {
             $columns = array_keys($data);
-            function map ($item) {
+            function map($item)
+            {
                 return $item . '=:' . $item;
             }
             $columns = array_map('map', $columns);
             $bindingSql = implode(',', $columns);
             // echo $bindingSql;
             // exit;
-            $sql = 'UPDATE ' .  $table . ' SET ' . $bindingSql . ' WHERE `id` =:id';
-            
+            $sql = 'UPDATE ' . $table . ' SET ' . $bindingSql . ' WHERE `id` =:id';
+
             $stm = $this->pdo->prepare($sql);
-            
+
             // Now, we assign id to bind
             $data['id'] = $id;
 
@@ -157,45 +158,61 @@ class Database
         return ($success) ? $row : [];
     }
 
-    public function loginCheck($email, $password)
+
+    public function loginCheck($email, $plainPassword)
     {
-        $sql = 'SELECT * FROM users WHERE `email` = :email AND `password` = :password';
-        // echo $sql;
+        $sql = 'SELECT * FROM users WHERE email = :email';
         $stm = $this->pdo->prepare($sql);
         $stm->bindValue(':email', $email);
-        $stm->bindValue(':password', $password);
-        $success = $stm->execute();
+        $stm->execute();
         $row = $stm->fetch(PDO::FETCH_ASSOC);
-        return ($success) ? $row : [];
+
+        if ($row && password_verify($plainPassword, $row['password'])) {
+            return $row;  // Login success
+        }
+        return false;  // Login failed
     }
 
-        public function setLogin($id)
-        {
-            $sql = 'UPDATE users SET is_login = 1, is_confirmed = 1, is_active = 1 WHERE id = :id';
-            $stm = $this->pdo->prepare($sql);
-            $stm->bindValue(':id', $id, PDO::PARAM_INT);
-            $success = $stm->execute();
-            $stm->closeCursor(); // good practice for unbuffered queries
-            return $success;
-        }
+    public function setLogin($id)
+    {
+        $sql = 'UPDATE users SET is_login = 1, is_confirmed = 1, is_active = 1 WHERE id = :id';
+        $stm = $this->pdo->prepare($sql);
+        $stm->bindValue(':id', $id, PDO::PARAM_INT);
+        $success = $stm->execute();
+        $stm->closeCursor(); // good practice for unbuffered queries
+        return $success;
+    }
 
+    // public function unsetLogin($id)
+    // {
+    //     try {
+    //         $sql = "UPDATE users SET is_login = :false WHERE id = :id"; //is_login = :false .is a placeholder to indicate user login(true) or not(false)
+    //         // id = :id also 
+    //         $stm = $this->pdo->prepare($sql);
+    //         $stm->bindValue(':false', '0');
+    //         $stm->bindValue(':id', $id);
+    //         $success = $stm->execute();
+    //         $row = $stm->fetch(PDO::FETCH_ASSOC);
+    //         return ($success) ? $row : [];
+    //     } catch (Exception $e) {
+    //         echo ($e);
+    //     }
+    // }
     public function unsetLogin($id)
     {
-       try{ 
-           $sql = "UPDATE users SET is_login = :false WHERE id = :id"; //is_login = :false .is a placeholder to indicate user login(true) or not(false)
-                                                                              // id = :id also 
-           $stm = $this->pdo->prepare($sql);
-           $stm->bindValue(':false','0');
-           $stm->bindValue(':id',$id);
-           $success = $stm->execute();
-           $row     = $stm->fetch(PDO::FETCH_ASSOC);
-           return ($success) ? $row : [];
-        }
-        catch( Exception $e)
-        {
-            echo($e);
+        try {
+            $sql = "UPDATE users SET is_login = :false WHERE id = :id";
+            $stm = $this->pdo->prepare($sql);
+            $stm->bindValue(':false', '0');  // or 0, but string '0' works fine
+            $stm->bindValue(':id', $id);
+            $success = $stm->execute();
+            return $success;
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return false;
         }
     }
+
 
     public function readAll($table)
     {
@@ -224,7 +241,7 @@ class Database
         $stm->bindValue(':column', $column);
         $success = $stm->execute();
         $row = $stm->fetch(PDO::FETCH_ASSOC);
-       //  print_r($row);
+        //  print_r($row);
         return ($success) ? $row : [];
     }
 
@@ -246,7 +263,7 @@ class Database
     //     {
     //         echo($e);
     //     }
-     
+
     // }
 
     public function incomeTransition()
@@ -258,7 +275,7 @@ class Database
             $row = $stm->fetch(PDO::FETCH_ASSOC);
             return ($success) ? $row : [];
         } catch (Exception $e) {
-            echo($e);
+            echo ($e);
         }
     }
 
@@ -280,7 +297,7 @@ class Database
     //     {
     //         echo($e);
     //     }
-     
+
     // }
     public function expenseTransition()
     {
@@ -291,23 +308,115 @@ class Database
             $row = $stm->fetch(PDO::FETCH_ASSOC);
             return ($success) ? $row : [];
         } catch (Exception $e) {
-            echo($e);
+            echo ($e);
         }
     }
 
 
     //pagination
     public function readPaged($table, $limit, $offset)
-            {
-                $sql = "SELECT * FROM {$table} LIMIT :limit OFFSET :offset";
-                $stm = $this->pdo->prepare($sql);
-                $stm->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
-                $stm->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-                $success = $stm->execute();
-                $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
-                return $success ? $rows : [];
-            }
+    {
+        $sql = "SELECT * FROM {$table} LIMIT :limit OFFSET :offset";
+        $stm = $this->pdo->prepare($sql);
+        $stm->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stm->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+        $success = $stm->execute();
+        $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
+        return $success ? $rows : [];
+    }
 
+    public function readWithCondition($table, $condition)
+    {
+        $sql = "SELECT * FROM $table WHERE $condition";
+        $stm = $this->pdo->prepare($sql);
+        $stm->execute();
+        return $stm->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Search with pagination and total count
+    public function search(string $table, array $columns, string $keyword, int $limit, int $offset): array
+    {
+        $searchTerm = "%$keyword%";
+
+        // Build WHERE clause for LIKE on multiple columns
+        $likeClauses = [];
+        foreach ($columns as $col) {
+            $likeClauses[] = "$col LIKE ?";
+        }
+        $whereClause = implode(' OR ', $likeClauses);
+
+        // Fetch data
+        $sqlData = "SELECT * FROM $table WHERE $whereClause LIMIT ? OFFSET ?";
+        $stmtData = $this->pdo->prepare($sqlData);
+
+        // Bind parameters for LIKE and pagination
+        $paramsData = array_fill(0, count($columns), $searchTerm);
+        $paramsData[] = $limit;
+        $paramsData[] = $offset;
+        $stmtData->execute($paramsData);
+        $data = $stmtData->fetchAll();
+
+        // Fetch total count (without LIMIT/OFFSET)
+        $sqlCount = "SELECT COUNT(*) FROM $table WHERE $whereClause";
+        $stmtCount = $this->pdo->prepare($sqlCount);
+        $paramsCount = array_fill(0, count($columns), $searchTerm);
+        $stmtCount->execute($paramsCount);
+        $total = (int) $stmtCount->fetchColumn();
+
+        return [
+            'data' => $data,
+            'total' => $total
+        ];
+    }
+    public function query($sql)
+    {
+        $this->stmt = $this->pdo->prepare($sql);
+        // $this->stmt->execute();
+    }
+
+    public function fetchAll()
+    {
+        return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function bind($param, $value, $type = null)
+    {
+        if (is_null($type)) {
+            switch (true) {
+                case is_int($value):
+                    $type = PDO::PARAM_INT;
+                    break;
+                case is_bool($value):
+                    $type = PDO::PARAM_BOOL;
+                    break;
+                case is_null($value):
+                    $type = PDO::PARAM_NULL;
+                    break;
+                default:
+                    $type = PDO::PARAM_STR;
+            }
+        }
+        $this->stmt->bindValue($param, $value, $type);
+    }
+
+    public function getBookingsByMovieDateShowtime($movie_id, $show_time_id, $booking_date)
+    {
+        $sql = "SELECT seat_id FROM bookings WHERE movie_id = :movie_id AND show_time_id = :show_time_id AND booking_date = :booking_date";
+        $this->query($sql);
+        $this->bind(':movie_id', $movie_id);
+        $this->bind(':show_time_id', $show_time_id);
+        $this->bind(':booking_date', $booking_date);
+        $this->stmt->execute();
+        return $this->fetchAll();
+    }
+    
+public function getAvgRatingByMovieId($movie_id)
+    {
+        $this->query("SELECT CEIL(AVG(count)) AS avg_rating FROM ratings WHERE movie_id = :movie_id");
+        $this->bind(':movie_id', $movie_id);
+        $this->stmt->execute();
+        $row = $this->stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['avg_rating'] ?? 0;
+    }
 
 }
 

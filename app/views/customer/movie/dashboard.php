@@ -1,123 +1,98 @@
 <?php
-    require_once __DIR__ . '/../layout/nav.php';
+require_once __DIR__ . '/../layout/nav.php';
 ?>
 
-<section class="main-movie-carousel py-5">
-        <div class="container">
-            <div id="movieCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <div class="row align-items-center">
-                            <div class="col-md-4 text-center">
-                                <img src="https://via.placeholder.com/250x380?text=Tangled" class="img-fluid" alt="Tangled">
-                            </div>
-                            <div class="col-md-8 text-start">
-                                <h2 class="movie-title">Movie Name</h2>
-                                <p class="movie-type">Movie Type</p>
-                                <div class="d-flex gap-2">
-                                    <a href="<?php echo URLROOT; ?>/movie/movieDetail"><button class="btn btn-secondary btn-sm">View Detail</button></a>
-                                    <button class="btn btn-outline-secondary btn-sm">▶️ watch trailer</button>
+<section class="main-movie-carousel py-4">
+    <div class="container">
+        <div id="movieCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <?php foreach ($data['now_showing_movies'] as $index => $movie): ?>
+                    <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                        <div class="d-flex align-items-center justify-content-center" style="min-height: 300px;">
+                            <div class="row w-100 align-items-center justify-content-center text-center text-md-start">
+                                <div class="col-md-4 mb-3 mb-md-0 text-center">
+                                    <div class="ratio ratio-1x1" style="max-width: 250px; margin: 0 auto;">
+                                        <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
+                                            class="img-fluid rounded object-fit-cover"
+                                            alt="<?= htmlspecialchars($movie['movie_name']) ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h4 class="movie-title mb-1"><?= htmlspecialchars($movie['movie_name']) ?></h4>
+                                    <p class="movie-type mb-2"><?= htmlspecialchars($movie['type_name'] ?? 'N/A') ?></p>
+                                    <div class="d-flex gap-2 justify-content-center justify-content-md-start">
+                                        <a href="<?= URLROOT; ?>/movie/movieDetail/<?= $movie['id'] ?>">
+                                            <button class="btn btn-secondary btn-sm">View Detail</button>
+                                        </a>
+                                        <a href="<?= URLROOT; ?>/trailer/movieDetail/<?= $movie['id'] ?>">
+                                            <button class="btn btn-outline-secondary btn-sm">▶️ Watch Trailer</button>
+                                        </a>
+                                        <!-- <button class="btn btn-outline-secondary btn-sm">▶️ Watch Trailer</button> -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="carousel-item active">
-                        <div class="row align-items-center">
-                            <div class="col-md-4 text-center">
-                                <img src="https://via.placeholder.com/250x380?text=Tangled" class="img-fluid" alt="Tangled">
-                            </div>
-                            <div class="col-md-8 text-start">
-                                <h2 class="movie-title">Movie Name</h2>
-                                <p class="movie-type">Movie Type</p>
-                                <div class="d-flex gap-2">
-                                     <a href="<?php echo URLROOT; ?>/movie/movieDetail"><button class="btn btn-secondary btn-sm">View Detail</button></a>
-                                    <button class="btn btn-outline-secondary btn-sm">▶️ watch trailer</button>
-                                </div>
-                            </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Carousel Controls -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#movieCarousel" data-bs-slide="prev" >
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#movieCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="movie-section py-4">
+    <div class="container">
+        <h2 class="section-title d-flex justify-content-between align-items-center">
+            Now Showing
+            <a href="<?php echo URLROOT; ?>/movie/nowShowing" class="text-dark text-decoration-none">›</a>
+        </h2>
+
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-4">
+            <?php foreach ($data['now_showing_movies'] as $movie): ?>
+                <div class="col">
+                    <div class="card movie-card">
+                        <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
+                            class="card-img-top" alt="<?php echo $movie['movie_name']; ?>">
+                        <div class="card-body p-2">
+                            <h5 class="card-title mb-1"><?php echo $movie['movie_name']; ?></h5>
+                            <!-- <p class="mb-1"><small><?php echo $movie['actor_name']; ?></small></p> -->
                         </div>
                     </div>
-                    </div>
-                <button class="carousel-control-prev " type="button" data-bs-target="#movieCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#movieCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
-            </div>
+                </div>
+            <?php endforeach; ?>
         </div>
-    </section>
 
-    <section class="movie-section py-4">
-        <div class="container">
-            <h3 class="section-title d-flex justify-content-between align-items-center">
-                Now Showing
-                <a href="<?php echo URLROOT; ?>/movie/nowShowing" class="text-dark text-decoration-none">›</a>
-            </h3>
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-4">
+        <h2 class="section-title d-flex justify-content-between align-items-center">
+            Movie Trailer
+            <a href="<?php echo URLROOT; ?>/trailer/trailer" class="text-dark text-decoration-none">›</a>
+        </h2>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-4 mt-4">
+            <?php foreach ($data['trailers'] as $trailer): ?>
                 <div class="col">
                     <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Tangled" class="card-img-top" alt="Tangled">
+                        <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"
+                            class="card-img-top" alt="<?php echo $trailer['movie_name']; ?>">
+                        <div class="card-body p-2">
+                            <h5 class="card-title mb-1"><?php echo $trailer['movie_name']; ?></h5>
+                            <!-- <p class="mb-1"><small><?php echo $trailer['actor_name']; ?></small></p> -->
                         </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Cargo" class="card-img-top" alt="Cargo">
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+3" class="card-img-top" alt="Movie 3">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+4" class="card-img-top" alt="Movie 4">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+5" class="card-img-top" alt="Movie 5">
-                    </div>
-                </div>
-            </div>
-
-           
-
-            <h3 class="section-title d-flex justify-content-between align-items-center">
-                Movie Trailer
-                <a href="<?php echo URLROOT; ?>/movie/trailer" class="text-dark text-decoration-none">›</a>
-            </h3>
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-4">
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+X" class="card-img-top" alt="Movie X">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+Y" class="card-img-top" alt="Movie Y">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+Z" class="card-img-top" alt="Movie Z">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Cargo" class="card-img-top" alt="Cargo">
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="card movie-card">
-                        <img src="https://via.placeholder.com/150x225?text=Movie+Q" class="card-img-top" alt="Movie Q">
-                    </div>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
-    </section>
+    </div>
+</section>
 <?php
-    require_once __DIR__ . '/../layout/footer.php';
+require_once __DIR__ . '/../layout/footer.php';
 ?>

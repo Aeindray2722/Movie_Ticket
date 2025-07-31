@@ -11,7 +11,7 @@ $currentPage = $_SERVER['REQUEST_URI'];
   <title>Dashboard Sidebar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Head tag ထဲမှာထည့်ပါ -->
+ 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/admin.css">
@@ -25,7 +25,7 @@ $currentPage = $_SERVER['REQUEST_URI'];
       <li class="nav-item">
         <a class="nav-link <?php echo (strpos($currentPage, '/movie/dashboard') !== false ? 'active' : ''); ?>"
           href="<?php echo URLROOT; ?>/movie/dashboard">
-          <i class="fas fa-film"></i> Dashboard
+          <i class="fas fa-home"></i> Dashboard
         </a>
       </li>
 
@@ -66,8 +66,8 @@ $currentPage = $_SERVER['REQUEST_URI'];
       </li>
 
       <li class="nav-item">
-        <a class="nav-link <?php echo (strpos($currentPage, '/payment/addPayment') !== false ? 'active' : ''); ?>"
-          href="<?php echo URLROOT; ?>/payment/addPayment">
+        <a class="nav-link <?php echo (strpos($currentPage, '/payment/index') !== false ? 'active' : ''); ?>"
+          href="<?php echo URLROOT; ?>/payment/index">
           <i class="fas fa-dollar-sign"></i> Payment
         </a>
       </li>

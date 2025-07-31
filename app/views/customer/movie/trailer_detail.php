@@ -1,11 +1,30 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
 ?>
+<style>
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        padding-top: 50%;
+        /* 2:1 aspect ratio (height is 50% of width) */
+        background-color: #000;
+        overflow: hidden;
+    }
+
+    .video-wrapper video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <section class="movie-detail-page-content py-4">
     <div class="container">
         <div class="mb-3">
-            <a href="<?php echo URLROOT; ?>/movie/nowShowing" class="btn btn-back-to-list">
+            <a href="<?php echo URLROOT; ?>/trailer/trailer" class="btn btn-back-to-list">
                 <i class="fas fa-arrow-left me-2"></i>
             </a>
         </div>
@@ -20,11 +39,13 @@ require_once __DIR__ . '/../layout/nav.php';
                 </div>
                 <div class="col-md-7 col-lg-8">
                     <div class="card-body movie-detail-body">
-                        <h5 class="card-title movie-detail-title"><strong
-                                style="color : black">Title: </strong><?= htmlspecialchars($data['movie']['movie_name']) ?>
+                        <h5 class="card-title movie-detail-title"><strong style="color : black">Title:
+                            </strong><?= htmlspecialchars($data['movie']['movie_name']) ?>
                         </h5>
-                        <p class="movie-detail-type"><strong style="color : black">Type: </strong><?= htmlspecialchars($data['movie']['type_name']) ?></p>
-                        <p class="movie-detail-actors"><strong style="color : black">Actor/Actress: </strong><?= htmlspecialchars($data['movie']['actor_name']) ?></p>
+                        <p class="movie-detail-type"><strong style="color : black">Type:
+                            </strong><?= htmlspecialchars($data['movie']['type_name']) ?></p>
+                        <p class="movie-detail-actors"><strong style="color : black">Actor/Actress:
+                            </strong><?= htmlspecialchars($data['movie']['actor_name']) ?></p>
                         <p class="movie-detail-description"><strong style="color : black">Description: </strong>
                             <?= nl2br(htmlspecialchars($data['movie']['description'])) ?>
                         </p>
@@ -39,10 +60,10 @@ require_once __DIR__ . '/../layout/nav.php';
                         </div>
 
                         <div class="d-flex gap-2">
-                            <a href="<?= URLROOT; ?>/booking/index<?= $data['movie']['id'] ?>">
-                                <button class="btn btn-book-now">Book Now</button>
-                            </a>
-
+                            <!-- Inside trailer_detail.php -->
+                            <button class="btn btn-book-now" data-bs-toggle="modal" data-bs-target="#trailerModal">
+                                Watch Trailer
+                            </button>
                             <button class="btn btn-warning" data-bs-toggle="modal"
                                 data-bs-target="#rateModal">Rate</button>
                         </div>
@@ -134,9 +155,31 @@ require_once __DIR__ . '/../layout/nav.php';
         </div>
     </div>
 </div>
+<!-- Below your Rate Modal -->
+<div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- large modal -->
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 0.5rem 1rem;">
+                <h5 class="modal-title" style="font-size: 1rem;">
+                    (<?= htmlspecialchars($data['movie']['movie_name']) ?>) Trailer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    onclick="pauseTrailer()"></button>
+            </div>
 
+            <div class="modal-body p-0">
+                <div class="video-wrapper">
+                    <video id="trailerVideo" controls>
+                        <source
+                            src="<?= URLROOT . '/videos/trailers/' . htmlspecialchars($data['trailer']['trailer_vd']) ?>"
+                            type="video/mp4">
+                    </video>
+                </div>
+            </div>
 
-
+        </div>
+    </div>
+</div>
 <?php
 require_once __DIR__ . '/../layout/footer.php';
 ?>
@@ -185,5 +228,19 @@ require_once __DIR__ . '/../layout/footer.php';
                 window.location.href = '<?= URLROOT ?>/comment/destroy/' + encodedId;
             }
         });
+    }
+</script>
+<script>
+    function pauseTrailer() {
+        const video = document.getElementById('trailerVideo');
+        if (video) {
+            video.pause();
+        }
+    }
+
+    // Also pause when modal hides
+    const modal = document.getElementById('trailerModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', pauseTrailer);
     }
 </script>

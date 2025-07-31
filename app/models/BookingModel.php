@@ -10,6 +10,7 @@ class BookingModel
     private $seat_id;
     private $status;
     private $total_amount;
+    private $booking_date;
     private $created_at;
     private $updated_at;
 
@@ -24,7 +25,7 @@ class BookingModel
 
     public function setUserId($user_id)
     {
-        $this->$user_id = $user_id;
+        $this->user_id = $user_id;
     }
     public function getUserId()
     {
@@ -70,7 +71,14 @@ class BookingModel
     {
         return $this->total_amount;
     }
-    
+    public function setBookingDate($booking_date)
+    {
+        $this->booking_date = $booking_date;
+    }
+    public function getBookingDate()
+    {
+        return $this->booking_date;
+    }
     
     public function setCreatedAt($created_at)
     {
@@ -100,6 +108,7 @@ class BookingModel
             "seat_id" => $this->getSeatId(),
             "status" => $this->getStatus(),
             "total_amount" => $this->getTotalAmount(),
+            "booking_date" => $this->getBookingDate(),
             "created_at" => $this->getCreatedAt(),
             "updated_at" => $this->getUpdatedAt()
         ];

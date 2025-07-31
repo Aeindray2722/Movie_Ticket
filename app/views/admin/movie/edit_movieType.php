@@ -1,10 +1,4 @@
-<?php
-// PHP code to simulate fetching admin data for editing
-// In a real application, you would connect to your database
-// and fetch current admin data here to pre-fill the form.
 
-
-?>
 
 <?php
 require_once __DIR__ . '/../layout/sidebar.php';

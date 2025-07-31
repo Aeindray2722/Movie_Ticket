@@ -5,7 +5,7 @@
 <section class="payment-page-content py-4">
     <div class="container">
         <div class="mb-3">
-            <a href="<?php echo URLROOT; ?>/booking/booking" class="btn btn-back-to-list">
+            <a href="<?= URLROOT; ?>/booking/index/<?= $data['movie']['id'] ?>"class="btn btn-back-to-list">
                 <i class="fas fa-arrow-left me-2"></i> 
             </a>
         </div>

@@ -11,37 +11,43 @@ class Movie extends Controller
     }
     public function index()
     {
-        $limit = 3; // number of movies per page
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $limit = 5;
         $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
         if ($page < 1)
             $page = 1;
         $offset = ($page - 1) * $limit;
 
-        // Get paged movies
-        $movies = $this->db->readPaged('movies', $limit, $offset);
+        $columnsToSearch = ['movie_name', 'type_name', 'actor_name']; // Adjust as needed
 
-        // You might also want total movie count for calculating total pages
-        $totalMovies = count($this->db->readAll('movies')); // or create a count query for better performance
+        if ($search !== '') {
+            $result = $this->db->search('view_movies_info', $columnsToSearch, $search, $limit, $offset);
+            $movies = $result['data'] ?? [];
+            $totalMovies = $result['total'] ?? 0;
+        } else {
+            $movies = $this->db->readPaged('view_movies_info', $limit, $offset);
+            // Use a COUNT query here for performance in real projects
+            $totalMovies = count($this->db->readAll('view_movies_info'));
+        }
+
         $totalPages = ceil($totalMovies / $limit);
 
-        $show_times = $this->db->readAll('show_times');
         $types = $this->db->readAll('types');
+        $show_times = $this->db->readAll('show_times');
+        $movielist = $this->db->readAll('movies');
 
         $data = [
             'movies' => $movies,
-            'show_times' => $show_times,
+            'movieList' => $movielist,
             'types' => $types,
+            'show_times' => $show_times,
+            'search' => $search,
             'page' => $page,
             'totalPages' => $totalPages
         ];
 
         $this->view('admin/movie/movie_list', $data);
     }
-
-
-
-
-
     public function create()
     {
         $movies = $this->db->readAll('movies');
@@ -100,11 +106,11 @@ class Movie extends Controller
             // Insert into database directly (without MovieModel)
             $movieCreated = $this->db->create('movies', $movieData);
 
-            if ($movieCreated) {
-                setMessage('success', 'Movie added successfully!');
-            } else {
-                setMessage('error', 'Failed to add movie.');
-            }
+            // if ($movieCreated) {
+            //     setMessage('success', 'Movie added successfully!');
+            // } else {
+            //     setMessage('error', 'Failed to add movie.');
+            // }
             redirect('movie');
         }
     }
@@ -153,16 +159,26 @@ class Movie extends Controller
             $start_date = $_POST['start_date'];
             $end_date = $_POST['end_date'];
 
-            // Get old image in case no new image is uploaded
+            // Get old movie
             $old_movie = $this->db->getById('movies', $id);
-            $movie_img = $old_movie['movie_img'];
+            $movie_img = $old_movie['movie_img']; // Default to old image
 
-            // Handle file upload if new image is uploaded
+            // Check for new image
             if (isset($_FILES['movie_image']) && $_FILES['movie_image']['error'] == 0) {
-                $movie_img = $_FILES['movie_image']['name'];
+                // Delete old image
+                $oldImagePath = __DIR__ . '/../../public/images/movies/' . $movie_img;
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+
+                // Upload new image
+                $newFilename = time() . '_' . basename($_FILES['movie_image']['name']);
                 $targetDir = __DIR__ . '/../../public/images/movies/';
-                $targetFile = $targetDir . basename($movie_img);
-                move_uploaded_file($_FILES['movie_image']['tmp_name'], $targetFile);
+                $targetFile = $targetDir . $newFilename;
+
+                if (move_uploaded_file($_FILES['movie_image']['tmp_name'], $targetFile)) {
+                    $movie_img = $newFilename;
+                }
             }
 
             // Create and populate model
@@ -173,13 +189,14 @@ class Movie extends Controller
             $movie->setGenre($genre);
             $movie->setDescription($description);
             $movie->setTypeId($type_id);
-            $movie->setShowTimeId(json_encode($show_times)); // JSON encode
+            $movie->setShowTimeId(json_encode($show_times));
             $movie->setStartDate($start_date);
             $movie->setEndDate($end_date);
             $movie->setMovieImg($movie_img);
             $movie->setUpdatedAt(date('Y-m-d H:i:s'));
+
             $data = $movie->toArray();
-            unset($data['created_at']);
+            unset($data['created_at']); // Don't update created_at
 
             $isUpdated = $this->db->update('movies', $movie->getId(), $data);
 
@@ -189,19 +206,39 @@ class Movie extends Controller
     }
 
 
+
     // Destroy - Delete a movie from the database
     public function destroy($id)
     {
         $id = base64_decode($id); // Decode ID (optional)
 
-        $movie = new MovieModel();
-        $movie->setId($id);
+        // Step 1: Get the movie data
+        $movie = $this->db->getById('movies', $id);
 
-        // Delete the movie
-        $isDeleted = $this->db->delete('movies', $movie->getId());
+        if (!$movie) {
+            setMessage('error', 'Movie not found!');
+            redirect('movie');
+            return;
+        }
 
-        setMessage('success', 'Movie deleted successfully!');
-        redirect('movie'); // Redirect to movie index page
+        // Step 2: Delete the movie image
+        $movieImg = $movie['movie_img'];
+        $imagePath = __DIR__ . '/../../public/images/movies/' . $movieImg;
+
+        if (file_exists($imagePath)) {
+            unlink($imagePath); // delete image file
+        }
+
+        // Step 3: Delete the movie record from DB
+        $isDeleted = $this->db->delete('movies', $id);
+
+        if ($isDeleted) {
+            setMessage('success', 'Movie and image deleted successfully!');
+        } else {
+            setMessage('error', 'Failed to delete movie.');
+        }
+
+        redirect('movie'); // Go back to movie list
     }
 
     // Fetch movie data as JSON (for AJAX requests)
@@ -220,16 +257,109 @@ class Movie extends Controller
         $this->view('admin/movie/dashboard');
     }
 
-     public function nowShowing()
+    public function nowShowing()
     {
-        $this->view('customer/movie/nowshowing');
+        $type = $_GET['type'] ?? null;
+        $limit = 4; // movies per page
+        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+        if ($page < 1)
+            $page = 1;
+        $offset = ($page - 1) * $limit;
+        $types = $this->db->readAll('types');
+
+        if ($type) {
+            // Count total movies with type filter
+            $countSql = "SELECT COUNT(*) as total FROM view_movies_info
+            WHERE CURDATE() BETWEEN start_date AND end_date
+            AND LOWER(type_name) = :type";
+            $this->db->query($countSql);
+            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
+            $this->db->stmt->execute();
+            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+            $total = $totalRow['total'] ?? 0;
+
+            // Get paginated movies
+            $sql = "SELECT * FROM view_movies_info
+            WHERE CURDATE() BETWEEN start_date AND end_date
+            AND LOWER(type_name) = :type
+            ORDER BY id DESC
+            LIMIT :limit OFFSET :offset";
+            $this->db->query($sql);
+            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
+            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+            $this->db->stmt->execute();
+            $nowShowingMovies = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } else {
+            // Count total movies without filter
+            $countSql = "SELECT COUNT(*) as total FROM view_movies_info
+            WHERE CURDATE() BETWEEN start_date AND end_date";
+            $this->db->query($countSql);
+            $this->db->stmt->execute();
+            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+            $total = $totalRow['total'] ?? 0;
+
+            // Get paginated movies
+            $sql = "SELECT * FROM view_movies_info
+            WHERE CURDATE() BETWEEN start_date AND end_date
+            ORDER BY id DESC
+            LIMIT :limit OFFSET :offset";
+            $this->db->query($sql);
+            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+            $this->db->stmt->execute();
+            $nowShowingMovies = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        $totalPages = ceil($total / $limit);
+
+        $data = [
+            'now_showing_movies' => $nowShowingMovies,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'type' => $type,
+            'types' => $types
+        ];
+
+        $this->view('customer/movie/nowshowing', $data);
     }
-    
-    public function movieDetail()
+
+    public function movieDetail($id)
     {
-        $this->view('customer/movie/movie_detail');
+        // Fetch movie info by ID from view_movies_info
+        $movie = $this->db->getById('view_movies_info', $id);
+
+        if (!$movie) {
+            setMessage('error', 'Movie not found!');
+            redirect('movie/nowShowing');
+        }
+
+        // ✅ Fetch average rating for this movie (rounded)
+        $avg_rating = $this->db->getAvgRatingByMovieId($id);
+
+        $sqlComments = "SELECT c.id, c.message, c.user_id, c.created_at, u.name ,u.profile_img
+                    FROM comments c
+                    JOIN users u ON c.user_id = u.id
+                    WHERE c.movie_id = :movie_id
+                    ORDER BY c.created_at DESC";
+        $this->db->query($sqlComments);
+        $this->db->bind(':movie_id', $id);
+        $this->db->stmt->execute();
+        $comments = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Pass data to view
+        $data = [
+            'movie' => $movie,
+            'avg_rating' => $avg_rating,
+            'comment' =>$comments
+        ];
+
+
+        $this->view('customer/movie/movie_detail', $data);
     }
-    
+
+
+
 
 
 

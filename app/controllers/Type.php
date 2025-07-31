@@ -9,17 +9,7 @@ class Type extends Controller
         $this->model('TypeModel');
         $this->db = new Database();
     }
-    // public function create()
-    // {
-    //     $types = $this->db->readAll('types');
-
-    //     $data = [
-    //         'types' => $types,
-    //         'index' => 'type'
-    //     ];
-
-    //     $this->view('admin/movie/movie_type', $data);
-    // }
+  
 
     public function store()
     {
@@ -34,13 +24,9 @@ class Type extends Controller
 
             $typeCreated = $this->db->create('types', $type->toArray());
 
-            if ($typeCreated) {
-                setMessage('success', 'Create successful!');
-            } else {
-                setMessage('error', 'Insert failed!');
-            }
-
-            redirect('type');
+            $_SESSION['success'] = "Type added successfully!";
+            header("Location: " . URLROOT . "/type");
+            exit;
         }
     }
     public function update()
@@ -62,10 +48,6 @@ class Type extends Controller
             redirect('type');
         }
     }
-
-
-
-
 
     public function index()
     {

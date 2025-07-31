@@ -11,7 +11,7 @@ class Pages extends Controller
 
     public function index()
     {
-        $this->view('admin/movie/dashboard');
+        $this->view('pages/main');
     }
 
     public function login()
@@ -28,10 +28,37 @@ class Pages extends Controller
     {
         $this->view('customer/payment/about');
     }
-     public function home()
+    public function home()
     {
-        $this->view('customer/movie/dashboard');
+        // Fetch now showing movies
+        $nowShowingMovies = $this->db->readWithCondition(
+            'view_movies_info',
+            "CURDATE() BETWEEN start_date AND end_date ORDER BY id DESC LIMIT 5"
+        );
+
+        // Fetch trailers with movie_img and movie_name from movies table using JOIN
+        $sql = "
+        SELECT trailers.*, movies.movie_img, movies.movie_name
+        FROM trailers
+        JOIN movies ON trailers.movie_id = movies.id
+        ORDER BY trailers.created_at DESC
+        LIMIT 5
+    ";
+        $this->db->query($sql);
+        $this->db->stmt->execute();
+        $trailers = $this->db->fetchAll(); 
+
+        $data = [
+            'now_showing_movies' => $nowShowingMovies,
+            'trailers' => $trailers
+        ];
+
+        $this->view('customer/movie/dashboard', $data);
     }
+
+
+
+
 
     public function dashboard()
     {

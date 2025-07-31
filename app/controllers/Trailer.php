@@ -113,14 +113,21 @@ class Trailer extends Controller
             $old_trailer = $this->db->getById('trailers', $id);
             $trailer_vd = $old_trailer['trailer_vd'];
 
+            $targetDir = __DIR__ . '/../../public/videos/trailers/';
+
             if (isset($_FILES['trailer_file']) && $_FILES['trailer_file']['error'] == 0) {
-                $targetDir = __DIR__ . '/../../public/videos/trailers/';
+                // ✅ Delete old trailer video file
+                $oldPath = $targetDir . $trailer_vd;
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+
+                // ✅ Upload new trailer file
                 $trailer_vd = time() . '_' . basename($_FILES['trailer_file']['name']);
                 $targetFile = $targetDir . $trailer_vd;
                 move_uploaded_file($_FILES['trailer_file']['tmp_name'], $targetFile);
             }
 
-            // Prepare data for update
             $trailerData = [
                 'movie_id' => $movie_id,
                 'trailer_vd' => $trailer_vd,
@@ -138,20 +145,30 @@ class Trailer extends Controller
         }
     }
 
+
     // Destroy - Delete a movie from the database
     public function destroy($id)
     {
+        $id = base64_decode($id);
 
-        $id = base64_decode($id); // Decode ID (optional)
+        // Get trailer info (to find file name)
+        $trailer = $this->db->getById('trailers', $id);
 
-        $trailers = new TrailerModel();
-        $trailers->setId($id);
+        if ($trailer) {
+            // ✅ Delete trailer file
+            $filePath = __DIR__ . '/../../public/videos/trailers/' . $trailer['trailer_vd'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
 
-        // Delete the movie
-        $isDeleted = $this->db->delete('trailers', $trailers->getId());
+            // ✅ Delete record from DB
+            $this->db->delete('trailers', $id);
+            setMessage('success', 'Trailer deleted successfully!');
+        } else {
+            setMessage('error', 'Trailer not found!');
+        }
 
-        setMessage('success', 'Trailers deleted successfully!');
-        redirect('trailer'); // Redirect to movie index page
+        redirect('trailer');
     }
 
     public function addTrailer()
@@ -162,11 +179,126 @@ class Trailer extends Controller
 
     public function trailer()
     {
-        $this->view('customer/movie/trailer');
+        $type = $_GET['type'] ?? null;
+        $limit = 4; // trailers per page
+        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+        if ($page < 1)
+            $page = 1;
+        $offset = ($page - 1) * $limit;
+        $types = $this->db->readAll('types');
+
+        if ($type) {
+            // Count total trailers with movie type filter
+            $countSql = "
+            SELECT COUNT(*) as total 
+            FROM trailers
+            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
+            WHERE LOWER(view_movies_info.type_name) = :type
+        ";
+            $this->db->query($countSql);
+            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
+            $this->db->stmt->execute();
+            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+            $total = $totalRow['total'] ?? 0;
+
+            // Get paginated trailers with movie_img and type
+            $sql = "
+            SELECT trailers.*, view_movies_info.movie_img, view_movies_info.movie_name, view_movies_info.actor_name, view_movies_info.type_name
+            FROM trailers
+            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
+            WHERE LOWER(view_movies_info.type_name) = :type
+            ORDER BY trailers.created_at DESC
+            LIMIT :limit OFFSET :offset
+        ";
+            $this->db->query($sql);
+            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
+            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+            $this->db->stmt->execute();
+            $trailers = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            // Count total trailers without filter
+            $countSql = "
+            SELECT COUNT(*) as total 
+            FROM trailers
+            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
+        ";
+            $this->db->query($countSql);
+            $this->db->stmt->execute();
+            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+            $total = $totalRow['total'] ?? 0;
+
+            // Get paginated trailers with movie_img and type
+            $sql = "
+            SELECT trailers.*, view_movies_info.movie_img, view_movies_info.movie_name, view_movies_info.actor_name, view_movies_info.type_name
+            FROM trailers
+            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
+            ORDER BY trailers.created_at DESC
+            LIMIT :limit OFFSET :offset
+        ";
+            $this->db->query($sql);
+            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+            $this->db->stmt->execute();
+            $trailers = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        $totalPages = ceil($total / $limit);
+
+        $data = [
+            'trailers' => $trailers,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'type' => $type,
+            'types' => $types
+        ];
+
+        $this->view('customer/movie/trailer', $data);
     }
-    public function trailerWatch()
+    public function movieDetail($id)
     {
-        $this->view('customer/movie/trailer_watch');
+        // Fetch movie info by ID from view_movies_info
+        $movie = $this->db->getById('view_movies_info', $id);
+
+        if (!$movie) {
+            setMessage('error', 'Movie not found!');
+            redirect('trailer/trailer');
+        }
+
+        // ✅ Fetch average rating for this movie (rounded)
+        $this->db->query("SELECT CEIL(AVG(count)) AS avg_rating FROM ratings WHERE movie_id = :movie_id");
+        $this->db->bind(':movie_id', $id);
+        $this->db->stmt->execute();
+        $row = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+        $avg_rating = $row['avg_rating'] ?? 0;
+
+        $sqlComments = "SELECT c.id, c.message, c.user_id, c.created_at, u.name ,u.profile_img
+                    FROM comments c
+                    JOIN users u ON c.user_id = u.id
+                    WHERE c.movie_id = :movie_id
+                    ORDER BY c.created_at DESC";
+        $this->db->query($sqlComments);
+        $this->db->bind(':movie_id', $id);
+        $this->db->stmt->execute();
+        $comments = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->db->query("SELECT * FROM trailers WHERE movie_id = :movie_id LIMIT 1");
+        $this->db->bind(':movie_id', $id);
+        $this->db->stmt->execute();
+        $trailer = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Pass data to view
+        $data = [
+            'movie' => $movie,
+            'avg_rating' => $avg_rating,
+            'comment' => $comments,
+            'trailer' => $trailer
+        ];
+
+
+        $this->view('customer/movie/trailer_detail', $data);
     }
+
+
 
 }

@@ -58,10 +58,10 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <input type="date" class="form-control" id="start_date" name="start_date" value="<?= htmlspecialchars($movies['start_date']) ?>" required>
+                            <input type="date" class="form-control" id="start_date" name="start_date" value="<?= htmlspecialchars(date('Y-m-d', strtotime($movies['start_date']))) ?>" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="date" class="form-control" id="end_date" name="end_date" value="<?= htmlspecialchars($movies['end_date']) ?>" required>
+                            <input type="date" class="form-control" id="end_date" name="end_date" value="<?= htmlspecialchars(date('Y-m-d', strtotime($movies['end_date']))) ?>" required>
                         </div>
                     </div>
 
