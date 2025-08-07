@@ -2,7 +2,7 @@
 
 class UserModel
 {
-    // ✅ Declare all private properties
+    // Properties
     private $id;
     private $name;
     private $email;
@@ -12,12 +12,13 @@ class UserModel
     private $provider_token;
     private $is_active;
     private $password;
+    private $customer_type;
     private $created_at;
     private $updated_at;
     private $is_login;
     private $is_confirmed;
 
-    // ✅ Setters & Getters
+    // Setters and Getters (as you provided)...
     public function setId($id)
     {
         $this->id = $id;
@@ -26,7 +27,6 @@ class UserModel
     {
         return $this->id;
     }
-
     public function setName($name)
     {
         $this->name = $name;
@@ -35,7 +35,6 @@ class UserModel
     {
         return $this->name;
     }
-
     public function setEmail($email)
     {
         $this->email = $email;
@@ -44,7 +43,6 @@ class UserModel
     {
         return $this->email;
     }
-
     public function setPassword($password)
     {
         $this->password = $password;
@@ -53,7 +51,6 @@ class UserModel
     {
         return $this->password;
     }
-
     public function setPhone($phone)
     {
         $this->phone = $phone;
@@ -62,7 +59,14 @@ class UserModel
     {
         return $this->phone;
     }
-
+    public function setCustomerType($customer_type)
+    {
+        $this->customer_type = $customer_type;
+    }
+    public function getCustomerType()
+    {
+        return $this->customer_type;
+    }
     public function setProfileImg($profile_img)
     {
         $this->profile_img = $profile_img;
@@ -71,7 +75,6 @@ class UserModel
     {
         return $this->profile_img;
     }
-
     public function setRole($role)
     {
         $this->role = $role;
@@ -80,7 +83,6 @@ class UserModel
     {
         return $this->role;
     }
-
     public function setIsActive($is_active)
     {
         $this->is_active = $is_active;
@@ -89,7 +91,6 @@ class UserModel
     {
         return $this->is_active;
     }
-
     public function setCreatedAt($created_at)
     {
         $this->created_at = $created_at;
@@ -98,7 +99,6 @@ class UserModel
     {
         return $this->created_at;
     }
-
     public function setProviderToken($provider_token)
     {
         $this->provider_token = $provider_token;
@@ -107,7 +107,6 @@ class UserModel
     {
         return $this->provider_token;
     }
-
     public function setUpdatedAt($updated_at)
     {
         $this->updated_at = $updated_at;
@@ -116,7 +115,6 @@ class UserModel
     {
         return $this->updated_at;
     }
-
     public function setIsConfirmed($is_confirmed)
     {
         $this->is_confirmed = $is_confirmed;
@@ -125,7 +123,6 @@ class UserModel
     {
         return $this->is_confirmed;
     }
-
     public function setIsLogin($is_login)
     {
         $this->is_login = $is_login;
@@ -135,7 +132,7 @@ class UserModel
         return $this->is_login;
     }
 
-    // ✅ Convert all to array
+    // Convert to array
     public function toArray()
     {
         return [
@@ -147,6 +144,7 @@ class UserModel
             "profile_img" => $this->getProfileImg(),
             "is_active" => $this->getIsActive(),
             "role" => $this->getRole(),
+            "customer_type" => $this->getCustomerType(),
             "created_at" => $this->getCreatedAt(),
             "provider_token" => $this->getProviderToken(),
             "updated_at" => $this->getUpdatedAt(),
@@ -155,3 +153,4 @@ class UserModel
         ];
     }
 }
+

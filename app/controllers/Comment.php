@@ -8,7 +8,14 @@ class Comment extends Controller
         $this->model('CommentModel'); // Assuming you have a CommentModel 
         $this->db = new Database();
     }
-
+    public function middleware()
+    {
+        return [
+            'store' => ['CustomerMiddleware'],
+            'destory' => ['CustomerMiddleware'],
+        ];
+    }
+    
 
 
     public function store()

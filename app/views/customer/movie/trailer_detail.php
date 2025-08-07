@@ -30,14 +30,13 @@ require_once __DIR__ . '/../layout/nav.php';
         </div>
 
         <div class="card movie-detail-card mb-4">
-            <div class="row g-0">
-                <div class="col-md-5 col-lg-4 movie-detail-poster-col">
+            <div class="row g-0 flex-column flex-md-row">
+                <div class="col-12 col-md-5 col-lg-4 movie-detail-poster-col">
                     <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($data['movie']['movie_img']) ?>"
-                        class="img-fluid rounded-start movie-detail-poster"
+                        class="img-fluid rounded-top rounded-md-start movie-detail-poster w-100"
                         alt="<?= htmlspecialchars($data['movie']['movie_name']) ?>">
-
                 </div>
-                <div class="col-md-7 col-lg-8">
+                <div class="col-12 col-md-7 col-lg-8">
                     <div class="card-body movie-detail-body">
                         <h5 class="card-title movie-detail-title"><strong style="color : black">Title:
                             </strong><?= htmlspecialchars($data['movie']['movie_name']) ?>
@@ -59,8 +58,7 @@ require_once __DIR__ . '/../layout/nav.php';
                             <?php endfor; ?>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <!-- Inside trailer_detail.php -->
+                        <div class="d-flex gap-2 flex-wrap">
                             <button class="btn btn-book-now" data-bs-toggle="modal" data-bs-target="#trailerModal">
                                 Watch Trailer
                             </button>
@@ -78,18 +76,18 @@ require_once __DIR__ . '/../layout/nav.php';
             <div class="row g-3">
                 <?php if (!empty($data['comment'])): ?>
                     <?php foreach ($data['comment'] as $comment): ?>
-                        <div class="col-md-4">
-                            <div class="d-flex p-3 shadow-sm rounded bg-white">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="d-flex p-3 shadow-sm rounded bg-white h-100">
                                 <img src="<?= URLROOT ?>/images/users/<?= $comment['profile_img'] ?? 'default.png' ?>"
-                                    class="img-fluid rounded-circle me-3" style="width: 80px; height: 80px;" alt="Profile">
+                                    class="img-fluid rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Profile">
 
                                 <div class="flex-grow-1">
 
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <h5 class="mb-0"><?= htmlspecialchars($comment['name']) ?></h5>
+                                        <h5 class="mb-0 text-truncate"><?= htmlspecialchars($comment['name']) ?></h5>
 
                                         <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $comment['user_id']): ?>
-                                            <button class="btn btn-sm btn-outline-danger btn-action"
+                                            <button class="btn btn-sm btn-outline-danger btn-action ms-2"
                                                 onclick="deleteMovie('<?= base64_encode($comment['id']) ?>')">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
@@ -124,7 +122,6 @@ require_once __DIR__ . '/../layout/nav.php';
         </div>
     </div>
 </section>
-<!-- Rate Modal -->
 <div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="rateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -155,9 +152,8 @@ require_once __DIR__ . '/../layout/nav.php';
         </div>
     </div>
 </div>
-<!-- Below your Rate Modal -->
 <div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- large modal -->
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header" style="padding: 0.5rem 1rem;">
                 <h5 class="modal-title" style="font-size: 1rem;">
@@ -204,10 +200,8 @@ require_once __DIR__ . '/../layout/footer.php';
         });
     }
 
-    // Call it once DOM is loaded
     document.addEventListener('DOMContentLoaded', bindStarClickEvents);
 
-    // Optional: rebind on modal shown (if modal is dynamic)
     const modal = document.getElementById('ratingModal');
     if (modal) {
         modal.addEventListener('shown.bs.modal', bindStarClickEvents);
@@ -238,9 +232,8 @@ require_once __DIR__ . '/../layout/footer.php';
         }
     }
 
-    // Also pause when modal hides
-    const modal = document.getElementById('trailerModal');
-    if (modal) {
-        modal.addEventListener('hidden.bs.modal', pauseTrailer);
+    const trailerModal = document.getElementById('trailerModal');
+    if (trailerModal) {
+        trailerModal.addEventListener('hidden.bs.modal', pauseTrailer);
     }
 </script>

@@ -51,7 +51,7 @@
                                 <td><?= htmlspecialchars($movie['show_time_list']) ?></td>
                                 <td><?= htmlspecialchars($movie['actor_name']) ?></td>
                                 <td><?= htmlspecialchars($movie['genre']) ?></td>
-                                <td class="text-center">
+                                <td class="text-center d-flex">
                                     <a href="<?= URLROOT . '/movie/edit/' . $movie['id'] ?>"
                                         class="btn btn-sm btn-outline-primary me-1" title="Edit">
                                         <i class="fas fa-edit"></i>

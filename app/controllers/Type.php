@@ -9,7 +9,17 @@ class Type extends Controller
         $this->model('TypeModel');
         $this->db = new Database();
     }
-  
+     public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'create' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'editType' => ['AdminMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+        ];
+    }
 
     public function store()
     {
@@ -97,7 +107,7 @@ class Type extends Controller
         $types = new TypeModel();
         $types->setId($id);
 
-        $isdestroy = $this->db->delete('types', $types->getId($id));
+        $isdestroy = $this->db->delete('types', $types->getId());
         redirect('type');
     }
 }

@@ -71,6 +71,12 @@ $currentPage = $_SERVER['REQUEST_URI'];
           <i class="fas fa-dollar-sign"></i> Payment
         </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link <?php echo (strpos($currentPage, '/contact/index') !== false ? 'active' : ''); ?>"
+          href="<?php echo URLROOT; ?>/contact/index">
+          <i class="fa-solid fa-address-book"></i> Contact
+        </a>
+      </li>
 
       <li class="nav-item">
         <a class="nav-link <?php echo (strpos($currentPage, '/booking/bookingHistory') !== false ? 'active' : ''); ?>"

@@ -8,7 +8,8 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         if (
             stripos($user['name'], $_GET['search']) !== false ||
             stripos($user['email'], $_GET['search']) !== false ||
-            stripos($user['phone'], $_GET['search']) !== false
+            stripos($user['phone'], $_GET['search']) !== false ||
+            stripos($user['customer_type'], $_GET['search']) !== false
         ) {
             $filtered_user[] = $user;
         }
@@ -42,6 +43,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
+                        <th>Customer_type</th>
                         <th>Create date</th>
                         <th></th>
                     </tr>
@@ -57,6 +59,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
                                 <td><?php echo htmlspecialchars($user['name']); ?></td>
                                 <td><?php echo htmlspecialchars($user['email']); ?></td>
                                 <td><?php echo htmlspecialchars($user['phone']); ?></td>
+                                <td><?php echo htmlspecialchars($user['customer_type']); ?></td>
                                 <td><?php echo htmlspecialchars($user['created_at']); ?></td>
                                 <td>
                                     <button class="btn-action btn btn-sm btn-outline-danger"

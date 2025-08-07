@@ -9,6 +9,9 @@ $is_logged_in = $user_id !== null && $user_role == 1; // Only customer
 $is_guest = $user_id === null; // Not logged in
 
 $currentPage = $_SERVER['REQUEST_URI'];
+
+$profileImg = $_SESSION['profile_img'] ?? 'default_profile.jpg';
+$userName = $_SESSION['user_name'] ?? 'Guest';
 ?>
 
 <!DOCTYPE html>
@@ -23,6 +26,7 @@ $currentPage = $_SERVER['REQUEST_URI'];
   <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/customer.css" />
 
   <style>
+    /*  */
     .custom-dropdown-menu {
       display: none;
       position: absolute;
@@ -81,19 +85,30 @@ $currentPage = $_SERVER['REQUEST_URI'];
     }
   </style>
 </head>
+<script>
+  window.addEventListener('scroll', function () {
+    const navbar = document.querySelector('.navbar-custom');
+    if (window.scrollY > 10) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  });
+</script>
 
 <body>
   <?php require_once APPROOT . '/views/inc/header.php'; ?>
-  <nav class="navbar navbar-expand-lg ">
+  <nav class="navbar navbar-expand-lg sticky-top navbar-custom">
     <div class="container-fluid">
       <a class="navbar-brand me-6 ms-3" href="#">
         <img src="<?php echo URLROOT; ?>/images/layout/logo.png" alt="Logo" class="d-inline-block align-text-top">
       </a>
 
-      <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      <!-- Enable the responsive toggler -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-      </button> -->
+      </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-5 me-auto mb-2 mb-lg-0">
@@ -105,7 +120,6 @@ $currentPage = $_SERVER['REQUEST_URI'];
             <a class="nav-link <?php echo (strpos($currentPage, '/movie/nowShowing') !== false ? 'active' : ''); ?>"
               href="<?php echo URLROOT; ?>/movie/nowShowing">Now Showing</a>
           </li>
-
           <li class="nav-item me-3">
             <a class="nav-link <?php echo (strpos($currentPage, '/trailer/trailer') !== false ? 'active' : ''); ?>"
               href="<?php echo URLROOT; ?>/trailer/trailer">Movie Trailer</a>
@@ -121,25 +135,24 @@ $currentPage = $_SERVER['REQUEST_URI'];
                 href="<?php echo URLROOT; ?>/booking/history">History</a>
             </li>
           <?php endif; ?>
-
         </ul>
-
-        <form class="d-flex me-3"> 
-          <input class="form-control me-2" type="search" placeholder="Search"
-            aria-label="Search">
-          <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i></button>
-        </form>
-
 
         <ul class="navbar-nav ms-auto">
           <?php if ($is_logged_in): ?>
-            <li class="nav-item dropdown-wrapper">
+            <li class="nav-item dropdown-wrapper me-3">
               <a class="nav-link" href="#" id="customDropdownToggle">
-                <span class="d-none d-lg-inline">Customer</span>
-                <i class="fas fa-user-circle fa-2x"></i>
+                <?php if ($profileImg !== 'default_profile.jpg'): ?>
+                  <img src="<?= URLROOT ?>/images/users/<?= htmlspecialchars($profileImg) ?>" alt="Profile Picture"
+                    class="rounded-circle" width="30" height="30">
+                <?php else: ?>
+                  <i class="fas fa-user-circle fa-2x"></i>
+                <?php endif; ?>
+                <span class="d-none d-lg-inline">
+                  <?= htmlspecialchars($userName) ?>
+                </span>
               </a>
               <div class="custom-dropdown-menu" id="customDropdownMenu">
-                <a href="<?php echo URLROOT; ?>/user/index">
+                <a href="<?php echo URLROOT; ?>/user/Userindex">
                   <i class="fas fa-user fa-sm me-2 text-gray-400"></i> Profile
                 </a>
                 <a href="<?php echo URLROOT; ?>/user/UserchangePassword">
@@ -152,7 +165,7 @@ $currentPage = $_SERVER['REQUEST_URI'];
               </div>
             </li>
           <?php else: ?>
-            <li class="nav-item ">
+            <li class="nav-item">
               <a class="nav-link" href="<?php echo URLROOT; ?>/pages/login">Login</a>
             </li>
             <li class="nav-item">
@@ -160,10 +173,11 @@ $currentPage = $_SERVER['REQUEST_URI'];
             </li>
           <?php endif; ?>
         </ul>
-
       </div>
     </div>
+  
   </nav>
+
 
   <!-- Logout Modal -->
   <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -199,6 +213,7 @@ $currentPage = $_SERVER['REQUEST_URI'];
         menu.classList.remove('show');
       }
     });
+    
   </script>
 </body>
 

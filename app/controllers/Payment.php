@@ -9,6 +9,19 @@ class Payment extends Controller
         $this->db = new Database();
         $this->model('PaymentModel');
     }
+    public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'edit' => ['AdminMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+            'payment' => ['CustomerMiddleware'],
+            'storePayment' => ['CustomerMiddleware'],
+        ];
+    }
+
     public function index()
     {
         $limit = 3;
@@ -28,7 +41,7 @@ class Payment extends Controller
 
         $this->view('admin/payment/add_payment', $data);
     }
-   public function store()
+    public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $payment_method = trim($_POST['payment_method']);
@@ -58,7 +71,7 @@ class Payment extends Controller
         $payment = $this->db->getById('payments', $id);
         if (!$payment) {
             setMessage('error', 'Invalid payment ID!');
-            redirect('payment');     
+            redirect('payment');
         }
 
         $data = [
@@ -67,7 +80,7 @@ class Payment extends Controller
 
         $this->view('admin/payment/edit_payment', $data);
     }
-     public function update()
+    public function update()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'];
@@ -111,10 +124,122 @@ class Payment extends Controller
 
     public function Payment()
     {
-        $this->view('customer/payment/payment');
+        $user_id = $_SESSION['user_id'] ?? null;
+        if (!$user_id) {
+            setMessage('error', 'Please log in first.');
+            redirect('pages/login');
+            return;
+        }
+
+        $payment = $this->db->readAll('payments');
+        $users = $this->db->getById('users', $user_id);
+
+        $stmt = $this->db->pdo->prepare("SELECT * FROM bookings WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+        $stmt->execute([$user_id]);
+        $booking = $stmt->fetch();
+
+        // Convert seat_id JSON to array
+        // $seatIds = json_decode($booking['seat_id'], true);
+        $seatIds = [];
+
+        if (isset($booking['seat_id']) && !empty($booking['seat_id'])) {
+            $decoded = json_decode($booking['seat_id'], true);
+            if (is_array($decoded)) {
+                $seatIds = $decoded;
+            }
+        }
+        // Get seat names by IDs
+        $seatMap = $this->db->getSeatNamesByIds($seatIds);
+        $seatNames = [];
+        foreach ($seatIds as $id) {
+            if (isset($seatMap[$id])) {
+                $seatNames[] = $seatMap[$id];
+            }
+        }
+
+        $data = [
+            'payments' => $payment,
+            'users' => $users,
+            'booking' => $booking,
+            'seat_names' => $seatNames
+        ];
+
+        $this->view('customer/payment/payment', $data);
+    }
+    public function storePayment()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $user_id = $_SESSION['user_id'] ?? null;
+            if (!$user_id) {
+                setMessage('error', 'Please login first.');
+                redirect('pages/login');
+                return;
+            }
+
+            // Get latest booking of this user (same as in Payment())
+            $stmt = $this->db->pdo->prepare("SELECT * FROM bookings WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+            $stmt->execute([$user_id]);
+            $booking = $stmt->fetch();
+
+            if (!$booking) {
+                setMessage('error', 'No booking found for payment.');
+                redirect('customer/booking/booking_history');
+                return;
+            }
+
+            // Get posted payment method (payment_method is actually the payment ID or method string?)
+            $payment_method = $_POST['payment_method'] ?? null;
+
+            // Find payment_id from payments table by payment_method string
+            $paymentRow = $this->db->columnFilter('payments', 'payment_method', $payment_method);
+
+            if (!$paymentRow) {
+                setMessage('error', 'Invalid payment method selected.');
+                redirect('payment/payment');
+                return;
+            }
+
+            $payment_id = $paymentRow['id'];
+
+            $payslip_img = '';
+
+            if (isset($_FILES['payslip_img']) && $_FILES['payslip_img']['error'] == 0) {
+                $targetDir = __DIR__ . '/../../public/images/payslips/';
+
+                $payslip_img = time() . '_' . basename($_FILES['payslip_img']['name']);
+                $targetFile = $targetDir . $payslip_img;
+
+                move_uploaded_file($_FILES['payslip_img']['tmp_name'], $targetFile);
+            }
+
+            // Prepare data for payment_history table
+            $paymentHistoryData = [
+                'booking_id' => $booking['id'],
+                'payment_id' => $payment_id,
+                'payslip_image' => $payslip_img,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            $insertId = $this->db->create('payment_history', $paymentHistoryData);
+
+            if ($insertId) {
+                // setMessage('success', 'Payment recorded successfully.');
+                redirect('booking/history');
+            } else {
+                // setMessage('error', 'Failed to record payment.');
+                redirect('payment/payment');
+            }
+        } else {
+            redirect('payment/payment');
+        }
     }
 
-    
-   
+
+
+
+
+
+
 
 }

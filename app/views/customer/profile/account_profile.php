@@ -32,7 +32,7 @@ require_once __DIR__ . '/../layout/nav.php';
                                         <a href="<?php echo URLROOT; ?>/user/UserchangePassword"><button
                                                 class="btn btn-change-password">Change Password</button></a>
                                         <a
-                                            href="<?php echo URLROOT; ?>/user/editProfile/<?php echo $data['user_info']['id']; ?>">
+                                            href="<?php echo URLROOT; ?>/user/editUserProfile/<?php echo $data['user_info']['id']; ?>">
                                             <button class="btn btn-edit-profile">Edit Profile</button>
                                         </a>
 

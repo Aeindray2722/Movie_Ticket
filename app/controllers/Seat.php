@@ -9,7 +9,17 @@ class Seat extends Controller
         $this->db = new Database();
         $this->model('SeatModel');
     }
-
+    public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'create' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'edit' => ['AdminMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+        ];
+    }
     public function index()
     {
         $limit = 10;

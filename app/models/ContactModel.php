@@ -5,7 +5,7 @@ class ContactModel
     // Access Modifier = public, private, protected
     private $id;
     private $user_id;
-    private $title;
+    private $email;
     private $message;
     private $created_at;
     private $updated_at;
@@ -26,13 +26,13 @@ class ContactModel
     {
         return $this->user_id;
     }
-    public function setTitle($title)
+    public function setEmail($email)
     {
-        $this->title = $title;
+        $this->email = $email;
     }
-    public function getTitle()
+    public function getEmail()
     {
-        return $this->title;
+        return $this->email;
     }
     public function setMessage($message)
     {
@@ -65,7 +65,7 @@ class ContactModel
         return [
             "id" =>$this->getId(),
             "user_id" => $this->getUserId(),
-            "title" => $this->getTitle(),
+            "email" => $this->getEmail(),
             "message" => $this->getMessage(),
             "created_at" => $this->getCreatedAt(),
             "updated_at" => $this->getUpdatedAt()

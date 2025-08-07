@@ -55,6 +55,9 @@
                             <i class="fa fa-lock" aria-hidden="true"></i>
                         </span>
                     </div>
+                    <div class="text-end mt-1 mb-2 ">
+                        <a href="<?php echo URLROOT; ?>/auth/forgotPassword">Forgot Password?</a>
+                    </div>
 
                     <div class=" offset-3">
                         <button type="submit" class="btn btn-register w-50 justify-content-center">Login</button>
@@ -63,10 +66,11 @@
                     <div class="mb-3 mt-3 text-center">
                         <div class="row justify-content-center">
                             <div class="col-auto">
-                                <button type="button" class="btn btn-outline-danger">
+                                <a href="<?php echo URLROOT; ?>/auth/googleLogin" class="btn btn-outline-danger">
                                     <i class="fab fa-google me-2"></i> Google
-                                </button>
+                                </a>
                             </div>
+
                             <div class="col-auto">
                                 <button type="button" class="btn btn-outline-primary">
                                     <i class="fab fa-facebook-f me-2"></i> Facebook

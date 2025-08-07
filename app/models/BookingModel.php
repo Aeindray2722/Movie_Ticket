@@ -13,7 +13,7 @@ class BookingModel
     private $booking_date;
     private $created_at;
     private $updated_at;
-
+   
      public function setId($id)
     {
         $this->id = $id;
@@ -98,6 +98,8 @@ class BookingModel
     {
         return $this->updated_at;
     }
+   
+
 
     public function toArray() {
         return [

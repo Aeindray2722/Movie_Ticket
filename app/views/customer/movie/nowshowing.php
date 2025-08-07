@@ -1,18 +1,17 @@
-<?php
-extract($data);
-require_once __DIR__ . '/../layout/nav.php';
-?>
+<?php extract($data); require_once __DIR__ . '/../layout/nav.php'; ?>
 
 <section class="now-showing-page-content py-4">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
             <div>
                 <h2 class="section-heading mb-4">Now Showing</h2>
                 <p class="section-subheading mt-3">Today</p>
             </div>
             <div class="search-bar-on-page">
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="search" aria-label="Search">
+                <form class="d-flex" method="GET" action="<?= URLROOT ?>/movie/nowShowing">
+                    <input type="hidden" name="type" value="<?= htmlspecialchars($data['type'] ?? '') ?>">
+                    <input class="form-control me-2" type="search" name="search"
+                        value="<?= htmlspecialchars($data['search'] ?? '') ?>" placeholder="search">
                     <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </div>
@@ -21,7 +20,6 @@ require_once __DIR__ . '/../layout/nav.php';
         <div class="filter-buttons mb-4 me-3">
             <a href="<?= URLROOT ?>/movie/nowShowing"
                 class="btn btn-filter <?= empty($_GET['type']) ? 'active' : '' ?>">All</a>
-
             <?php foreach ($data['types'] as $t): ?>
                 <a href="<?= URLROOT ?>/movie/nowShowing?type=<?= strtolower($t['name']) ?>"
                     class="btn btn-filter <?= ($_GET['type'] ?? '') === strtolower($t['name']) ? 'active' : '' ?>">
@@ -30,17 +28,17 @@ require_once __DIR__ . '/../layout/nav.php';
             <?php endforeach; ?>
         </div>
 
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2 gy-5 mb-4">
+        <div class="row gy-5 mb-4">
             <?php foreach ($data['now_showing_movies'] as $movie): ?>
-                <div class="col ">
-                    <div class="card movie-card-lg shadow-sm">
-                        <div class="row g-0 ">
-                            <div class="col-md-4">
+                <div class="col-12 col-md-6">
+                    <div class="card movie-card-lg shadow-sm h-100">
+                        <div class="row g-0 flex-column flex-md-row">
+                            <div class="col-12 col-md-4">
                                 <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
-                                    class="img-fluid rounded-start movie-poster-lg shadow-sm"
+                                    class="img-fluid rounded-top rounded-md-start movie-poster-lg shadow-sm w-100"
                                     alt="<?= $movie['movie_name']; ?>">
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-12 col-md-8">
                                 <div class="card-body">
                                     <p class="card-text-lg"><strong style="color : black">Title:</strong>
                                         <?= htmlspecialchars($movie['movie_name'] ?? 'N/A'); ?></p>
@@ -49,15 +47,16 @@ require_once __DIR__ . '/../layout/nav.php';
                                     <p class="card-text-lg"><strong style="color : black">Actor:</strong>
                                         <?= htmlspecialchars($movie['actor_name'] ?? 'N/A'); ?></p>
                                     <a href="<?= URLROOT; ?>/movie/movieDetail/<?= $movie['id'] ?>">
-                                        <button class="btn btn-view-detail">View Detail</button>
+                                        <button class="btn btn-view-detail mt-3">View Detail</button>
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?> <!-- ✅ close foreach here -->
-        </div> <!-- ✅ close row after the loop -->
+            <?php endforeach; ?>
+        </div>
+
         <?php if (!empty($_GET['type']) && empty($data['now_showing_movies'])): ?>
             <div class="alert alert-warning text-center">No <?= htmlspecialchars($_GET['type']) ?> movies today.</div>
         <?php endif; ?>
@@ -67,17 +66,16 @@ require_once __DIR__ . '/../layout/nav.php';
                 <ul class="pagination justify-content-end">
                     <?php for ($p = 1; $p <= $data['totalPages']; $p++): ?>
                         <li class="page-item <?= ($p == $data['page']) ? 'active' : '' ?>">
-                            <a class="page-link" href="?type=<?= urlencode($data['type'] ?? '') ?>&page=<?= $p ?>"><?= $p ?></a>
+                            <a class="page-link"
+                                href="?type=<?= urlencode($data['type'] ?? '') ?>&search=<?= urlencode($data['search'] ?? '') ?>&page=<?= $p ?>">
+                                <?= $p ?>
+                            </a>
                         </li>
                     <?php endfor; ?>
                 </ul>
             </nav>
         <?php endif; ?>
-
-
     </div>
 </section>
 
-<?php
-require_once __DIR__ . '/../layout/footer.php';
-?>
+<?php require_once __DIR__ . '/../layout/footer.php'; ?>

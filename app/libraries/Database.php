@@ -32,37 +32,6 @@ class Database
             echo $this->error;
         }
     }
-
-    // public function create($table, $data)
-    // {
-    //     // print_r($data);  
-    //     // exit;
-    //     try {
-    //         $column = array_keys($data);
-    //         $columnSql = implode(', ', $column);
-    //         $bindingSql = ':' . implode(',:', $column);
-    //         //echo $bindingSql;
-    //         $sql = "INSERT INTO $table ($columnSql) VALUES ($bindingSql)";
-    //         // echo $sql;
-    //         // exit;
-    //         $stm = $this->pdo->prepare($sql);  
-    //         // print_r($stm);
-    //         // exit;
-    //         foreach ($data as $key => $value) {
-    //             // echo $key . ' => ' . $value . '<br>';
-    //             // echo ':' . $key . ' => ' . $value . '<br>';
-
-    //             $stm->bindValue(':' . $key, $value);
-    //         }
-    //         // print_r($stm);
-    //         $status = $stm->execute();
-    //         // echo $status;
-    //         return ($status) ? $this->pdo->lastInsertId() : false;
-    //     } catch (PDOException $e) {
-    //         echo $e;
-    //     }
-    // }
-
     public function create($table, $data)
     {
         try {
@@ -98,7 +67,6 @@ class Database
             return false;
         }
     }
-
     // Update Query
     public function update($table, $id, $data)
     {
@@ -115,15 +83,12 @@ class Database
             }
             $columns = array_map('map', $columns);
             $bindingSql = implode(',', $columns);
-            // echo $bindingSql;
-            // exit;
             $sql = 'UPDATE ' . $table . ' SET ' . $bindingSql . ' WHERE `id` =:id';
 
             $stm = $this->pdo->prepare($sql);
-
             // Now, we assign id to bind
             $data['id'] = $id;
-
+            // var_dump($data['id']); exit;
             foreach ($data as $key => $value) {
                 $stm->bindValue(':' . $key, $value);
             }
@@ -135,9 +100,7 @@ class Database
             exit;
         }
     }
-
-
-
+    //delete
     public function delete($table, $id)
     {
         $sql = 'DELETE FROM ' . $table . ' WHERE `id` = :id';
@@ -157,8 +120,7 @@ class Database
         $row = $stm->fetch(PDO::FETCH_ASSOC);
         return ($success) ? $row : [];
     }
-
-
+    //loginCheck
     public function loginCheck($email, $plainPassword)
     {
         $sql = 'SELECT * FROM users WHERE email = :email';
@@ -182,22 +144,7 @@ class Database
         $stm->closeCursor(); // good practice for unbuffered queries
         return $success;
     }
-
-    // public function unsetLogin($id)
-    // {
-    //     try {
-    //         $sql = "UPDATE users SET is_login = :false WHERE id = :id"; //is_login = :false .is a placeholder to indicate user login(true) or not(false)
-    //         // id = :id also 
-    //         $stm = $this->pdo->prepare($sql);
-    //         $stm->bindValue(':false', '0');
-    //         $stm->bindValue(':id', $id);
-    //         $success = $stm->execute();
-    //         $row = $stm->fetch(PDO::FETCH_ASSOC);
-    //         return ($success) ? $row : [];
-    //     } catch (Exception $e) {
-    //         echo ($e);
-    //     }
-    // }
+    //unset login
     public function unsetLogin($id)
     {
         try {
@@ -212,8 +159,7 @@ class Database
             return false;
         }
     }
-
-
+    //readAll
     public function readAll($table)
     {
         $sql = 'SELECT * FROM ' . $table;
@@ -223,7 +169,7 @@ class Database
         $row = $stm->fetchAll(PDO::FETCH_ASSOC);
         return ($success) ? $row : [];
     }
-
+    //getById
     public function getById($table, $id)
     {
         $sql = 'SELECT * FROM ' . $table . ' WHERE `id` =:id';
@@ -234,7 +180,7 @@ class Database
         $row = $stm->fetch(PDO::FETCH_ASSOC);
         return ($success) ? $row : [];
     }
-
+    //getByCategory
     public function getByCategoryId($table, $column)
     {
         $stm = $this->pdo->prepare('SELECT * FROM ' . $table . ' WHERE name =:column');
@@ -244,75 +190,6 @@ class Database
         //  print_r($row);
         return ($success) ? $row : [];
     }
-
-    // For Dashboard
-    // public function incomeTransition()
-    // {
-    //    try{
-
-    //        $sql        = "SELECT *,SUM(amount) AS amount FROM incomes WHERE
-    //        (date = { fn CURDATE() }) ";
-    //        $stm = $this->pdo->prepare($sql);
-    //        $success = $stm->execute();
-
-    //        $row     = $stm->fetch(PDO::FETCH_ASSOC);
-    //        return ($success) ? $row : [];
-
-    //     }
-    //     catch( Exception $e)
-    //     {
-    //         echo($e);
-    //     }
-
-    // }
-
-    public function incomeTransition()
-    {
-        try {
-            $sql = "SELECT SUM(amount) AS total_amount FROM incomes WHERE date = CURDATE()";
-            $stm = $this->pdo->prepare($sql);
-            $success = $stm->execute();
-            $row = $stm->fetch(PDO::FETCH_ASSOC);
-            return ($success) ? $row : [];
-        } catch (Exception $e) {
-            echo ($e);
-        }
-    }
-
-
-    // public function expenseTransition()
-    // {
-    //    try{
-
-    //        $sql        = "SELECT * ,SUM(amount*qty) AS amount FROM expenses WHERE
-    //        (date = { fn CURDATE() }) ";
-    //        $stm = $this->pdo->prepare($sql);
-    //        $success = $stm->execute();
-
-    //        $row     = $stm->fetch(PDO::FETCH_ASSOC);
-    //        return ($success) ? $row : [];
-
-    //     }
-    //     catch( Exception $e)
-    //     {
-    //         echo($e);
-    //     }
-
-    // }
-    public function expenseTransition()
-    {
-        try {
-            $sql = "SELECT SUM(amount * qty) AS total_expense FROM expenses WHERE date = CURDATE()";
-            $stm = $this->pdo->prepare($sql);
-            $success = $stm->execute();
-            $row = $stm->fetch(PDO::FETCH_ASSOC);
-            return ($success) ? $row : [];
-        } catch (Exception $e) {
-            echo ($e);
-        }
-    }
-
-
     //pagination
     public function readPaged($table, $limit, $offset)
     {
@@ -324,7 +201,7 @@ class Database
         $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
         return $success ? $rows : [];
     }
-
+    //readWithCondition
     public function readWithCondition($table, $condition)
     {
         $sql = "SELECT * FROM $table WHERE $condition";
@@ -332,7 +209,6 @@ class Database
         $stm->execute();
         return $stm->fetchAll(PDO::FETCH_ASSOC);
     }
-
     // Search with pagination and total count
     public function search(string $table, array $columns, string $keyword, int $limit, int $offset): array
     {
@@ -373,7 +249,6 @@ class Database
         $this->stmt = $this->pdo->prepare($sql);
         // $this->stmt->execute();
     }
-
     public function fetchAll()
     {
         return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -397,26 +272,213 @@ class Database
         }
         $this->stmt->bindValue($param, $value, $type);
     }
-
     public function getBookingsByMovieDateShowtime($movie_id, $show_time_id, $booking_date)
     {
-        $sql = "SELECT seat_id FROM bookings WHERE movie_id = :movie_id AND show_time_id = :show_time_id AND booking_date = :booking_date";
-        $this->query($sql);
+        $this->query("SELECT * FROM bookings 
+              WHERE movie_id = :movie_id 
+              AND show_time_id = :show_time_id 
+              AND booking_date = :booking_date
+              AND status IN (0, 1)"); // status 0 or 1 only
+
         $this->bind(':movie_id', $movie_id);
         $this->bind(':show_time_id', $show_time_id);
         $this->bind(':booking_date', $booking_date);
+
         $this->stmt->execute();
-        return $this->fetchAll();
+        return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-public function getAvgRatingByMovieId($movie_id)
+    // public function getAvgRatingByMovieId($movie_id)
+    // {
+    //     $this->query("SELECT CEIL(AVG(count)) AS avg_rating FROM ratings WHERE movie_id = :movie_id");
+    //     $this->bind(':movie_id', $movie_id);
+    //     $this->stmt->execute();
+    //     $row = $this->stmt->fetch(PDO::FETCH_ASSOC);
+    //     return $row['avg_rating'] ?? 0;
+    // }
+    public function getAvgRatingByMovieId($movie_id)
     {
-        $this->query("SELECT CEIL(AVG(count)) AS avg_rating FROM ratings WHERE movie_id = :movie_id");
+        $this->query("SELECT GetAvgRatingByMovieId(:movie_id) AS avg_rating");
         $this->bind(':movie_id', $movie_id);
         $this->stmt->execute();
         $row = $this->stmt->fetch(PDO::FETCH_ASSOC);
         return $row['avg_rating'] ?? 0;
     }
+
+    public function getSeatNamesByIds(array $seatIds)
+    {
+        if (empty($seatIds)) {
+            return [];
+        }
+
+        // Filter only numeric values
+        $seatIds = array_filter($seatIds, fn($id) => is_numeric($id));
+        $seatIds = array_values($seatIds); // reindex
+
+        if (empty($seatIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($seatIds), '?'));
+        $sql = "SELECT id, seat_row, seat_number FROM seats WHERE id IN ($placeholders)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($seatIds); // now safe
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $seatMap = [];
+        foreach ($results as $row) {
+            $seatMap[$row['id']] = $row['seat_row'] . $row['seat_number'];
+        }
+
+        return $seatMap;
+    }
+    public function getBookingsByUser($user_id)
+    {
+        $sql = "SELECT * FROM bookings WHERE user_id = :user_id ORDER BY created_at DESC";
+        $this->query($sql);
+        $this->bind(':user_id', $user_id);
+        $this->stmt->execute();
+        return $this->fetchAll();
+    }
+    public function updateStatus($booking_id, $status)
+    {
+        $sql = "UPDATE bookings SET status = :status WHERE id = :id";
+        $this->query($sql);
+        $this->bind(':status', $status);
+        $this->bind(':id', $booking_id);
+        return $this->stmt->execute();
+    }
+    public function single()
+    {
+        $this->stmt->execute();
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function lastInsertId()
+    {
+        return $this->pdo->lastInsertId();
+    }
+    public function getMonthlySummary()
+    {
+        $this->query("CALL generate_monthly_summary()");
+        $this->stmt->execute();
+
+        $bookings = $this->stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->stmt->nextRowset();
+        $revenue = $this->stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->stmt->nextRowset();
+        $customers = $this->stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->stmt->nextRowset();
+        $bestMovie = $this->stmt->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            'total_bookings' => $bookings['total_bookings'] ?? 0,
+            'total_revenue' => $revenue['total_revenue'] ?? 0,
+            'total_customers' => $customers['total_customers'] ?? 0,
+            'best_selling_movie' => $bestMovie['movie_name'] ?? 'N/A',
+            'best_selling_count' => $bestMovie['bookings_count'] ?? 0,
+        ];
+    }
+    // Example pagination function with optional type filter
+    public function paginateByType(string $tableOrView, int $limit, int $page, ?string $type = null, array $additionalWhere = [], string $orderBy = 'id')
+    {
+        if ($page < 1)
+            $page = 1;
+
+        $offset = ($page - 1) * $limit;
+        $params = [];
+
+        // WHERE clause array
+        $whereClauses = [];
+
+        // Type filtering
+        if ($type !== null) {
+            $whereClauses[] = "LOWER(type_name) = :type";
+            $params[':type'] = strtolower($type);
+        }
+
+        // Additional custom where conditions (e.g., CURDATE() BETWEEN ...)
+        foreach ($additionalWhere as $index => $condition) {
+            if (is_array($condition) && count($condition) === 2) {
+                // condition with parameter
+                [$condStr, $val] = $condition;
+                $placeholder = ":param_$index";
+                // replace ? in condition with placeholder if needed
+                $condStr = str_replace('?', $placeholder, $condStr);
+                $whereClauses[] = $condStr;
+                $params[$placeholder] = $val;
+            } else {
+                // Just a plain condition string, no parameter
+                $whereClauses[] = $condition;
+            }
+        }
+
+
+        $whereSql = count($whereClauses) ? 'WHERE ' . implode(' AND ', $whereClauses) : '';
+
+        // Count total
+        $countSql = "SELECT COUNT(*) AS total FROM $tableOrView $whereSql";
+        $this->query($countSql);
+        foreach ($params as $key => $val) {
+            $this->stmt->bindValue($key, $val, PDO::PARAM_STR);
+        }
+        $this->stmt->execute();
+        $totalRow = $this->stmt->fetch(PDO::FETCH_ASSOC);
+        $total = $totalRow['total'] ?? 0;
+
+        // Select paginated data
+        $dataSql = "SELECT * FROM $tableOrView $whereSql ORDER BY $orderBy DESC LIMIT :limit OFFSET :offset";
+        $this->query($dataSql);
+        foreach ($params as $key => $val) {
+            $this->stmt->bindValue($key, $val, PDO::PARAM_STR);
+        }
+        $this->stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $this->stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $this->stmt->execute();
+        $data = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalPages = ceil($total / $limit);
+
+        return [
+            'data' => $data,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'total' => $total
+        ];
+    }
+    public function getUserMonthlyBookingTotal(int $userId): float
+    {
+        $startDate = (new DateTime('first day of this month'))->setTime(0, 0, 0)->format('Y-m-d H:i:s');
+        $endDate = (new DateTime('last day of this month'))->setTime(23, 59, 59)->format('Y-m-d H:i:s');
+
+        $sql = "SELECT SUM(total_amount) as total FROM bookings 
+            WHERE user_id = :user_id AND created_at BETWEEN :start_date AND :end_date";
+
+        $this->query($sql);
+        $this->bind(':user_id', $userId);
+        $this->bind(':start_date', $startDate);
+        $this->bind(':end_date', $endDate);
+
+        $row = $this->single();
+        if (!$row) {
+            return 0;
+        }
+
+        return (float) ($row['total'] ?? 0);
+    }
+    public function updatePasswordByEmail($email, $hashedPassword)
+    {
+        $sql = "UPDATE users SET password = :password, updated_at = NOW() WHERE email = :email";
+        $this->query($sql);
+        $this->bind(':password', $hashedPassword);
+        $this->bind(':email', $email);
+
+        return $this->stmt->execute();
+    }
+
+
+
 
 }
 

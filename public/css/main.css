@@ -1,5 +1,22 @@
 /*//////////////////////////////////////////////////////////////////
 [ FONT ]*/
+.navbar-custom {
+    background-color: rgba(193, 112, 205, 0.6); /* glass-like purple */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* for Safari */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1030;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.navbar-custom.scrolled {
+    background-color: rgba(161, 85, 186, 0.75); /* slightly darker + less transparent */
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+}
+
 
 @font-face {
     font-family: Poppins-Regular;

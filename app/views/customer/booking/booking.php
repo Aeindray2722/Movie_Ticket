@@ -189,10 +189,12 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                                                 }
                                             }
                                             $class = $seatStatus === 0 ? 'seat-available' : 'seat-not-available';
+                                            // var_dump($class); exit;
                                             ?>
                                             <div class="seat <?= $class ?>"
                                                 data-seat="<?= htmlspecialchars($row . $seatNum) ?>"></div>
                                         <?php endforeach; ?>
+                                        
                                     </div>
 
                                 </div>

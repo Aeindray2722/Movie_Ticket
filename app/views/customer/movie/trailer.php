@@ -4,14 +4,17 @@ require_once __DIR__ . '/../layout/nav.php';
 
 <section class="now-showing-page-content py-4">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
             <div>
                 <h2 class="section-heading mb-4">Movie Trailer</h2>
-
             </div>
             <div class="search-bar-on-page">
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="search" aria-label="Search">
+                <form class="d-flex" method="get" action="<?= URLROOT ?>/trailer/trailer">
+                    <input class="form-control me-2" type="search" name="search" placeholder="Search"
+                        aria-label="Search" value="<?= htmlspecialchars($data['search']) ?>">
+                    <?php if (!empty($data['type'])): ?>
+                        <input type="hidden" name="type" value="<?= htmlspecialchars($data['type']) ?>">
+                    <?php endif; ?>
                     <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </div>
@@ -28,17 +31,17 @@ require_once __DIR__ . '/../layout/nav.php';
                 </a>
             <?php endforeach; ?>
         </div>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-2 gy-5 mb-4">
+        <div class="row gy-5 mb-4">
             <?php foreach ($data['trailers'] as $trailer): ?>
-                <div class="col ">
-                    <div class="card movie-card-lg shadow-sm">
-                        <div class="row g-0 ">
-                            <div class="col-md-4">
+                <div class="col-12 col-md-6">
+                    <div class="card movie-card-lg shadow-sm h-100">
+                        <div class="row g-0 flex-column flex-md-row">
+                            <div class="col-12 col-md-4">
                                 <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"
-                                    class="img-fluid rounded-start movie-poster-lg shadow-sm"
+                                    class="img-fluid rounded-top rounded-md-start movie-poster-lg shadow-sm w-100"
                                     alt="<?= $trailer['movie_name']; ?>">
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-12 col-md-8">
                                 <div class="card-body">
                                     <p class="card-text-lg"><strong style="color : black">Title:</strong>
                                         <?= htmlspecialchars($trailer['movie_name'] ?? 'N/A'); ?></p>
@@ -47,17 +50,16 @@ require_once __DIR__ . '/../layout/nav.php';
                                     <p class="card-text-lg"><strong style="color : black">Actor:</strong>
                                         <?= htmlspecialchars($trailer['actor_name'] ?? 'N/A'); ?></p>
                                     <a href="<?= URLROOT; ?>/trailer/movieDetail/<?= $trailer['movie_id'] ?>">
-                                        <button class="btn btn-view-detail">View Detail</button>
+                                        <button class="btn btn-view-detail mt-3">View Detail</button>
                                     </a>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?> <!-- ✅ close foreach here -->
-        </div> <!-- ✅ close row after the loop -->
-        <?php if (!empty($_GET['type']) && empty($data['now_showing_movies'])): ?>
+            <?php endforeach; ?>
+        </div>
+        <?php if (!empty($_GET['type']) && empty($data['trailers'])): ?>
             <div class="alert alert-warning text-center">No <?= htmlspecialchars($_GET['type']) ?> movies .</div>
         <?php endif; ?>
 
@@ -66,7 +68,10 @@ require_once __DIR__ . '/../layout/nav.php';
                 <ul class="pagination justify-content-end">
                     <?php for ($p = 1; $p <= $data['totalPages']; $p++): ?>
                         <li class="page-item <?= ($p == $data['page']) ? 'active' : '' ?>">
-                            <a class="page-link" href="?type=<?= urlencode($data['type'] ?? '') ?>&page=<?= $p ?>"><?= $p ?></a>
+                            <a class="page-link"
+                                href="?type=<?= urlencode($data['type'] ?? '') ?>&page=<?= $p ?>">
+                                <?= $p ?>
+                            </a>
                         </li>
                     <?php endfor; ?>
                 </ul>

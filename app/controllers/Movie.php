@@ -9,6 +9,19 @@ class Movie extends Controller
         $this->model('MovieModel'); // Assuming you have a MovieModel
         $this->db = new Database();
     }
+    public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'create' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'edit' => ['AdminMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+            'dashboard' => ['AdminMiddleware'],
+        ];
+    }
+
     public function index()
     {
         $search = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -48,6 +61,7 @@ class Movie extends Controller
 
         $this->view('admin/movie/movie_list', $data);
     }
+
     public function create()
     {
         $movies = $this->db->readAll('movies');
@@ -251,79 +265,121 @@ class Movie extends Controller
 
 
 
-
     public function dashboard()
     {
-        $this->view('admin/movie/dashboard');
+        // 1. Fetch 5 most recent bookings
+        $limit = 5;
+        $sql = "SELECT * FROM bookings ORDER BY booking_date DESC LIMIT :limit";
+        $this->db->query($sql);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        $this->db->stmt->execute();
+        $recentBookings = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Collect all seat IDs from recent bookings to map to seat names
+        $allSeatIds = [];
+        foreach ($recentBookings as $booking) {
+            $seat_ids = json_decode($booking['seat_id'], true);
+            if (is_array($seat_ids)) {
+                $allSeatIds = array_merge($allSeatIds, $seat_ids);
+            }
+        }
+
+        // 3. Get seat names map for all seat IDs
+        $seatMap = $this->db->getSeatNamesByIds($allSeatIds);
+
+        // 4. Enrich bookings with movie, user, seat names, showtime, and status text
+        foreach ($recentBookings as &$booking) {
+            $movie = $this->db->getById('movies', $booking['movie_id']);
+            $booking['movie_name'] = $movie['movie_name'] ?? 'Unknown';
+
+            $user = $this->db->getById('users', $booking['user_id']);
+            $booking['user_name'] = $user['name'] ?? 'Unknown';
+
+            $seat_ids = json_decode($booking['seat_id'], true);
+            $seat_names = [];
+            foreach ($seat_ids as $sid) {
+                $seat_names[] = $seatMap[$sid] ?? 'Unknown';
+            }
+            $booking['seats'] = implode(', ', $seat_names);
+
+            $showTime = $this->db->getById('show_times', $booking['show_time_id']);
+            $booking['show_time'] = $showTime['show_time'] ?? 'Unknown';
+
+            $statusMap = [0 => 'Confirmed', 1 => 'Pending', 2 => 'Rejected'];
+            $booking['status_text'] = $statusMap[$booking['status']] ?? 'Unknown';
+        }
+        unset($booking); // break reference
+
+        // 5. Get monthly summary report from stored procedure
+        $report = $this->db->getMonthlySummary();
+
+        // 6. Pass both data arrays to the dashboard view
+        $data = [
+            'recentBookings' => $recentBookings,
+            'report' => $report,
+        ];
+
+        $this->view('admin/movie/dashboard', $data);
     }
 
     public function nowShowing()
     {
         $type = $_GET['type'] ?? null;
-        $limit = 4; // movies per page
+        $search = trim($_GET['search'] ?? '');
         $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
-        if ($page < 1)
-            $page = 1;
+        $limit = 4;
         $offset = ($page - 1) * $limit;
+
         $types = $this->db->readAll('types');
+        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
 
-        if ($type) {
-            // Count total movies with type filter
-            $countSql = "SELECT COUNT(*) as total FROM view_movies_info
-            WHERE CURDATE() BETWEEN start_date AND end_date
-            AND LOWER(type_name) = :type";
-            $this->db->query($countSql);
-            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
-            $this->db->stmt->execute();
-            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
-            $total = $totalRow['total'] ?? 0;
+        $filteredMovies = [];
+        $total = 0;
 
-            // Get paginated movies
-            $sql = "SELECT * FROM view_movies_info
-            WHERE CURDATE() BETWEEN start_date AND end_date
-            AND LOWER(type_name) = :type
-            ORDER BY id DESC
-            LIMIT :limit OFFSET :offset";
-            $this->db->query($sql);
-            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
-            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
-            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
-            $this->db->stmt->execute();
-            $nowShowingMovies = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($search !== '') {
+            // Search with keyword
+            $result = $this->db->search('view_movies_info', $columnsToSearch, $search, $limit, $offset);
 
+            // Filter result to only show movies with valid date range
+            $today = date('Y-m-d');
+            $filtered = array_filter($result['data'], function ($movie) use ($today, $type) {
+                $isShowing = ($movie['start_date'] <= $today && $movie['end_date'] >= $today);
+                $isTypeMatch = !$type || strtolower($movie['type_name']) === strtolower($type);
+                return $isShowing && $isTypeMatch;
+            });
+
+            // Paginate manually
+            $total = count($filtered);
+            $movies = array_slice(array_values($filtered), $offset, $limit);
         } else {
-            // Count total movies without filter
-            $countSql = "SELECT COUNT(*) as total FROM view_movies_info
-            WHERE CURDATE() BETWEEN start_date AND end_date";
-            $this->db->query($countSql);
-            $this->db->stmt->execute();
-            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
-            $total = $totalRow['total'] ?? 0;
-
-            // Get paginated movies
-            $sql = "SELECT * FROM view_movies_info
-            WHERE CURDATE() BETWEEN start_date AND end_date
-            ORDER BY id DESC
-            LIMIT :limit OFFSET :offset";
-            $this->db->query($sql);
-            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
-            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
-            $this->db->stmt->execute();
-            $nowShowingMovies = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+            // No search keyword, use pagination
+            $result = $this->db->paginateByType(
+                'view_movies_info',
+                $limit,
+                $page,
+                $type,
+                ['CURDATE() BETWEEN start_date AND end_date']
+            );
+            $movies = $result['data'];
+            $total = $result['total'] ?? count($movies);
         }
 
         $totalPages = ceil($total / $limit);
 
         $data = [
-            'now_showing_movies' => $nowShowingMovies,
+            'now_showing_movies' => $movies,
             'page' => $page,
             'totalPages' => $totalPages,
             'type' => $type,
-            'types' => $types
+            'types' => $types,
+            'search' => $search
         ];
 
         $this->view('customer/movie/nowshowing', $data);
     }
+
+
+
 
     public function movieDetail($id)
     {
@@ -351,18 +407,12 @@ class Movie extends Controller
         $data = [
             'movie' => $movie,
             'avg_rating' => $avg_rating,
-            'comment' =>$comments
+            'comment' => $comments
         ];
 
 
         $this->view('customer/movie/movie_detail', $data);
     }
-
-
-
-
-
-
 
 }
 ?>

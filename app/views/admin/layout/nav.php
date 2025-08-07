@@ -97,8 +97,8 @@ $userName = $_SESSION['user_name'] ?? 'Guest';
                   class="fa-solid fa-lock fa-sm me-2 text-gray-400"></i> Change Password</a>
               <hr class="dropdown-divider">
               <a href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                <i class="fas fa-sign-out-alt fa-sm me-2 text-gray-400"></i> Logout
-              </a>
+                  <i class="fas fa-sign-out-alt fa-sm me-2 text-gray-400"></i> Logout
+                </a>
             </div>
           </li>
         </ul>

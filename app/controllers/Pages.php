@@ -23,11 +23,13 @@ class Pages extends Controller
     {
         $this->view('pages/register1');
     }
-
     public function about()
     {
-        $this->view('customer/payment/about');
+        $users = $this->db->readWithCondition("users", "role = 0"); // ✅ Correct usage
+        $data = ['team' => $users];
+        $this->view('customer/payment/about', $data);
     }
+
     public function home()
     {
         // Fetch now showing movies
@@ -46,7 +48,7 @@ class Pages extends Controller
     ";
         $this->db->query($sql);
         $this->db->stmt->execute();
-        $trailers = $this->db->fetchAll(); 
+        $trailers = $this->db->fetchAll();
 
         $data = [
             'now_showing_movies' => $nowShowingMovies,
@@ -60,17 +62,17 @@ class Pages extends Controller
 
 
 
-    public function dashboard()
-    {
-        $income = $this->db->incomeTransition();
-        $expense = $this->db->expenseTransition();
+    // public function dashboard()
+    // {
+    //     $income = $this->db->incomeTransition();
+    //     $expense = $this->db->expenseTransition();
 
-        $data = [
-            'income' => isset($income['amount']) ? $income : ['amount' => 0],
-            'expense' => isset($expense['amount']) ? $expense : ['amount' => 0]
-        ];
+    //     $data = [
+    //         'income' => isset($income['amount']) ? $income : ['amount' => 0],
+    //         'expense' => isset($expense['amount']) ? $expense : ['amount' => 0]
+    //     ];
 
-        $this->view('pages/dashboard', $data);
-    }
+    //     $this->view('pages/dashboard', $data);
+    // }
 
 }

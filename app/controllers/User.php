@@ -9,6 +9,27 @@ class User extends Controller
         $this->db = new Database();
         $this->model('UserModel');
     }
+     public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'Userindex' => ['CustomerMiddleware'],
+            'create' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'editProfile' => ['AdminMiddleware'],
+            'editUserProfile' => ['CustomerMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+            'staffList' => ['AdminMiddleware'],
+            'userList' => ['AdminMiddleware'],
+            'updatePassword' => ['AuthMiddleware'],
+            'storeUserOrStaff' => ['AdminMiddleware'],
+            'changePassword' => ['AdminMiddleware'],
+            'addStaff' => ['AdminMiddleware'],
+            'addUser' => ['AdminMiddleware'],
+            'UserchangePassword' => ['CustomerMiddle']
+        ];
+    }
     public function index()
     {
         // Check if user is logged in
@@ -28,14 +49,28 @@ class User extends Controller
         ];
 
         // Redirect based on role
-        if ($user['role'] == 0) {
             $this->view('admin/profile/account_profile', $data);
-        } elseif ($user['role'] == 1) {
-            $this->view('customer/profile/account_profile', $data);
-        } else {
-            setMessage('error', 'Invalid user role.');
+    }
+    public function Userindex()
+    {
+        // Check if user is logged in
+        if (!isset($_SESSION['user_id'])) {
+            setMessage('error', 'Please login first.');
             redirect('pages/login');
         }
+        $userId = $_SESSION['user_id'];
+        $user = $this->db->getById('users', $userId);
+        if (!$user) {
+            setMessage('error', 'User not found.');
+            redirect('pages/login');
+        }
+
+        $data = [
+            'user_info' => $user
+        ];
+
+        // Redirect based on role
+            $this->view('customer/profile/account_profile', $data);
     }
     public function editProfile()
     {
@@ -56,15 +91,29 @@ class User extends Controller
         $data = [
             'users' => $user
         ];
-
-        if ($user['role'] == 0) {
             $this->view('admin/profile/edit_profile', $data);
-        } elseif ($user['role'] == 1) {
-            $this->view('customer/profile/edit_profile', $data);
-        } else {
-            setMessage('error', 'Invalid user role.');
+
+    }
+    public function editUserProfile()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            setMessage('error', 'Please login first.');
             redirect('pages/login');
         }
+
+        $userId = $_SESSION['user_id'];
+        $user = $this->db->getById('users', $userId);
+
+        if (!$user) {
+            setMessage('error', 'User not found.');
+            redirect('pages/login');
+        }
+
+        // Validate role-based routing
+        $data = [
+            'users' => $user
+        ];
+            $this->view('customer/profile/edit_profile', $data);
     }
 
     // Update - Save the edited movie data
@@ -300,12 +349,34 @@ class User extends Controller
             $password = $_POST['password'] ?? '';
             $phone = trim($_POST['phone'] ?? '');
             $role = (int) ($_POST['role'] ?? 1); // Cast to integer
-            // Basic validation
-            if (empty($name) || empty($email) || empty($password) || empty($phone)) {
-                setMessage('error', 'Name, Email,phone and Password are required!');
+
+            // --- Start Validation ---
+            // Create a temporary array for validation that doesn't include password for update
+            $validationData = [
+                'name' => $name,
+                'email' => $email,
+                'phone' => $phone,
+                // Add a dummy password field for the validator, it won't be used for update
+                'password' => 'dummy_password_for_validation'
+            ];
+
+            require_once __DIR__ . '/../helpers/UserValidator.php';
+
+            // Include the UserValidator class
+            // require_once '../app/validators/UserValidator.php'; // Adjust path if needed
+            $validator = new UserValidator($validationData);
+            $errors = $validator->validateFormForUpdate(); // Use a new method for update validation
+
+            if (!empty($errors)) {
+                // If there are validation errors, set messages and redirect
+                foreach ($errors as $error) {
+                    setMessage('error', $error);
+                }
+                // Redirect back to the edit profile page, retaining data if possible
                 redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
                 return;
             }
+            // --- End Validation ---
 
             // Check if email already exists
             $isExist = $this->db->columnFilter('users', 'email', $email);
@@ -329,6 +400,7 @@ class User extends Controller
                 'phone' => $phone,
                 'profile_img' => $profile_img,
                 'provider_token' => $provider_token,
+                'customer_type' => 'Normal',
                 'is_active' => 1,
                 'is_login' => 0,
                 'is_confirmed' => 1,
@@ -383,7 +455,7 @@ class User extends Controller
             // Search across name, email, phone
             $result = $this->db->search(
                 'users',
-                ['name', 'email', 'phone'],
+                ['name', 'email', 'phone','customer_type'],
                 $searchQuery,
                 100, // limit
                 0    // offset

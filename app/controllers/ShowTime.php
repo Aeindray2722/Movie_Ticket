@@ -6,7 +6,18 @@ class ShowTimeController extends Controller {
         $this->model('ShowTimeModel'); // Assuming you have a ShowTimeModel 
         $this->db = new Database(); 
     } 
-    
+     public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'create' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'edit' => ['AdminMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+        ];
+    }
+
     // Index - Display all showtimes 
     public function index() { 
         $showTimes = $this->db->readAll('show_times'); // Fetch all showtimes 

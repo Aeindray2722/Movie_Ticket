@@ -23,15 +23,17 @@
                 </div>
                 <div class="col-md-6 contact-us-col">
                     <h4>Contact us</h4>
-                    <form>
+                    <form method="POST" action="<?php echo URLROOT; ?>/contact/store">
                         <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Your Email">
+                            <input type="email" name="email" class="form-control" placeholder="Your Email">
                         </div>
                         <div class="mb-3">
-                            <textarea class="form-control" rows="3" placeholder="Your Message"></textarea>
+                            <textarea class="form-control" rows="3" name="contact_text"
+                                placeholder="Your Message"></textarea>
                         </div>
                         <button type="submit" class="btn btn-send">Send</button>
                     </form>
+
                     <div class="social-icons mt-3">
                         <a href="#" class=" me-2 text-primary"><i class="fa-brands fa-facebook-f"></i></a>
                         <a href="#" class="text-danger me-2"><i class="fa-brands fa-instagram"></i></a>
@@ -43,8 +45,20 @@
     <?php require_once APPROOT . '/views/inc/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    
+
 
 </body>
 
 </html>
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<?= $_SESSION['success'] ?>',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>

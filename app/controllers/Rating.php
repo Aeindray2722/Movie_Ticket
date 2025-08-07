@@ -8,7 +8,13 @@ class Rating extends Controller
         $this->model('RatingModel'); // optional if you want a model for Rating
         $this->db = new Database();
     }
-
+     public function middleware()
+    {
+        return [
+            'submit' => ['CustomerMiddleware'],
+            'storePayment' => ['CustomerMiddleware'],
+        ];
+    }
     public function submit()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

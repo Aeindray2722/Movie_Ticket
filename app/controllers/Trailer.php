@@ -9,6 +9,19 @@ class Trailer extends Controller
         $this->db = new Database();
         $this->model('TrailerModel');
     }
+     public function middleware()
+    {
+        return [
+            'index' => ['AdminMiddleware'],
+            'create' => ['AdminMiddleware'],
+            'store' => ['AdminMiddleware'],
+            'edit' => ['AdminMiddleware'],
+            'update' => ['AdminMiddleware'],
+            'destroy' => ['AdminMiddleware'],
+            'trailer' => ['CustomerMiddleware'],
+            'movieDetail' => ['CustomerMiddleware'],
+        ];
+    }
     public function index()
     {
         $limit = 3; // number of trailers per page
@@ -54,8 +67,6 @@ class Trailer extends Controller
 
         $this->view('admin/trailer/add_trailer', $data);
     }
-
-
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -144,8 +155,6 @@ class Trailer extends Controller
             redirect('trailer');
         }
     }
-
-
     // Destroy - Delete a movie from the database
     public function destroy($id)
     {
@@ -171,90 +180,86 @@ class Trailer extends Controller
         redirect('trailer');
     }
 
-    public function addTrailer()
-    {
-        $this->view('admin/trailer/add_trailer');
-    }
 
 
     public function trailer()
     {
         $type = $_GET['type'] ?? null;
-        $limit = 4; // trailers per page
+        $search = trim($_GET['search'] ?? '');
         $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
-        if ($page < 1)
-            $page = 1;
+        $limit = 4;
         $offset = ($page - 1) * $limit;
+
+        // All types list for filtering
         $types = $this->db->readAll('types');
 
-        if ($type) {
-            // Count total trailers with movie type filter
-            $countSql = "
-            SELECT COUNT(*) as total 
-            FROM trailers
-            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
-            WHERE LOWER(view_movies_info.type_name) = :type
-        ";
-            $this->db->query($countSql);
-            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
-            $this->db->stmt->execute();
-            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
-            $total = $totalRow['total'] ?? 0;
+        // Columns to search
+        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
 
-            // Get paginated trailers with movie_img and type
-            $sql = "
-            SELECT trailers.*, view_movies_info.movie_img, view_movies_info.movie_name, view_movies_info.actor_name, view_movies_info.type_name
-            FROM trailers
-            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
-            WHERE LOWER(view_movies_info.type_name) = :type
-            ORDER BY trailers.created_at DESC
-            LIMIT :limit OFFSET :offset
-        ";
-            $this->db->query($sql);
-            $this->db->stmt->bindValue(':type', strtolower($type), PDO::PARAM_STR);
-            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
-            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
-            $this->db->stmt->execute();
-            $trailers = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Default values
+        $trailers = [];
+        $total = 0;
+
+        if ($search !== '') {
+            // 🔍 Keyword search without pagination (we paginate manually after filtering)
+            $result = $this->db->search(
+                'trailers JOIN view_movies_info ON trailers.movie_id = view_movies_info.id',
+                $columnsToSearch,
+                $search,
+                $limit, // no limit
+                $offset  // no offset
+            );
+
+            // Optional filtering by type
+            $filtered = array_filter($result['data'], function ($trailer) use ($type) {
+                return !$type || strtolower($trailer['type_name']) === strtolower($type);
+            });
+
+            // Manual pagination
+            $total = count($filtered);
+            $trailers = array_slice(array_values($filtered), $offset, $limit);
+
         } else {
-            // Count total trailers without filter
-            $countSql = "
-            SELECT COUNT(*) as total 
-            FROM trailers
-            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
-        ";
-            $this->db->query($countSql);
-            $this->db->stmt->execute();
-            $totalRow = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
-            $total = $totalRow['total'] ?? 0;
+            // No search keyword — use paginated search
+            $result = $this->db->search(
+                'trailers JOIN view_movies_info ON trailers.movie_id = view_movies_info.id',
+                $columnsToSearch,
+                '',          // empty search string
+                $limit,
+                $offset
+            );
 
-            // Get paginated trailers with movie_img and type
-            $sql = "
-            SELECT trailers.*, view_movies_info.movie_img, view_movies_info.movie_name, view_movies_info.actor_name, view_movies_info.type_name
-            FROM trailers
-            JOIN view_movies_info ON trailers.movie_id = view_movies_info.id
-            ORDER BY trailers.created_at DESC
-            LIMIT :limit OFFSET :offset
-        ";
-            $this->db->query($sql);
-            $this->db->stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
-            $this->db->stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
-            $this->db->stmt->execute();
-            $trailers = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+            $trailers = $result['data'];
+            $total = $result['total'] ?? count($trailers);
+
+            // Optional filtering by type (after fetching)
+            if ($type) {
+                $trailers = array_filter($trailers, function ($trailer) use ($type) {
+                    return strtolower($trailer['type_name']) === strtolower($type);
+                });
+                $trailers = array_values($trailers); // reindex
+                $total = count($trailers);
+            }
         }
 
         $totalPages = ceil($total / $limit);
 
+        // Prepare view data
         $data = [
             'trailers' => $trailers,
             'page' => $page,
             'totalPages' => $totalPages,
             'type' => $type,
-            'types' => $types
+            'types' => $types,
+            'search' => $search
         ];
 
+        // 👁 Show trailer page
         $this->view('customer/movie/trailer', $data);
     }
+
+
+
     public function movieDetail($id)
     {
         // Fetch movie info by ID from view_movies_info
@@ -266,11 +271,7 @@ class Trailer extends Controller
         }
 
         // ✅ Fetch average rating for this movie (rounded)
-        $this->db->query("SELECT CEIL(AVG(count)) AS avg_rating FROM ratings WHERE movie_id = :movie_id");
-        $this->db->bind(':movie_id', $id);
-        $this->db->stmt->execute();
-        $row = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
-        $avg_rating = $row['avg_rating'] ?? 0;
+        $avg_rating = $this->db->getAvgRatingByMovieId($id);
 
         $sqlComments = "SELECT c.id, c.message, c.user_id, c.created_at, u.name ,u.profile_img
                     FROM comments c
