@@ -1,4 +1,10 @@
 <?php
+require_once __DIR__ . '/../../vendor/autoload.php';
+// use Dotenv\Dotenv; // ✅ This line is important
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
+// $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../../');
+$dotenv->load();
 
 // DB Params
 define('DB_HOST', 'db');
@@ -6,19 +12,22 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'movie_ticket');
 
-
-// Define App Root
-define ('APPROOT', dirname(dirname(__FILE__)));
-
-// Define URL Root
+// App settings
+define('APPROOT', dirname(dirname(__FILE__)));
 define('URLROOT', 'http://localhost:8000');
-
-
-
-
-define('GOOGLE_CLIENT_ID', '545819856659-v1gndceuh2eajlmrs3aijcm745vausn8.apps.googleusercontent.com');
-define('GOOGLE_CLIENT_SECRET', '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');
-define('GOOGLE_REDIRECT_URI', URLROOT . '/auth/googleCallback');
-
-// Define SITENAME
 define('SITENAME', 'Cash Flow');
+
+// Google OAuth
+// define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID'));
+// define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET'));
+// // define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI'));
+// define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI'));
+
+define('GOOGLE_CLIENT_ID', $_ENV['GOOGLE_CLIENT_ID'] ?? '');
+define('GOOGLE_CLIENT_SECRET', $_ENV['GOOGLE_CLIENT_SECRET'] ?? '');
+define('GOOGLE_REDIRECT_URI', $_ENV['GOOGLE_REDIRECT_URI'] ?? '');
+
+
+// var_dump(getenv('GOOGLE_CLIENT_ID'));
+// var_dump(GOOGLE_CLIENT_ID);
+// exit;

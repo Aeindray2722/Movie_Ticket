@@ -158,8 +158,12 @@ class Auth extends Controller
 
     public function googleLogin()
     {
+        // var_dump("ok");//string(2) "ok"
+        // exit;
         $client = new GoogleClient();
         $client->setClientId(GOOGLE_CLIENT_ID);
+        // var_dump($dd);
+        // exit;//Null
         $client->setClientSecret(GOOGLE_CLIENT_SECRET);
         $client->setRedirectUri(GOOGLE_REDIRECT_URI);
         $client->addScope('email');
