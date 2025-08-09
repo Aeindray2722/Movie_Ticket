@@ -2,6 +2,12 @@
 require_once __DIR__ . '/../layout/nav.php';
 ?>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    .viewer-count {
+    font-size: 16px;
+}
+
+</style>
 <section class="movie-detail-page-content py-4">
     <div class="container">
         <div class="mb-3">
@@ -19,23 +25,32 @@ require_once __DIR__ . '/../layout/nav.php';
                 </div>
                 <div class="col-12 col-md-7 col-lg-8">
                     <div class="card-body movie-detail-body">
-                        <h5 class="card-title movie-detail-title"><strong
-                                style="color : black">Title: </strong><?= htmlspecialchars($data['movie']['movie_name']) ?>
+                        <h5 class="card-title movie-detail-title"><strong style="color : black">Title:
+                            </strong><?= htmlspecialchars($data['movie']['movie_name']) ?>
                         </h5>
-                        <p class="movie-detail-type"><strong style="color : black">Type: </strong><?= htmlspecialchars($data['movie']['type_name']) ?></p>
-                        <p class="movie-detail-actors"><strong style="color : black">Actor/Actress: </strong><?= htmlspecialchars($data['movie']['actor_name']) ?></p>
+                        <p class="movie-detail-type"><strong style="color : black">Type:
+                            </strong><?= htmlspecialchars($data['movie']['type_name']) ?></p>
+                        <p class="movie-detail-actors"><strong style="color : black">Actor/Actress:
+                            </strong><?= htmlspecialchars($data['movie']['actor_name']) ?></p>
                         <p class="movie-detail-description"><strong style="color : black">Description: </strong>
                             <?= nl2br(htmlspecialchars($data['movie']['description'])) ?>
                         </p>
-                        <div class="movie-detail-rating mb-3">
-                            <?php
-                            $avg = $data['avg_rating'] ?? 0;
-                            for ($i = 1; $i <= 5; $i++):
-                                $class = $i <= $avg ? 'text-warning' : 'text-secondary';
-                                ?>
-                                <i class="fas fa-star <?= $class ?>"></i>
-                            <?php endfor; ?>
+                        <div class="movie-detail-rating mb-3 d-flex align-items-center gap-3">
+                            <div>
+                                <?php
+                                $avg = $data['avg_rating'] ?? 0;
+                                for ($i = 1; $i <= 5; $i++):
+                                    $class = $i <= $avg ? 'text-warning' : 'text-secondary';
+                                    ?>
+                                    <i class="fas fa-star <?= $class ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <div class="viewer-count d-flex align-items-center text-muted">
+                                <i class="fas fa-eye me-1"></i>
+                                <?= (int) ($data['movie']['view_count'] ?? 0) ?>
+                            </div>
                         </div>
+
 
                         <div class="d-flex gap-2 flex-wrap">
                             <a href="<?= URLROOT; ?>/booking/index<?= $data['movie']['id'] ?>">
@@ -59,7 +74,8 @@ require_once __DIR__ . '/../layout/nav.php';
                         <div class="col-12 col-md-6 col-lg-4">
                             <div class="d-flex p-3 shadow-sm rounded bg-white h-100">
                                 <img src="<?= URLROOT ?>/images/users/<?= $comment['profile_img'] ?? 'default.png' ?>"
-                                    class="img-fluid rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Profile">
+                                    class="img-fluid rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;"
+                                    alt="Profile">
 
                                 <div class="flex-grow-1">
 

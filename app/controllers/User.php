@@ -2,14 +2,17 @@
 
 class User extends Controller
 {
-
     private $db;
+    private $userModel;
+
     public function __construct()
     {
         $this->db = new Database();
-        $this->model('UserModel');
+        $this->model('UserModel'); // You might want to store this in a property if you use it often
     }
-     public function middleware()
+    
+
+    public function middleware()
     {
         return [
             'index' => ['AdminMiddleware'],
@@ -18,7 +21,7 @@ class User extends Controller
             'store' => ['AdminMiddleware'],
             'editProfile' => ['AdminMiddleware'],
             'editUserProfile' => ['CustomerMiddleware'],
-            'update' => ['AdminMiddleware'],
+            'update' => ['AuthMiddleware'],
             'destroy' => ['AdminMiddleware'],
             'staffList' => ['AdminMiddleware'],
             'userList' => ['AdminMiddleware'],
@@ -27,476 +30,377 @@ class User extends Controller
             'changePassword' => ['AdminMiddleware'],
             'addStaff' => ['AdminMiddleware'],
             'addUser' => ['AdminMiddleware'],
-            'UserchangePassword' => ['CustomerMiddle']
+            'UserchangePassword' => ['CustomerMiddleware'],
         ];
     }
+
+    private function getCurrentUser()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            setMessage('error', 'Please login first.');
+            redirect('pages/login');
+            exit;
+        }
+        $user = $this->db->getById('users', $_SESSION['user_id']);
+        if (!$user) {
+            setMessage('error', 'User not found.');
+            redirect('pages/login');
+            exit;
+        }
+        return $user;
+    }
+
     public function index()
     {
-        // Check if user is logged in
-        if (!isset($_SESSION['user_id'])) {
-            setMessage('error', 'Please login first.');
-            redirect('pages/login');
-        }
-        $userId = $_SESSION['user_id'];
-        $user = $this->db->getById('users', $userId);
-        if (!$user) {
-            setMessage('error', 'User not found.');
-            redirect('pages/login');
-        }
-
-        $data = [
-            'user_info' => $user
-        ];
-
-        // Redirect based on role
-            $this->view('admin/profile/account_profile', $data);
+        $user = $this->getCurrentUser();
+        $this->view('admin/profile/account_profile', ['user_info' => $user]);
     }
+
     public function Userindex()
     {
-        // Check if user is logged in
-        if (!isset($_SESSION['user_id'])) {
-            setMessage('error', 'Please login first.');
-            redirect('pages/login');
-        }
-        $userId = $_SESSION['user_id'];
-        $user = $this->db->getById('users', $userId);
-        if (!$user) {
-            setMessage('error', 'User not found.');
-            redirect('pages/login');
-        }
-
-        $data = [
-            'user_info' => $user
-        ];
-
-        // Redirect based on role
-            $this->view('customer/profile/account_profile', $data);
+        $user = $this->getCurrentUser();
+        $this->view('customer/profile/account_profile', ['user_info' => $user]);
     }
+
     public function editProfile()
     {
-        if (!isset($_SESSION['user_id'])) {
-            setMessage('error', 'Please login first.');
-            redirect('pages/login');
-        }
-
-        $userId = $_SESSION['user_id'];
-        $user = $this->db->getById('users', $userId);
-
-        if (!$user) {
-            setMessage('error', 'User not found.');
-            redirect('pages/login');
-        }
-
-        // Validate role-based routing
-        $data = [
-            'users' => $user
-        ];
-            $this->view('admin/profile/edit_profile', $data);
-
+        $user = $this->getCurrentUser();
+        $this->view('admin/profile/edit_profile', ['users' => $user]);
     }
+
     public function editUserProfile()
     {
-        if (!isset($_SESSION['user_id'])) {
-            setMessage('error', 'Please login first.');
-            redirect('pages/login');
-        }
-
-        $userId = $_SESSION['user_id'];
-        $user = $this->db->getById('users', $userId);
-
-        if (!$user) {
-            setMessage('error', 'User not found.');
-            redirect('pages/login');
-        }
-
-        // Validate role-based routing
-        $data = [
-            'users' => $user
-        ];
-            $this->view('customer/profile/edit_profile', $data);
+        $user = $this->getCurrentUser();
+        $this->view('customer/profile/edit_profile', ['users' => $user]);
     }
 
-    // Update - Save the edited movie data
     public function update()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = $_POST['id'];
-            $name = $_POST['name'];
-            $email = $_POST['email'];
-            $phone = $_POST['phone'];
+        // var_dump($_POST); exit;
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            redirect('user');
+            return;
+        }
 
-            // Get old profile
-            $old_profile = $this->db->getById('users', $id);
-            if (!$old_profile) {
-                setMessage('error', 'User not found.');
-                redirect('user');
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            setMessage('error', 'Invalid user ID.');
+            redirect('user/editProfile');
+            return;
+        }
+
+        $old_profile = $this->db->getById('users', $id);
+                // var_dump($old_profile); exit;
+        if (!$old_profile) {
+            setMessage('error', 'User not found.');
+            redirect('user');
+            return;
+        }
+        // Prepare data for validation
+        $validationData = [
+            'name' => trim($_POST['name'] ?? ''),
+            'email' => trim($_POST['email'] ?? ''),
+            'phone' => trim($_POST['phone'] ?? ''),
+            'password' => 'dummy_password_for_validation', // For validator
+        ];
+
+        require_once __DIR__ . '/../helpers/UserValidator.php';
+        $validator = new UserValidator($validationData);
+        $errors = $validator->validateFormForUpdate();
+
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                setMessage('error', $error);
+            }
+            redirect('user/editProfile');
+            return;
+        }
+
+        $name = $validationData['name'];
+        $email = $validationData['email'];
+        $phone = $validationData['phone'];
+        $role = isset($_POST['role']) ? (int) $_POST['role'] : $old_profile['role'];
+        $password = $old_profile['password'];
+        $customerType = $old_profile['customer_type'];
+        $provider_token = $old_profile['provider_token'];
+        $profile_img = $old_profile['profile_img'];
+
+        // Email uniqueness check
+        if ($email !== $old_profile['email'] && $this->db->columnFilter('users', 'email', $email)) {
+            setMessage('error', 'This email is already registered!');
+            redirect('user/editProfile');
+            return;
+        }
+
+        // Handle profile image upload
+        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === 0) {
+            $oldImagePath = __DIR__ . '/../../public/images/users/' . $profile_img;
+            if (file_exists($oldImagePath) && $profile_img !== 'default_profile.jpg') {
+                unlink($oldImagePath);
             }
 
-            // --- Start Validation ---
-            // Create a temporary array for validation that doesn't include password for update
-            $validationData = [
-                'name' => $name,
-                'email' => $email,
-                'phone' => $phone,
-                // Add a dummy password field for the validator, it won't be used for update
-                'password' => 'dummy_password_for_validation'
-            ];
+            $newFilename = time() . '_' . basename($_FILES['profile_image']['name']);
+            $targetDir = __DIR__ . '/../../public/images/users/';
+            $targetFile = $targetDir . $newFilename;
 
-            require_once __DIR__ . '/../helpers/UserValidator.php';
-
-            // Include the UserValidator class
-            // require_once '../app/validators/UserValidator.php'; // Adjust path if needed
-            $validator = new UserValidator($validationData);
-            $errors = $validator->validateFormForUpdate(); // Use a new method for update validation
-
-            if (!empty($errors)) {
-                // If there are validation errors, set messages and redirect
-                foreach ($errors as $error) {
-                    setMessage('error', $error);
-                }
-                // Redirect back to the edit profile page, retaining data if possible
-                redirect('user/editProfile');
-                return;
-            }
-            // --- End Validation ---
-
-            $password = $old_profile['password'];
-            $provider_token = $old_profile['provider_token'];
-            $profile_img = $old_profile['profile_img'];
-            $role = (int) ($_POST['role'] ?? $old_profile['role']);
-
-
-            // Check if email is changed and already exists for other users
-            if ($email !== $old_profile['email']) {
-                $isExist = $this->db->columnFilter('users', 'email', $email);
-                if ($isExist) {
-                    setMessage('error', 'This email is already registered!');
-                    redirect('user/editProfile');
-                    return;
-                }
-            }
-            // Handle image upload
-            if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
-                $oldImagePath = __DIR__ . '/../../public/images/users/' . $profile_img;
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-
-                $newFilename = time() . '_' . basename($_FILES['profile_image']['name']);
-                $targetDir = __DIR__ . '/../../public/images/users/';
-                $targetFile = $targetDir . $newFilename;
-
-                if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $targetFile)) {
-                    $profile_img = $newFilename;
-                }
-            }
-
-            // Populate model
-            $user = new UserModel();
-            $user->setId($id);
-            $user->setName($name);
-            $user->setEmail($email);
-            $user->setPhone($phone);
-            $user->setProviderToken($provider_token);
-            $user->setIsActive($old_profile['is_active']);
-            $user->setIsLogin($old_profile['is_login']);
-            $user->setIsConfirmed($old_profile['is_confirmed']);
-            $user->setRole($role);
-            $user->setProfileImg($profile_img);
-            $user->setPassword($password);
-            $user->setUpdatedAt(date('Y-m-d H:i:s'));
-
-            $data = $user->toArray();
-            unset($data['created_at']);
-
-            $isUpdated = $this->db->update('users', $user->getId(), $data);
-
-            if ($isUpdated) {
-                $_SESSION['profile_img'] = $profile_img;
-                $_SESSION['user_name'] = $name;
-                setMessage('success', 'Update successful!');
-
-                // ✅ Redirect based on role
-                if ($role === 0) {
-                    redirect('user');
-                } elseif ($role === 1) {
-                    redirect('user');
-                } else {
-                    redirect('user');
-                }
-            } else {
-                setMessage('error', 'Failed to update user.');
-
-                // ❗ Error redirect based on role
-                if ($role === 0) {
-                    redirect('user/editProfile');
-                } elseif ($role === 1) {
-                    redirect('user/editProfile');
-                } else {
-                    redirect('user');
-                }
+            if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $targetFile)) {
+                $profile_img = $newFilename;
             }
         }
+
+        // Prepare UserModel for update
+        $userModel = new UserModel();
+        $userModel->setId($id);
+        $userModel->setName($name);
+        $userModel->setEmail($email);
+        $userModel->setPhone($phone);
+        $userModel->setProviderToken($provider_token);
+        $userModel->setIsActive($old_profile['is_active']);
+        $userModel->setIsLogin($old_profile['is_login']);
+        $userModel->setIsConfirmed($old_profile['is_confirmed']);
+        $userModel->setRole($role);
+        $userModel->setProfileImg($profile_img);
+        $userModel->setPassword($password);
+        $userModel->setUpdatedAt(date('Y-m-d H:i:s'));
+        $customerType = $old_profile['customer_type'] ?: 'Normal';  // fallback if null
+
+        $userModel->setCustomerType($customerType);
+
+        $data = $userModel->toArray();
+        unset($data['created_at']);
+        // $role = (int) ($_POST['role']);
+        // var_dump($role); exit;
+        $isUpdated = $this->db->update('users', $id, $data);
+        // var_dump($_SESSION[int('role')]); exit;
+
+        if ($isUpdated) {
+            $_SESSION['profile_img'] = $profile_img;
+            $_SESSION['user_name'] = $name;
+            $_SESSION['role'] = (int) $role; // cast to integer
+            setMessage('success', 'Update successful!');
+            redirect($role === 1 ? 'user/Userindex' : 'user');
+           
+        } else {
+            setMessage('error', 'Failed to update user.');
+
+            // ❗ Error redirect based on role
+            if ($role === 0) {
+                redirect('user/editProfile');
+            } elseif ($role === 1) {
+                redirect('user/editUserProfile');
+            } else {
+                redirect('user');
+            }
+        }
+
     }
 
     public function updatePassword()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Check if user is logged in
-            if (!isset($_SESSION['user_id'])) {
-                setMessage('error', 'Please login first.');
-                redirect('pages/login');
-                exit;
-            }
-
-            $userId = $_SESSION['user_id']; // Use directly as integer
-
-            // Get user from DB
-            $user = $this->db->getById('users', $userId);
-
-            if (!$user) {
-                setMessage('error', 'User not found.');
-                redirect('pages/login');
-                exit;
-            }
-
-            // Load your validator helper
-            require_once __DIR__ . '/../helpers/UserValidator.php';
-
-            $validator = new UserValidator($_POST);
-            $errors = $validator->validatePasswordChange();
-
-            // Check if old password matches
-            if (!password_verify($_POST['old_password'], $user['password'])) {
-                $errors['old_password-err'] = 'Old password is incorrect.';
-            }
-
-            if (!empty($errors)) {
-                // Show all errors as messages
-                foreach ($errors as $error) {
-                    setMessage('error', $error);
-                }
-                // Redirect to the correct change password page based on role
-                $role = (int) ($_POST['role'] ?? $user['role']);
-                redirect($role === 1 ? 'user/UserchangePassword' : 'user/changePassword');
-                exit;
-            }
-
-            // Hash new password
-            $hashedPassword = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
-
-            // Prepare data for update
-            $data = [
-                'password' => $hashedPassword,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-
-            // Update user password in DB
-            $isUpdated = $this->db->update('users', $userId, $data);
-
-            if ($isUpdated) {
-                setMessage('success', 'Password updated successfully.');
-                redirect('user');
-            } else {
-                setMessage('error', 'Failed to update password.');
-                $role = (int) ($_POST['role'] ?? $user['role']);
-                redirect($role === 1 ? 'user/UserchangePassword' : 'user/changePassword');
-            }
-        } else {
-            // If not POST request, redirect somewhere (optional)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             redirect('user');
+            return;
         }
+
+        $user = $this->getCurrentUser();
+
+        require_once __DIR__ . '/../helpers/UserValidator.php';
+        $validator = new UserValidator($_POST);
+        $errors = $validator->validatePasswordChange();
+
+        if (!password_verify($_POST['old_password'] ?? '', $user['password'])) {
+            $errors['old_password-err'] = 'Old password is incorrect.';
+        }
+
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                setMessage('error', $error);
+            }
+            $redirectRoute = ((int) ($user['role'] ?? 0) === 1) ? 'user/UserchangePassword' : 'user/changePassword';
+            redirect($redirectRoute);
+            return;
+        }
+
+        $hashedPassword = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+
+        $data = [
+            'password' => $hashedPassword,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $isUpdated = $this->db->update('users', $user['id'], $data);
+
+        if ($isUpdated) {
+            setMessage('success', 'Password updated successfully.');
+            $role = (int) ($_POST['role'] ?? $user['role']);
+            redirect($role === 1 ? 'user/Userindex' : 'user/index');
+        } else {
+            setMessage('error', 'Failed to update password.');
+            $role = (int) ($_POST['role'] ?? $user['role']);
+            redirect($role === 1 ? 'user/UserchangePassword' : 'user/changePassword');
+        }
+
     }
-
-
 
     public function staffList()
     {
-        $searchQuery = $_GET['search'] ?? '';
+        $searchQuery = trim($_GET['search'] ?? '');
         $staff = [];
 
-        if (!empty($searchQuery)) {
-            // Search across name, email, phone
+        if ($searchQuery !== '') {
             $result = $this->db->search(
                 'users',
                 ['name', 'email', 'phone'],
                 $searchQuery,
-                100, // limit
-                0    // offset
+                100,
+                0
             );
 
-            // Only staff (role = 0)
             $staff = array_filter($result['data'], fn($user) => $user['role'] == 0);
         } else {
             $staff = $this->db->readWithCondition('users', 'role = 0');
         }
 
-        $data = [
+        $this->view('admin/profile/staff_list', [
             'staff_members' => $staff,
             'search_query' => $searchQuery
-        ];
-
-
-        $this->view('admin/profile/staff_list', $data);
+        ]);
     }
 
     public function storeUserOrStaff()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-            $name = trim($_POST['name'] ?? '');
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $phone = trim($_POST['phone'] ?? '');
-            $role = (int) ($_POST['role'] ?? 1); // Cast to integer
-
-            // --- Start Validation ---
-            // Create a temporary array for validation that doesn't include password for update
-            $validationData = [
-                'name' => $name,
-                'email' => $email,
-                'phone' => $phone,
-                // Add a dummy password field for the validator, it won't be used for update
-                'password' => 'dummy_password_for_validation'
-            ];
-
-            require_once __DIR__ . '/../helpers/UserValidator.php';
-
-            // Include the UserValidator class
-            // require_once '../app/validators/UserValidator.php'; // Adjust path if needed
-            $validator = new UserValidator($validationData);
-            $errors = $validator->validateFormForUpdate(); // Use a new method for update validation
-
-            if (!empty($errors)) {
-                // If there are validation errors, set messages and redirect
-                foreach ($errors as $error) {
-                    setMessage('error', $error);
-                }
-                // Redirect back to the edit profile page, retaining data if possible
-                redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
-                return;
-            }
-            // --- End Validation ---
-
-            // Check if email already exists
-            $isExist = $this->db->columnFilter('users', 'email', $email);
-            if ($isExist) {
-                setMessage('error', 'This email is already registered!');
-                redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
-                return;
-            }
-
-            // Hash password
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-            // Profile image default
-            $profile_img = 'default_profile.jpg';
-            $provider_token = bin2hex(random_bytes(50));
-
-            $data = [
-                'name' => $name,
-                'email' => $email,
-                'password' => $hashedPassword,
-                'phone' => $phone,
-                'profile_img' => $profile_img,
-                'provider_token' => $provider_token,
-                'customer_type' => 'Normal',
-                'is_active' => 1,
-                'is_login' => 0,
-                'is_confirmed' => 1,
-                'role' => $role,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-
-            $inserted = $this->db->create('users', $data);
-
-            if ($inserted) {
-                setMessage('success', ($role === 1 ? 'User' : 'Staff') . ' created successfully!');
-                redirect($role === 1 ? 'user/userList' : 'user/staffList');
-            } else {
-                setMessage('error', 'Failed to create ' . ($role === 1 ? 'user' : 'staff') . '!');
-                redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
-            }
-        } else {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             redirect('user');
+            return;
+        }
+
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $phone = trim($_POST['phone'] ?? '');
+        $role = (int) ($_POST['role'] ?? 1);
+
+        require_once __DIR__ . '/../helpers/UserValidator.php';
+
+        $validationData = [
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'password' => $password,
+        ];
+        require_once __DIR__ . '/../helpers/UserValidator.php';
+
+        // Include the UserValidator class
+        // require_once '../app/validators/UserValidator.php'; // Adjust path if needed
+        $validator = new UserValidator($validationData);
+        $errors = $validator->validateForm(); // ✅ This checks password too
+        // $validator = new UserValidator($validationData);
+        // $errors = $validator->validateFormForCreate();
+
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                setMessage('error', $error);
+            }
+            redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
+            return;
+        }
+
+        if ($this->db->columnFilter('users', 'email', $email)) {
+            setMessage('error', 'This email is already registered!');
+            redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
+            return;
+        }
+
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $profile_img = 'default_profile.jpg';
+        $provider_token = bin2hex(random_bytes(50));
+
+        $data = [
+            'name' => $name,
+            'email' => $email,
+            'password' => $hashedPassword,
+            'phone' => $phone,
+            'profile_img' => $profile_img,
+            'provider_token' => $provider_token,
+            'customer_type' => 'Normal',
+            'is_active' => 1,
+            'is_login' => 0,
+            'is_confirmed' => 1,
+            'role' => $role,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $inserted = $this->db->create('users', $data);
+
+        if ($inserted) {
+            setMessage('success', ($role === 1 ? 'User' : 'Staff') . ' created successfully!');
+            redirect($role === 1 ? 'user/userList' : 'user/staffList');
+        } else {
+            setMessage('error', 'Failed to create ' . ($role === 1 ? 'user' : 'staff') . '!');
+            redirect($role === 1 ? 'user/addUser' : 'user/addStaff');
         }
     }
 
-
-    public function destroy($id)
+    public function destroy($encodedId)
     {
-        $id = base64_decode($id);
-
-        // Get user by ID first to determine role (user or staff)
+        $id = base64_decode($encodedId);
         $user = $this->db->getById('users', $id);
+
         if (!$user) {
             setMessage('error', 'User not found.');
             redirect('user');
             return;
         }
-
-        $role = $user['role']; // 0 for staff, 1 for user
-
-        // Proceed to delete
-        $isdestroy = $this->db->delete('users', $id);
-
-        redirect($role === 1 ? 'user/userList' : 'user/staffList');
+        $role = (int) ($_POST['role'] ?? $user['role']);
+        $this->db->delete('users', $id);
+        // var_dump($role); exit;
+        setMessage('success', ($role === 1 ? 'User' : 'Staff') . ' deleted successfully!');
+            redirect($role === 1 ? 'user/userList' : 'user/staffList');
     }
-
-
 
     public function userList()
     {
-        $searchQuery = $_GET['search'] ?? '';
+        $searchQuery = trim($_GET['search'] ?? '');
         $users = [];
 
-        if (!empty($searchQuery)) {
-            // Search across name, email, phone
+        if ($searchQuery !== '') {
             $result = $this->db->search(
                 'users',
-                ['name', 'email', 'phone','customer_type'],
+                ['name', 'email', 'phone', 'customer_type'],
                 $searchQuery,
-                100, // limit
-                0    // offset
+                100,
+                0
             );
 
-            // Only users (role = 1)
             $users = array_filter($result['data'], fn($user) => $user['role'] == 1);
         } else {
             $users = $this->db->readWithCondition('users', 'role = 1');
         }
 
-        $data = [
+        $this->view('admin/profile/user_list', [
             'user_members' => $users,
             'search_query' => $searchQuery
-        ];
-
-        $this->view('admin/profile/user_list', $data);
+        ]);
     }
-
 
     public function changePassword()
     {
         $this->view('admin/profile/change_password');
     }
 
-
-
     public function addStaff()
     {
         $this->view('admin/profile/create_staff');
     }
+
     public function addUser()
     {
         $this->view('admin/profile/create_user');
     }
 
-
     public function UserchangePassword()
     {
         $this->view('customer/profile/change_password');
     }
-
-
 }

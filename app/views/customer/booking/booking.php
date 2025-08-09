@@ -17,13 +17,13 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
         </div>
 
         <div class="card movie-detail-card mb-4">
-            <div class="row g-0">
-                <div class="col-md-5 col-lg-4 movie-detail-poster-col">
+            <div class="row g-0 flex-column flex-md-row">
+                <div class="col-12 col-md-5 col-lg-4 movie-detail-poster-col">
                     <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($data['movie']['movie_img']) ?>"
-                        class="img-fluid rounded-start movie-detail-poster"
+                        class="img-fluid rounded-top rounded-md-start movie-detail-poster w-100"
                         alt="<?= htmlspecialchars($data['movie']['movie_name']) ?>">
                 </div>
-                <div class="col-md-7 col-lg-8">
+                <div class="col-12 col-md-7 col-lg-8">
                     <div class="card-body movie-detail-body">
                         <h1 class="card-title movie-detail-title"><strong style="color : black">Title:
                             </strong><?= htmlspecialchars($data['movie']['movie_name']) ?>
@@ -33,7 +33,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                         <p class="movie-detail-actors"><strong style="color : black">Actor/Actress:
                             </strong><?= htmlspecialchars($data['movie']['actor_name']) ?></p>
                         <p class="movie-detail-description"><strong style="color : black">Description: </strong>
-                            <?= htmlspecialchars($data['movie']['description']) ?>
+                            <?= nl2br(htmlspecialchars($data['movie']['description'])) ?>
                         </p>
                         <div class="movie-detail-rating mb-3">
                             <?php
@@ -51,8 +51,8 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
 
         <div class="selection-section card mb-4 p-4">
             <div class="row align-items-center mb-3">
-                <div class="col-md-10 offset-1 d-flex justify-content-center">
-                    <div class="d-flex flex-wrap gap-2">
+                <div class="col-12 col-md-10 offset-md-1 d-flex justify-content-center">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
                         <?php
                         $today = new DateTime('today');
                         foreach ($data['date'] as $date):
@@ -64,13 +64,12 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                                 <?= $date->format('D, M j') ?>
                             </a>
                         <?php endforeach; ?>
-
                     </div>
                 </div>
             </div>
 
-            <div class="row mb-4 text-center">
-                <div class="col-6 offset-3 d-flex justify-content-center">
+            <div class="row mb-4">
+                <div class="col-12 d-flex justify-content-center">
                     <div class="d-flex flex-wrap gap-2">
                         <?php foreach ($data['show_times'] as $time): ?>
                             <?php
@@ -81,8 +80,6 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                                 class="btn btn-time <?= ($time === $data['selected_time']) ? 'active' : '' ?>">
                                 <?= htmlspecialchars($formatted) ?>
                             </a>
-                            <!-- <button class="btn btn-time shadow-sm"
-                                style="color: black;"><?= htmlspecialchars($formatted) ?></button> -->
                         <?php endforeach; ?>
                     </div>
                 </div>
@@ -90,26 +87,22 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
 
 
             <?php
-            // Group seat rows dynamically by price
             function group_rows_by_price($map)
             {
                 $grouped = [];
 
                 foreach ($map as $row => $price) {
-                    $grouped[$price][] = $row; // Group rows with same price
+                    $grouped[$price][] = $row;
                 }
 
-                return $grouped; // eg: [3000 => ['A'], 4000 => ['B'], 5000 => ['C', 'D']]
+                return $grouped;
             }
-            ?>
-
-            <?php
             $grouped_rows = group_rows_by_price($data['seat_price_map']);
             ?>
 
             <div class="row justify-content-center mb-4">
                 <?php foreach ($grouped_rows as $price => $rows): ?>
-                    <div class="col-sm-6 col-md-3 mb-2">
+                    <div class="col-12 col-sm-6 col-md-3 mb-2">
                         <div class="cost-info card p-2 text-center">
                             <p class="mb-0">Cost of 1 ticket for</p>
                             <p class="mb-0 fw-bold">
@@ -135,73 +128,68 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                         <div class="legend-color-box bg-light-green"></div> <span>Available</span>
                     </div>
                 </div>
-
-                <div class="seat-layout d-inline-flex border p-3 rounded">
-                    <div class="seat-section me-4">
+                
+                <div class="seat-layout d-inline-flex border p-3 rounded flex-column flex-md-row">
+                    <div class="seat-section">
                         <?php foreach ($data['seats_grouped_by_row'] as $row => $seatNumbers): ?>
                             <div class="seat-row d-flex align-items-center mb-2">
                                 <span class="row-label me-2"><?= htmlspecialchars($row) ?></span>
-                                <div class="d-flex gap-3">
-                                    <?php
-                                    // Split seatNumbers into two groups: first 5 and the rest
-                                    $firstFiveSeats = array_slice($seatNumbers, 0, 5);
-                                    $secondSeats = array_slice($seatNumbers, 5);
-                                    ?>
-                                    <!-- First column with 5 seats -->
+                                <div class="d-flex gap-3 flex-wrap">
                                     <div class="seat-cluster d-flex gap-1">
+                                        <?php
+                                        $firstFiveSeats = array_slice($seatNumbers, 0, 5);
+                                        $secondSeats = array_slice($seatNumbers, 5);
+                                        ?>
                                         <?php foreach ($firstFiveSeats as $seatNum): ?>
                                             <?php
                                             $seatStatus = 0;
-                                            // var_dump($data['booked_seat_ids']); exit;
                                             foreach ($data['seats'] as $seat) {
                                                 if ($seat['seat_row'] === $row && $seat['seat_number'] == $seatNum) {
                                                     $seat_id = $seat['id'];
                                                     if (in_array($seat_id, $data['booked_seat_ids'])) {
-                                                        $seatStatus = 1; // already booked
+                                                        $seatStatus = 1;
                                                     } else {
-                                                        $seatStatus = (int) $seat['status']; // status from seats table
+                                                        $seatStatus = (int) $seat['status'];
                                                     }
                                                     break;
                                                 }
                                             }
                                             $class = $seatStatus === 0 ? 'seat-available' : 'seat-not-available';
-
                                             ?>
                                             <div class="seat <?= $class ?>"
                                                 data-seat="<?= htmlspecialchars($row . $seatNum) ?>"></div>
                                         <?php endforeach; ?>
                                     </div>
 
-                                    <!-- Second column with remaining seats -->
-                                    <div class="seat-cluster d-flex gap-1">
-                                        <?php foreach ($secondSeats as $seatNum): ?>
-                                            <?php
-                                            $seatStatus = 0;
-                                            foreach ($data['seats'] as $seat) {
-                                                if ($seat['seat_row'] === $row && $seat['seat_number'] == $seatNum) {
-                                                    $seat_id = $seat['id'];
-                                                    if (in_array($seat_id, $data['booked_seat_ids'])) {
-                                                        $seatStatus = 1; // already booked
-                                                    } else {
-                                                        $seatStatus = (int) $seat['status']; // status from seats table
+                                    <?php if (!empty($secondSeats)): ?>
+                                        <div class="seat-cluster d-flex gap-1">
+                                            <?php foreach ($secondSeats as $seatNum): ?>
+                                                <?php
+                                                $seatStatus = 0;
+                                                foreach ($data['seats'] as $seat) {
+                                                    if ($seat['seat_row'] === $row && $seat['seat_number'] == $seatNum) {
+                                                        $seat_id = $seat['id'];
+                                                        if (in_array($seat_id, $data['booked_seat_ids'])) {
+                                                            $seatStatus = 1;
+                                                        } else {
+                                                            $seatStatus = (int) $seat['status'];
+                                                        }
+                                                        break;
                                                     }
-                                                    break;
                                                 }
-                                            }
-                                            $class = $seatStatus === 0 ? 'seat-available' : 'seat-not-available';
-                                            // var_dump($class); exit;
-                                            ?>
-                                            <div class="seat <?= $class ?>"
-                                                data-seat="<?= htmlspecialchars($row . $seatNum) ?>"></div>
-                                        <?php endforeach; ?>
-                                        
-                                    </div>
-
+                                                $class = $seatStatus === 0 ? 'seat-available' : 'seat-not-available';
+                                                ?>
+                                                <div class="seat <?= $class ?>"
+                                                    data-seat="<?= htmlspecialchars($row . $seatNum) ?>"></div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
+
                 <form id="bookingForm" method="POST" action="<?= URLROOT ?>/booking/store" style="display:none;">
                     <input type="hidden" name="movie_id" value="<?= $data['movie']['id'] ?>">
                     <input type="hidden" name="show_time" value="<?= $data['selected_time'] ?>">
@@ -209,7 +197,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                     <input type="hidden" name="selected_seats" id="selectedSeatsInput">
                 </form>
 
-                <a href="" id="bookNowLink"><button class="btn btn-book-now mt-4 w-auto mx-auto d-block">Book
+                <a href="#" id="bookNowLink"><button class="btn btn-book-now mt-4 w-auto mx-auto d-block">Book
                         now</button></a>
             </div>
         </div>
@@ -278,11 +266,8 @@ require_once __DIR__ . '/../layout/footer.php';
                 return;
             }
 
-            // Set selected seats as JSON string into hidden input
             document.getElementById('selectedSeatsInput').value = JSON.stringify(seatNumbers);
-            // Submit the hidden booking form to store booking in DB
             document.getElementById('bookingForm').submit();
         });
     });
-</script>
 </script>

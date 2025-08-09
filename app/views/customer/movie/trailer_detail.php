@@ -48,14 +48,20 @@ require_once __DIR__ . '/../layout/nav.php';
                         <p class="movie-detail-description"><strong style="color : black">Description: </strong>
                             <?= nl2br(htmlspecialchars($data['movie']['description'])) ?>
                         </p>
-                        <div class="movie-detail-rating mb-3">
-                            <?php
-                            $avg = $data['avg_rating'] ?? 0;
-                            for ($i = 1; $i <= 5; $i++):
-                                $class = $i <= $avg ? 'text-warning' : 'text-secondary';
-                                ?>
-                                <i class="fas fa-star <?= $class ?>"></i>
-                            <?php endfor; ?>
+                        <div class="movie-detail-rating mb-3 d-flex align-items-center gap-3">
+                            <div>
+                                <?php
+                                $avg = $data['avg_rating'] ?? 0;
+                                for ($i = 1; $i <= 5; $i++):
+                                    $class = $i <= $avg ? 'text-warning' : 'text-secondary';
+                                    ?>
+                                    <i class="fas fa-star <?= $class ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <div class="viewer-count d-flex align-items-center text-muted">
+                                <i class="fas fa-eye me-1"></i>
+                                <?= (int) ($data['movie']['view_count'] ?? 0) ?>
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2 flex-wrap">

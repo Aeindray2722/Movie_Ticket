@@ -47,7 +47,7 @@ class Mail
         }
 
     }
-    private function sendMail($recipient_mail, $subject, $body)
+    public function sendMail($recipient_mail, $subject, $body)
     {
         require '../vendor/autoload.php';
 

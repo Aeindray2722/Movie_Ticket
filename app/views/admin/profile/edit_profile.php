@@ -26,6 +26,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
             <?php endif; ?>
             <form action="<?= URLROOT ?>/user/update" method="post" enctype="multipart/form-data" id="movieForm">
                 <input type="hidden" name="id" value="<?= $data['users']['id'] ?>">
+                <input type="hidden" name="role" value="<?= $data['users']['role'] ?>">
                 <div class="profile-content">
                     <div class="profile-image-upload-section">
                         <div class="profile-image-wrapper">

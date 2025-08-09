@@ -47,7 +47,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
                             <th>Name</th>
                             <th>Movie</th>
                             <th>Show Time</th>
-                            <th>Tickets</th>
+                            <th>Seats</th>
                             <th>Total Price</th>
                             <th>Status</th>
                         </tr>
@@ -56,10 +56,10 @@ require_once __DIR__ . '/../layout/sidebar.php';
                         <?php if (!empty($data['recentBookings'])): ?>
                             <?php foreach ($data['recentBookings'] as $booking): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($booking['user_name']) ?></td>
+                                    <td><?= htmlspecialchars($booking['name']) ?></td>
                                     <td><?= htmlspecialchars($booking['movie_name']) ?></td>
-                                    <td><?= htmlspecialchars($booking['show_time']) ?></td>
-                                    <td><?= htmlspecialchars($booking['seats']) ?></td>
+                                    <td><?= htmlspecialchars($booking['show_time_list']) ?></td>
+                                    <td><?= htmlspecialchars($booking['seat_row'] . $booking['seat_number']) ?></td>
                                     <td>$<?= number_format($booking['total_amount'], 2) ?></td>
                                     <td><?= htmlspecialchars($booking['status_text']) ?></td>
                                 </tr>

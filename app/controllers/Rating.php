@@ -8,13 +8,6 @@ class Rating extends Controller
         $this->model('RatingModel'); // optional if you want a model for Rating
         $this->db = new Database();
     }
-     public function middleware()
-    {
-        return [
-            'submit' => ['CustomerMiddleware'],
-            'storePayment' => ['CustomerMiddleware'],
-        ];
-    }
     public function submit()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -29,11 +22,7 @@ class Rating extends Controller
             }
 
             // Check if user already rated this movie
-            $this->db->query("SELECT * FROM ratings WHERE user_id = :user_id AND movie_id = :movie_id");
-            $this->db->bind(':user_id', $user_id);
-            $this->db->bind(':movie_id', $movie_id);
-            $this->db->stmt->execute();
-            $existingRating = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+            $existingRating = $this->db->getRatingByUserAndMovie($user_id, $movie_id);
 
             if ($existingRating) {
                 // Update existing rating by id

@@ -39,16 +39,8 @@ class Pages extends Controller
         );
 
         // Fetch trailers with movie_img and movie_name from movies table using JOIN
-        $sql = "
-        SELECT trailers.*, movies.movie_img, movies.movie_name
-        FROM trailers
-        JOIN movies ON trailers.movie_id = movies.id
-        ORDER BY trailers.created_at DESC
-        LIMIT 5
-    ";
-        $this->db->query($sql);
-        $this->db->stmt->execute();
-        $trailers = $this->db->fetchAll();
+       $trailers = $this->db->readWithCondition('view_trailers_info',
+            "1 ORDER BY trailer_created_at DESC LIMIT 5");
 
         $data = [
             'now_showing_movies' => $nowShowingMovies,
@@ -58,21 +50,5 @@ class Pages extends Controller
         $this->view('customer/movie/dashboard', $data);
     }
 
-
-
-
-
-    // public function dashboard()
-    // {
-    //     $income = $this->db->incomeTransition();
-    //     $expense = $this->db->expenseTransition();
-
-    //     $data = [
-    //         'income' => isset($income['amount']) ? $income : ['amount' => 0],
-    //         'expense' => isset($expense['amount']) ? $expense : ['amount' => 0]
-    //     ];
-
-    //     $this->view('pages/dashboard', $data);
-    // }
 
 }

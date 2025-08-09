@@ -1,6 +1,5 @@
 <?php require_once __DIR__ . '/../layout/nav.php'; ?>
 
-<!-- AOS Animation -->
 <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script>AOS.init();</script>
@@ -81,7 +80,6 @@
     }
 </style>
 
-<!-- OUR STORY -->
 <section class="about-section">
     <div class="container">
         <div class="row align-items-center">
@@ -98,13 +96,12 @@
             </div>
             <div class="col-lg-6 text-center mt-4 mt-lg-0" data-aos="fade-left">
                 <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8bW92aWUlMjB0aGVhdGVyfGVufDB8fDB8fHww"
-                    class="about-img" alt="Movie Experience">
+                    class="about-img w-100" alt="Movie Experience">
             </div>
         </div>
     </div>
 </section>
 
-<!-- OUR TEAM -->
 <section class="team-section">
     <div class="container text-center">
         <h2 data-aos="fade-up">Meet Our Team</h2>
@@ -112,11 +109,11 @@
             screen</p>
         <div class="row justify-content-center g-4">
             <?php
-    // var_dump($data['team']); exit;
             foreach ($data['team'] as $i => $member): ?>
                 <div class="col-6 col-md-4 col-lg-3" data-aos="zoom-in" data-aos-delay="<?= $i * 100 ?>">
                     <div class="team-member">
-                        <img src="/images/users/<?= $member['profile_img']; ?>" alt="<?= htmlspecialchars($member['name']); ?>">
+                        <img src="/images/users/<?= $member['profile_img']; ?>"
+                            alt="<?= htmlspecialchars($member['name']); ?>" class="img-fluid">
                         <h5><?= $member['name']; ?></h5>
                         <p>
                             <?= $member['role'] == 1 ? 'Customer' : 'Admin'; ?>

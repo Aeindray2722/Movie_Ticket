@@ -6,8 +6,8 @@ require_once __DIR__ . '/../layout/nav.php';
     <div class="container">
         <h2 class="mb-4">Payment</h2>
 
-        <div class="row">
-            <div class="col-md-6 mb-4">
+        <div class="row g-4">
+            <div class="col-12 col-lg-6 mb-4">
                 <div class="card payment-method-card h-100">
                     <div class="card-body">
                         <h3 class="card-title payment-method-title mb-4">Payment Method</h3>
@@ -27,20 +27,21 @@ require_once __DIR__ . '/../layout/nav.php';
                 </div>
             </div>
 
-            <div class="col-md-6 mb-4">
+            <div class="col-12 col-lg-6 mb-4">
                 <div class="card payment-info-card h-100">
                     <div class="card-body">
                         <h3 class="card-title payment-info-title mb-4">Payment Info</h3>
                         <form method="POST" enctype="multipart/form-data" action="<?= URLROOT ?>/payment/storePayment">
                             <div class="row">
-                                <div class="col">
+                                <div class="col-12 col-sm-6">
                                     <div class="mb-3">
                                         <label for="userName" class="form-label visually-hidden">User name</label>
-                                        <input type="text" name="name" class="form-control " id="userName" placeholder="User name"
+                                        <input type="text" name="name" class="form-control " id="userName"
+                                            placeholder="User name"
                                             value="<?php echo htmlspecialchars($data['users']['name']); ?>" disabled>
                                     </div>
                                 </div>
-                                <div class="col">
+                                <div class="col-12 col-sm-6">
                                     <div class="mb-3">
                                         <label for="emailAddress" class="form-label visually-hidden">Email
                                             address</label>
@@ -51,7 +52,7 @@ require_once __DIR__ . '/../layout/nav.php';
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col">
+                                <div class="col-12 col-sm-6">
                                     <div class="mb-3">
                                         <label for="choosePayment" class="form-label visually-hidden">Choose
                                             Payment</label>
@@ -65,20 +66,21 @@ require_once __DIR__ . '/../layout/nav.php';
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col">
+                                <div class="col-12 col-sm-6">
                                     <div class="mb-3">
                                         <label for="chooseFile" class="form-label visually-hidden">Choose file</label>
-                                        <input type="file" class="form-control" id="chooseFile" name="payslip_img" required>
+                                        <input type="file" class="form-control" id="chooseFile" name="payslip_img"
+                                            required>
                                     </div>
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <div class="col">
+                                <div class="col-12 col-sm-6">
                                     <p class="h5 mt-3">Seats:
                                         <?php echo htmlspecialchars(implode(', ', $data['seat_names'])); ?>
                                     </p>
                                 </div>
-                                <div class="col">
+                                <div class="col-12 col-sm-6">
                                     <p class="h5 mt-3">Total Amount:
                                         <?= htmlspecialchars($data['booking']['total_amount'] ?? '0.00') ?>
                                     </p>

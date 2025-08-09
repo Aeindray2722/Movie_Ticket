@@ -12,8 +12,6 @@ class Contact extends Controller
     {
         return [
             'index' => ['AdminMiddleware'],
-            'store' => ['CustomerMiddleware'],
-            'destory' => ['AdminMiddleware'],
         ];
     }
     
@@ -37,7 +35,6 @@ class Contact extends Controller
         $this->view('admin/layout/contact', $data);
     }
    
-
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -51,8 +48,6 @@ class Contact extends Controller
             $email = $_POST['email'];
             $contactText = trim($_POST['contact_text']);
             $userId = $_SESSION['user_id'] ?? null;
-
-
             // Prepare data to insert
             $data = [
                 'user_id' => $userId,
@@ -76,8 +71,6 @@ class Contact extends Controller
             
         }
     }
-
-
 
     public function destroy($id)
     {

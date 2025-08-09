@@ -297,7 +297,6 @@ class Auth extends Controller
                 // Redirect to OTP verification page
                 $this->view('pages/sendOtp');
             } else {
-                // var_dump($user); exit;
                 setMessage('error', 'Email not found in our system.');
                 redirect('auth/forgotPassword');
             }
@@ -322,8 +321,7 @@ class Auth extends Controller
     }
     public function verifyOtp()
     {
-        var_dump($_SESSION); 
-        // var_dump($_POST); exit;
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $otpInput = implode('', array_map('trim', [
                 $_POST['digit1'] ?? '',
@@ -333,6 +331,7 @@ class Auth extends Controller
             ]));
 
             if (isset($_SESSION['otp']) && $_SESSION['otp'] == $otpInput) {
+
                 setMessage('success', 'OTP Verified. You can now reset your password.');
                 redirect('auth/resetPassword');  // redirect instead of view()
             } else {

@@ -180,16 +180,16 @@ class Database
         $row = $stm->fetch(PDO::FETCH_ASSOC);
         return ($success) ? $row : [];
     }
-    //getByCategory
-    public function getByCategoryId($table, $column)
-    {
-        $stm = $this->pdo->prepare('SELECT * FROM ' . $table . ' WHERE name =:column');
-        $stm->bindValue(':column', $column);
-        $success = $stm->execute();
-        $row = $stm->fetch(PDO::FETCH_ASSOC);
-        //  print_r($row);
-        return ($success) ? $row : [];
-    }
+    // //getByCategory
+    // public function getByCategoryId($table, $column)
+    // {
+    //     $stm = $this->pdo->prepare('SELECT * FROM ' . $table . ' WHERE name =:column');
+    //     $stm->bindValue(':column', $column);
+    //     $success = $stm->execute();
+    //     $row = $stm->fetch(PDO::FETCH_ASSOC);
+    //     //  print_r($row);
+    //     return ($success) ? $row : [];
+    // }
     //pagination
     public function readPaged($table, $limit, $offset)
     {
@@ -352,6 +352,8 @@ class Database
         $this->stmt->execute();
         return $this->stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+
     public function lastInsertId()
     {
         return $this->pdo->lastInsertId();
@@ -476,7 +478,101 @@ class Database
 
         return $this->stmt->execute();
     }
+    public function incrementViewCount($id)
+    {
+        $sql = "UPDATE movies SET view_count = view_count + 1 WHERE id = :id";
+        $this->query($sql);
+        $this->bind(':id', $id);
+        $this->stmt->execute();
+        return $this->stmt->rowCount(); // returns number of rows updated
+    }
+    public function getCommentsWithUserInfo($movie_id)
+    {
+        $sql = "SELECT c.id, c.message, c.user_id, c.created_at, u.name, u.profile_img
+            FROM comments c
+            JOIN users u ON c.user_id = u.id
+            WHERE c.movie_id = :movie_id
+            ORDER BY c.created_at DESC";
 
+        $this->query($sql);
+        $this->bind(':movie_id', $movie_id);
+        $this->stmt->execute();
+        return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getShowTimeIdByValue(string $showTime): int
+    {
+        $this->query("SELECT id FROM show_times WHERE show_time = :show_time LIMIT 1");
+        $this->bind(':show_time', $showTime);
+        $this->stmt->execute();
+        $row = $this->stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? (int) $row['id'] : 0;
+    }
+
+    public function getLatestBookingByUserId($user_id)
+    {
+        $sql = "SELECT * FROM bookings WHERE user_id = :user_id ORDER BY id DESC LIMIT 1";
+        $this->query($sql);
+        $this->bind(':user_id', $user_id);
+        $this->stmt->execute();
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function getTrailerByMovieId($movie_id)
+    {
+        $this->query("SELECT * FROM trailers WHERE movie_id = :movie_id LIMIT 1");
+        $this->bind(':movie_id', $movie_id);
+        $this->stmt->execute();
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    // Decode JSON seat_id and return array safely
+    public function decodeSeatIds($booking)
+    {
+        $seat_ids = json_decode($booking['seat_id'] ?? '[]', true);
+        return is_array($seat_ids) ? $seat_ids : [];
+    }
+
+    // Get readable seat names for booking seat_id JSON
+    public function getReadableSeatNames($booking)
+    {
+        $seat_ids = $this->decodeSeatIds($booking);
+        if (empty($seat_ids))
+            return [];
+
+        $seatMap = $this->getSeatNamesByIds($seat_ids);
+        $seat_names = [];
+
+        foreach ($seat_ids as $sid) {
+            $seat_names[] = $seatMap[$sid] ?? 'Unknown';
+        }
+
+        return $seat_names;
+    }
+    public function getTotalCount($table)
+    {
+        $sql = "SELECT COUNT(*) AS total FROM $table";
+        return (int) $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
+
+
+    function uploadImage($file, $relativeDir)
+    {
+        $uploadDir = __DIR__ . $relativeDir;
+        $filename = time() . '_' . basename($file['name']);
+        $target = $uploadDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $target)) {
+            return $filename;
+        }
+
+        return null;
+    }
+    public function getRatingByUserAndMovie($user_id, $movie_id)
+    {
+        $this->query("SELECT * FROM ratings WHERE user_id = :user_id AND movie_id = :movie_id");
+        $this->bind(':user_id', $user_id);
+        $this->bind(':movie_id', $movie_id);
+        return $this->single();
+    }
 
 
 

@@ -9,7 +9,8 @@ class Trailer extends Controller
         $this->db = new Database();
         $this->model('TrailerModel');
     }
-     public function middleware()
+    
+    public function middleware()
     {
         return [
             'index' => ['AdminMiddleware'],
@@ -18,8 +19,8 @@ class Trailer extends Controller
             'edit' => ['AdminMiddleware'],
             'update' => ['AdminMiddleware'],
             'destroy' => ['AdminMiddleware'],
-            'trailer' => ['CustomerMiddleware'],
-            'movieDetail' => ['CustomerMiddleware'],
+            // 'trailer' => ['CustomerMiddleware'],
+            // 'movieDetail' => ['CustomerMiddleware'],
         ];
     }
     public function index()
@@ -269,24 +270,14 @@ class Trailer extends Controller
             setMessage('error', 'Movie not found!');
             redirect('trailer/trailer');
         }
-
+        // Increment view count first
+        $this->db->incrementViewCount($id);
         // ✅ Fetch average rating for this movie (rounded)
         $avg_rating = $this->db->getAvgRatingByMovieId($id);
 
-        $sqlComments = "SELECT c.id, c.message, c.user_id, c.created_at, u.name ,u.profile_img
-                    FROM comments c
-                    JOIN users u ON c.user_id = u.id
-                    WHERE c.movie_id = :movie_id
-                    ORDER BY c.created_at DESC";
-        $this->db->query($sqlComments);
-        $this->db->bind(':movie_id', $id);
-        $this->db->stmt->execute();
-        $comments = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $comments = $this->db->getCommentsWithUserInfo($id);
 
-        $this->db->query("SELECT * FROM trailers WHERE movie_id = :movie_id LIMIT 1");
-        $this->db->bind(':movie_id', $id);
-        $this->db->stmt->execute();
-        $trailer = $this->db->stmt->fetch(PDO::FETCH_ASSOC);
+        $trailer = $this->db->getTrailerByMovieId($id);
 
         // Pass data to view
         $data = [

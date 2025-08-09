@@ -95,11 +95,7 @@ class Movie extends Controller
 
             // Handle file upload
             if (isset($_FILES['movie_image']) && $_FILES['movie_image']['error'] == 0) {
-                $targetDir = __DIR__ . '/../../public/images/movies/';
-                // $targetDir = "uploads/movies/";
-                $movie_img = time() . '_' . basename($_FILES['movie_image']['name']); // prevent duplicate file name
-                $targetFile = $targetDir . $movie_img;
-                move_uploaded_file($_FILES['movie_image']['tmp_name'], $targetFile);
+                $movie_img = $this->db->uploadImage($_FILES['movie_image'], '/../../public/images/movies/');
             }
 
             // Prepare data array for insert
@@ -120,16 +116,9 @@ class Movie extends Controller
             // Insert into database directly (without MovieModel)
             $movieCreated = $this->db->create('movies', $movieData);
 
-            // if ($movieCreated) {
-            //     setMessage('success', 'Movie added successfully!');
-            // } else {
-            //     setMessage('error', 'Failed to add movie.');
-            // }
             redirect('movie');
         }
     }
-
-
 
     // Edit - Display the form to edit an existing movie
     public function edit($id)
@@ -142,8 +131,6 @@ class Movie extends Controller
         // var_dump($show_time_json);
         // exit;
         $movies['show_time_ids'] = json_decode($movies['show_time'], true) ?? [];
-        // var_dump($movies['show_time_ids']);
-        // exit;
 
         if (!$movies) {
             setMessage('error', 'Your Movie id is not have');
@@ -156,7 +143,7 @@ class Movie extends Controller
         ];
 
 
-        $this->view('admin/movie/edit_movie', $data); // Display the edit form with existing movie data
+        $this->view('admin/movie/edit_movie', $data);
     }
 
     // Update - Save the edited movie data
@@ -186,11 +173,9 @@ class Movie extends Controller
                 }
 
                 // Upload new image
-                $newFilename = time() . '_' . basename($_FILES['movie_image']['name']);
-                $targetDir = __DIR__ . '/../../public/images/movies/';
-                $targetFile = $targetDir . $newFilename;
+                $newFilename = $this->db->uploadImage($_FILES['movie_image'], '/../../public/images/movies/');
 
-                if (move_uploaded_file($_FILES['movie_image']['tmp_name'], $targetFile)) {
+                if ($newFilename !== null) {
                     $movie_img = $newFilename;
                 }
             }
@@ -218,8 +203,6 @@ class Movie extends Controller
             redirect('movie');
         }
     }
-
-
 
     // Destroy - Delete a movie from the database
     public function destroy($id)
@@ -263,57 +246,25 @@ class Movie extends Controller
         echo json_encode($json);
     }
 
-
-
     public function dashboard()
     {
-        // 1. Fetch 5 most recent bookings
-        $limit = 5;
-        $sql = "SELECT * FROM bookings ORDER BY booking_date DESC LIMIT :limit";
-        $this->db->query($sql);
-        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
-        $this->db->stmt->execute();
-        $recentBookings = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        // 1. Fetch 5 most recent bookings from the view
+        $recentBookings = $this->db->readWithCondition(
+            'view_bookings_info',
+            "1 ORDER BY booking_date DESC LIMIT 5"
+        );
 
-        // 2. Collect all seat IDs from recent bookings to map to seat names
-        $allSeatIds = [];
-        foreach ($recentBookings as $booking) {
-            $seat_ids = json_decode($booking['seat_id'], true);
-            if (is_array($seat_ids)) {
-                $allSeatIds = array_merge($allSeatIds, $seat_ids);
-            }
-        }
-
-        // 3. Get seat names map for all seat IDs
-        $seatMap = $this->db->getSeatNamesByIds($allSeatIds);
-
-        // 4. Enrich bookings with movie, user, seat names, showtime, and status text
+        // 2. Add status text mapping (if still using numeric codes)
+        $statusMap = [0 => 'Confirmed', 1 => 'Pending', 2 => 'Rejected'];
         foreach ($recentBookings as &$booking) {
-            $movie = $this->db->getById('movies', $booking['movie_id']);
-            $booking['movie_name'] = $movie['movie_name'] ?? 'Unknown';
-
-            $user = $this->db->getById('users', $booking['user_id']);
-            $booking['user_name'] = $user['name'] ?? 'Unknown';
-
-            $seat_ids = json_decode($booking['seat_id'], true);
-            $seat_names = [];
-            foreach ($seat_ids as $sid) {
-                $seat_names[] = $seatMap[$sid] ?? 'Unknown';
-            }
-            $booking['seats'] = implode(', ', $seat_names);
-
-            $showTime = $this->db->getById('show_times', $booking['show_time_id']);
-            $booking['show_time'] = $showTime['show_time'] ?? 'Unknown';
-
-            $statusMap = [0 => 'Confirmed', 1 => 'Pending', 2 => 'Rejected'];
             $booking['status_text'] = $statusMap[$booking['status']] ?? 'Unknown';
         }
-        unset($booking); // break reference
+        unset($booking);
 
-        // 5. Get monthly summary report from stored procedure
+        // 3. Monthly summary (if still using stored procedure or custom logic)
         $report = $this->db->getMonthlySummary();
 
-        // 6. Pass both data arrays to the dashboard view
+        // 4. Pass to view
         $data = [
             'recentBookings' => $recentBookings,
             'report' => $report,
@@ -321,7 +272,6 @@ class Movie extends Controller
 
         $this->view('admin/movie/dashboard', $data);
     }
-
     public function nowShowing()
     {
         $type = $_GET['type'] ?? null;
@@ -335,6 +285,7 @@ class Movie extends Controller
 
         $filteredMovies = [];
         $total = 0;
+
 
         if ($search !== '') {
             // Search with keyword
@@ -378,9 +329,6 @@ class Movie extends Controller
         $this->view('customer/movie/nowshowing', $data);
     }
 
-
-
-
     public function movieDetail($id)
     {
         // Fetch movie info by ID from view_movies_info
@@ -390,19 +338,13 @@ class Movie extends Controller
             setMessage('error', 'Movie not found!');
             redirect('movie/nowShowing');
         }
+        // Increment view count first
+        $this->db->incrementViewCount($id);
 
         // ✅ Fetch average rating for this movie (rounded)
         $avg_rating = $this->db->getAvgRatingByMovieId($id);
 
-        $sqlComments = "SELECT c.id, c.message, c.user_id, c.created_at, u.name ,u.profile_img
-                    FROM comments c
-                    JOIN users u ON c.user_id = u.id
-                    WHERE c.movie_id = :movie_id
-                    ORDER BY c.created_at DESC";
-        $this->db->query($sqlComments);
-        $this->db->bind(':movie_id', $id);
-        $this->db->stmt->execute();
-        $comments = $this->db->stmt->fetchAll(PDO::FETCH_ASSOC);
+        $comments = $this->db->getCommentsWithUserInfo($id);
         // Pass data to view
         $data = [
             'movie' => $movie,

@@ -35,7 +35,7 @@ require_once __DIR__ . '/../layout/nav.php';
                 <?php endforeach; ?>
             </div>
 
-            <button class="carousel-control-prev" type="button" data-bs-target="#movieCarousel" data-bs-slide="prev" >
+            <button class="carousel-control-prev" type="button" data-bs-target="#movieCarousel" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Previous</span>
             </button>
@@ -56,16 +56,19 @@ require_once __DIR__ . '/../layout/nav.php';
         <div class="row g-3 mb-4">
             <?php foreach ($data['now_showing_movies'] as $movie): ?>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card movie-card">
-                        <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
-                            class="card-img-top" alt="<?php echo $movie['movie_name']; ?>">
-                        <div class="card-body p-2">
-                            <h5 class="card-title mb-1 text-truncate"><?php echo $movie['movie_name']; ?></h5>
+                    <a href="<?= URLROOT . '/movie/movieDetail/' . $movie['id'] ?>" class="text-decoration-none text-dark">
+                        <div class="card movie-card h-100">
+                            <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
+                                class="card-img-top" alt="<?= htmlspecialchars($movie['movie_name']) ?>">
+                            <div class="card-body p-2">
+                                <h5 class="card-title mb-1 text-truncate"><?= htmlspecialchars($movie['movie_name']) ?></h5>
                             </div>
-                    </div>
+                        </div>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>
+
 
         <h2 class="section-title d-flex justify-content-between align-items-center">
             Movie Trailer
@@ -74,16 +77,21 @@ require_once __DIR__ . '/../layout/nav.php';
         <div class="row g-3 mb-4 mt-4">
             <?php foreach ($data['trailers'] as $trailer): ?>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card movie-card">
-                        <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"
-                            class="card-img-top" alt="<?php echo $trailer['movie_name']; ?>">
-                        <div class="card-body p-2">
-                            <h5 class="card-title mb-1 text-truncate"><?php echo $trailer['movie_name']; ?></h5>
+                    <a href="<?= URLROOT . '/trailer/movieDetail/' . $trailer['movie_id'] ?>"
+                        class="text-decoration-none text-dark">
+                        <div class="card movie-card h-100">
+                            <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"
+                                class="card-img-top" alt="<?= htmlspecialchars($trailer['movie_name']) ?>">
+                            <div class="card-body p-2">
+                                <h5 class="card-title mb-1 text-truncate"><?= htmlspecialchars($trailer['movie_name']) ?>
+                                </h5>
                             </div>
-                    </div>
+                        </div>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>
+
     </div>
 </section>
 

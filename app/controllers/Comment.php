@@ -8,16 +8,7 @@ class Comment extends Controller
         $this->model('CommentModel'); // Assuming you have a CommentModel 
         $this->db = new Database();
     }
-    public function middleware()
-    {
-        return [
-            'store' => ['CustomerMiddleware'],
-            'destory' => ['CustomerMiddleware'],
-        ];
-    }
-    
-
-
+  
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,14 +40,10 @@ class Comment extends Controller
 
             // $commentModel = new CommentModel();
             $commentCreated = $this->db->create('comments', $data);
-
-
             // redirect('movie/movieDetail/' . $movieId);
             redirect("movie/movieDetail/$movieId");
         }
     }
-
-
 
     // Destroy - Delete a comment from the database 
     public function destroy($encodedId)
@@ -71,7 +58,6 @@ class Comment extends Controller
             redirect('movie/nowShowing');
             exit;
         }
-
         $movie_id = $comment['movie_id'];
 
         // Delete comment using your Database delete function

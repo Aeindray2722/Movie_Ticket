@@ -22,6 +22,7 @@ class Payment extends Controller
         ];
     }
 
+
     public function index()
     {
         $limit = 3;
@@ -47,10 +48,7 @@ class Payment extends Controller
             $payment_method = trim($_POST['payment_method']);
             $account_number = trim($_POST['account_number']);
             $account_name = trim($_POST['account_name']);
-
-
             // Optional: Validate values here
-
             $paymentData = [
                 'payment_method' => $payment_method,
                 'account_number' => $account_number,
@@ -133,29 +131,10 @@ class Payment extends Controller
 
         $payment = $this->db->readAll('payments');
         $users = $this->db->getById('users', $user_id);
+        $booking = $this->db->getLatestBookingByUserId($user_id);
 
-        $stmt = $this->db->pdo->prepare("SELECT * FROM bookings WHERE user_id = ? ORDER BY id DESC LIMIT 1");
-        $stmt->execute([$user_id]);
-        $booking = $stmt->fetch();
-
-        // Convert seat_id JSON to array
-        // $seatIds = json_decode($booking['seat_id'], true);
-        $seatIds = [];
-
-        if (isset($booking['seat_id']) && !empty($booking['seat_id'])) {
-            $decoded = json_decode($booking['seat_id'], true);
-            if (is_array($decoded)) {
-                $seatIds = $decoded;
-            }
-        }
-        // Get seat names by IDs
-        $seatMap = $this->db->getSeatNamesByIds($seatIds);
-        $seatNames = [];
-        foreach ($seatIds as $id) {
-            if (isset($seatMap[$id])) {
-                $seatNames[] = $seatMap[$id];
-            }
-        }
+        // ✅ Call Database method
+        $seatNames = $this->db->getReadableSeatNames($booking);
 
         $data = [
             'payments' => $payment,
@@ -166,6 +145,7 @@ class Payment extends Controller
 
         $this->view('customer/payment/payment', $data);
     }
+
     public function storePayment()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -177,9 +157,7 @@ class Payment extends Controller
             }
 
             // Get latest booking of this user (same as in Payment())
-            $stmt = $this->db->pdo->prepare("SELECT * FROM bookings WHERE user_id = ? ORDER BY id DESC LIMIT 1");
-            $stmt->execute([$user_id]);
-            $booking = $stmt->fetch();
+            $booking = $this->db->getLatestBookingByUserId($user_id);
 
             if (!$booking) {
                 setMessage('error', 'No booking found for payment.');
@@ -200,16 +178,11 @@ class Payment extends Controller
             }
 
             $payment_id = $paymentRow['id'];
-
             $payslip_img = '';
 
-            if (isset($_FILES['payslip_img']) && $_FILES['payslip_img']['error'] == 0) {
-                $targetDir = __DIR__ . '/../../public/images/payslips/';
-
-                $payslip_img = time() . '_' . basename($_FILES['payslip_img']['name']);
-                $targetFile = $targetDir . $payslip_img;
-
-                move_uploaded_file($_FILES['payslip_img']['tmp_name'], $targetFile);
+            if (isset($_FILES['payslip_img']) && $_FILES['payslip_img']['error'] === 0) {
+                // Use the reusable upload function from Database
+                $payslip_img = $this->db->uploadImage($_FILES['payslip_img'], '/../../public/images/payslips/');
             }
 
             // Prepare data for payment_history table
@@ -234,12 +207,4 @@ class Payment extends Controller
             redirect('payment/payment');
         }
     }
-
-
-
-
-
-
-
-
 }
