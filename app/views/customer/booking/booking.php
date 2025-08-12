@@ -128,7 +128,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                         <div class="legend-color-box bg-light-green"></div> <span>Available</span>
                     </div>
                 </div>
-                
+
                 <div class="seat-layout d-inline-flex border p-3 rounded flex-column flex-md-row">
                     <div class="seat-section">
                         <?php foreach ($data['seats_grouped_by_row'] as $row => $seatNumbers): ?>
@@ -211,7 +211,6 @@ require_once __DIR__ . '/../layout/footer.php';
 <style>
     #bookNowLink {
         text-decoration: none;
-        /* underline ဖယ်ရှား */
     }
 </style>
 

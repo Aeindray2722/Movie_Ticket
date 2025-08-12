@@ -8,7 +8,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
     <div class="content-area">
         <div class="profile-card-container">
             <div class="profile-header-text">
-                <h4>Account Info </h4>
+                <h4>Account Info(Admin) </h4>
             </div>
             <div class="profile-content">
                 <div class="profile-image-wrapper">

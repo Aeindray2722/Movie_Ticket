@@ -59,7 +59,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
                                     <td><?= htmlspecialchars($booking['name']) ?></td>
                                     <td><?= htmlspecialchars($booking['movie_name']) ?></td>
                                     <td><?= htmlspecialchars($booking['show_time_list']) ?></td>
-                                    <td><?= htmlspecialchars($booking['seat_row'] . $booking['seat_number']) ?></td>
+                                    <td><?= htmlspecialchars($booking['seats']) ?></td>
                                     <td>$<?= number_format($booking['total_amount'], 2) ?></td>
                                     <td><?= htmlspecialchars($booking['status_text']) ?></td>
                                 </tr>

@@ -1,15 +1,22 @@
 <?php
+require_once __DIR__ . '/../services/TrailerService.php';
 
 class Trailer extends Controller
 {
+    private $service;
 
-    private $db;
     public function __construct()
     {
-        $this->db = new Database();
-        $this->model('TrailerModel');
+        try {
+            $db = new Database();
+            $this->model('TrailerModel');
+            $this->service = new TrailerService($db);
+        } catch (Exception $e) {
+            setMessage('error', 'Initialization failed: ' . $e->getMessage());
+            redirect('error');
+        }
     }
-    
+
     public function middleware()
     {
         return [
@@ -19,278 +26,152 @@ class Trailer extends Controller
             'edit' => ['AdminMiddleware'],
             'update' => ['AdminMiddleware'],
             'destroy' => ['AdminMiddleware'],
-            // 'trailer' => ['CustomerMiddleware'],
-            // 'movieDetail' => ['CustomerMiddleware'],
         ];
     }
+
     public function index()
     {
-        $limit = 3; // number of trailers per page
-        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-        if ($page < 1)
-            $page = 1;
-        $offset = ($page - 1) * $limit;
+        try {
+            $page = max((int) ($_GET['page'] ?? 1), 1);
+            $limit = 3;
 
-        // Get paged movies
-        $trailers = $this->db->readPaged('trailers', $limit, $offset);
-
-        // You might also want total movie count for calculating total pages
-        $totaltrailers = count($this->db->readAll('trailers')); // or create a count query for better performance
-        $totalPages = ceil($totaltrailers / $limit);
-
-        $types = $this->db->readAll('types');
-        $movies = $this->db->readAll('movies');
-
-        $data = [
-            'trailers' => $trailers,
-            'types' => $types,
-            'page' => $page,
-            'movies' => $movies,
-            'totalPages' => $totalPages
-        ];
-
-
-        $this->view('admin/trailer/add_trailer', $data);
+            $result = $this->service->getAllPaged($limit, $page);
+            $this->view('admin/trailer/add_trailer', [
+                'trailers' => $result['data'],
+                'types' => $this->service->getTypes(),
+                'movies' => $this->service->getMovies(),
+                'page' => $page,
+                'totalPages' => $result['totalPages']
+            ]);
+        } catch (Exception $e) {
+            setMessage('error', 'Failed to load trailers: ' . $e->getMessage());
+            redirect('trailer');
+        }
     }
+
     public function create()
     {
-        $trailers = $this->db->readAll('trailers');
-        $types = $this->db->readAll('types'); // ✅ correct
-        $movies = $this->db->readAll('movies');
-
-        $data = [
-            'trailers' => $trailers,
-            'types' => $types, // ✅ this makes the type dropdown work
-            'movies' => $movies,
-            'index' => 'movie'
-        ];
-
-
-        $this->view('admin/trailer/add_trailer', $data);
+        try {
+            $this->view('admin/trailer/add_trailer', [
+                'trailers' => $this->service->getAllPaged(100, 1)['data'],
+                'types' => $this->service->getTypes(),
+                'movies' => $this->service->getMovies(),
+                'index' => 'movie'
+            ]);
+        } catch (Exception $e) {
+            setMessage('error', 'Failed to load create form: ' . $e->getMessage());
+            redirect('trailer');
+        }
     }
+
     public function store()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-            $movie_id = $_POST['movie_id']; // ✅ correct name
-            $trailer_vd = '';
-
-            // ✅ Check file field is correct
-            if (isset($_FILES['trailer_file']) && $_FILES['trailer_file']['error'] == 0) {
-                $targetDir = __DIR__ . '/../../public/videos/trailers/';
-                $trailer_vd = time() . '_' . basename($_FILES['trailer_file']['name']);
-                $targetFile = $targetDir . $trailer_vd;
-                move_uploaded_file($_FILES['trailer_file']['tmp_name'], $targetFile);
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                redirect('trailer');
+                return;
             }
 
-
-            $trailerData = [
-                'movie_id' => $movie_id,
-                'trailer_vd' => $trailer_vd,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-            $this->db->create('trailers', $trailerData);
-            $_SESSION['success'] = "Trailer added successfully!";
-            header("Location: " . URLROOT . "/trailer");
-            exit;
-
+            $data = ['movie_id' => $_POST['movie_id']];
+            $this->service->create($data, $_FILES);
+            setMessage('success', 'Trailer added successfully!');
+            redirect('trailer');
+        } catch (Exception $e) {
+            setMessage('error', 'Failed to add trailer: ' . $e->getMessage());
+            redirect('trailer');
         }
     }
 
     public function edit($id)
     {
-        $trailers = $this->db->getById('trailers', $id);
-        $movies = $this->db->readAll('movies'); // Get available movie movies
-        // var_dump($movies);
-        if (!$trailers) {
-            setMessage('error', 'Your Movie id is not have');
-            return;
+        try {
+            $trailer = $this->service->findById($id);
+            if (!$trailer) {
+                throw new Exception('Trailer not found!');
+            }
+
+            $this->view('admin/trailer/edit_trailer', [
+                'movies' => $this->service->getMovies(),
+                'trailers' => $trailer
+            ]);
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
+            redirect('trailer');
         }
-        $data = [
-            'movies' => $movies,
-            'trailers' => $trailers
-        ];
-
-
-        $this->view('admin/trailer/edit_trailer', $data); // Display the edit form with existing movie data
     }
 
     public function update()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = $_POST['id'];
-            $movie_id = $_POST['movie_name'];
-
-            $old_trailer = $this->db->getById('trailers', $id);
-            $trailer_vd = $old_trailer['trailer_vd'];
-
-            $targetDir = __DIR__ . '/../../public/videos/trailers/';
-
-            if (isset($_FILES['trailer_file']) && $_FILES['trailer_file']['error'] == 0) {
-                // ✅ Delete old trailer video file
-                $oldPath = $targetDir . $trailer_vd;
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
-
-                // ✅ Upload new trailer file
-                $trailer_vd = time() . '_' . basename($_FILES['trailer_file']['name']);
-                $targetFile = $targetDir . $trailer_vd;
-                move_uploaded_file($_FILES['trailer_file']['tmp_name'], $targetFile);
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                redirect('trailer');
+                return;
             }
 
-            $trailerData = [
-                'movie_id' => $movie_id,
-                'trailer_vd' => $trailer_vd,
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-
-            $isUpdated = $this->db->update('trailers', $id, $trailerData);
-
-            if ($isUpdated) {
+            $id = $_POST['id'];
+            $data = ['movie_id' => $_POST['movie_name']];
+            if ($this->service->update($id, $data, $_FILES)) {
                 setMessage('success', 'Trailer updated successfully!');
             } else {
-                setMessage('error', 'Failed to update trailer!');
+                throw new Exception('Failed to update trailer!');
             }
+            redirect('trailer');
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
             redirect('trailer');
         }
     }
-    // Destroy - Delete a movie from the database
+
     public function destroy($id)
     {
-        $id = base64_decode($id);
-
-        // Get trailer info (to find file name)
-        $trailer = $this->db->getById('trailers', $id);
-
-        if ($trailer) {
-            // ✅ Delete trailer file
-            $filePath = __DIR__ . '/../../public/videos/trailers/' . $trailer['trailer_vd'];
-            if (file_exists($filePath)) {
-                unlink($filePath);
+        try {
+            $id = base64_decode($id);
+            if ($this->service->delete($id)) {
+                setMessage('success', 'Trailer deleted successfully!');
+            } else {
+                throw new Exception('Trailer not found!');
             }
-
-            // ✅ Delete record from DB
-            $this->db->delete('trailers', $id);
-            setMessage('success', 'Trailer deleted successfully!');
-        } else {
-            setMessage('error', 'Trailer not found!');
+            redirect('trailer');
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
+            redirect('trailer');
         }
-
-        redirect('trailer');
     }
-
-
 
     public function trailer()
     {
-        $type = $_GET['type'] ?? null;
-        $search = trim($_GET['search'] ?? '');
-        $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
-        $limit = 4;
-        $offset = ($page - 1) * $limit;
+        try {
+            $page = max((int) ($_GET['page'] ?? 1), 1);
+            $limit = 4;
+            $type = $_GET['type'] ?? null;
+            $search = trim($_GET['search'] ?? '');
 
-        // All types list for filtering
-        $types = $this->db->readAll('types');
-
-        // Columns to search
-        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
-
-        // Default values
-        $trailers = [];
-        $total = 0;
-
-        if ($search !== '') {
-            // 🔍 Keyword search without pagination (we paginate manually after filtering)
-            $result = $this->db->search(
-                'trailers JOIN view_movies_info ON trailers.movie_id = view_movies_info.id',
-                $columnsToSearch,
-                $search,
-                $limit, // no limit
-                $offset  // no offset
-            );
-
-            // Optional filtering by type
-            $filtered = array_filter($result['data'], function ($trailer) use ($type) {
-                return !$type || strtolower($trailer['type_name']) === strtolower($type);
-            });
-
-            // Manual pagination
-            $total = count($filtered);
-            $trailers = array_slice(array_values($filtered), $offset, $limit);
-
-        } else {
-            // No search keyword — use paginated search
-            $result = $this->db->search(
-                'trailers JOIN view_movies_info ON trailers.movie_id = view_movies_info.id',
-                $columnsToSearch,
-                '',          // empty search string
-                $limit,
-                $offset
-            );
-
-            $trailers = $result['data'];
-            $total = $result['total'] ?? count($trailers);
-
-            // Optional filtering by type (after fetching)
-            if ($type) {
-                $trailers = array_filter($trailers, function ($trailer) use ($type) {
-                    return strtolower($trailer['type_name']) === strtolower($type);
-                });
-                $trailers = array_values($trailers); // reindex
-                $total = count($trailers);
-            }
+            $result = $this->service->searchTrailers($type, $search, $limit, $page);
+            $this->view('customer/movie/trailer', [
+                'trailers' => $result['data'],
+                'page' => $page,
+                'totalPages' => $result['totalPages'],
+                'type' => $type,
+                'types' => $this->service->getTypes(),
+                'search' => $search
+            ]);
+        } catch (Exception $e) {
+            setMessage('error', 'Failed to load trailers: ' . $e->getMessage());
+            redirect('pages/home');
         }
-
-        $totalPages = ceil($total / $limit);
-
-        // Prepare view data
-        $data = [
-            'trailers' => $trailers,
-            'page' => $page,
-            'totalPages' => $totalPages,
-            'type' => $type,
-            'types' => $types,
-            'search' => $search
-        ];
-
-        // 👁 Show trailer page
-        $this->view('customer/movie/trailer', $data);
     }
-
-
 
     public function movieDetail($id)
     {
-        // Fetch movie info by ID from view_movies_info
-        $movie = $this->db->getById('view_movies_info', $id);
-
-        if (!$movie) {
-            setMessage('error', 'Movie not found!');
+        try {
+            $detail = $this->service->getMovieDetail($id);
+            if (!$detail) {
+                throw new Exception('Movie not found!');
+            }
+            $this->view('customer/movie/trailer_detail', $detail);
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
             redirect('trailer/trailer');
         }
-        // Increment view count first
-        $this->db->incrementViewCount($id);
-        // ✅ Fetch average rating for this movie (rounded)
-        $avg_rating = $this->db->getAvgRatingByMovieId($id);
-
-        $comments = $this->db->getCommentsWithUserInfo($id);
-
-        $trailer = $this->db->getTrailerByMovieId($id);
-
-        // Pass data to view
-        $data = [
-            'movie' => $movie,
-            'avg_rating' => $avg_rating,
-            'comment' => $comments,
-            'trailer' => $trailer
-        ];
-
-
-        $this->view('customer/movie/trailer_detail', $data);
     }
-
-
-
 }

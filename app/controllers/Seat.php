@@ -1,140 +1,153 @@
 <?php
+require_once __DIR__ . '/../services/SeatService.php';
 
 class Seat extends Controller
 {
-    private $db;
+    private $seatService;
 
     public function __construct()
     {
-        $this->db = new Database();
-        $this->model('SeatModel');
+        try {
+            $this->seatService = new SeatService(new Database());
+            $this->model('SeatModel');
+        } catch (Exception $e) {
+            setMessage('error', 'Initialization error: ' . $e->getMessage());
+            redirect('error'); // Or wherever is appropriate
+        }
     }
+
     public function middleware()
     {
         return [
-            'index' => ['AdminMiddleware'],
+            'index'  => ['AdminMiddleware'],
             'create' => ['AdminMiddleware'],
-            'store' => ['AdminMiddleware'],
-            'edit' => ['AdminMiddleware'],
+            'store'  => ['AdminMiddleware'],
+            'edit'   => ['AdminMiddleware'],
             'update' => ['AdminMiddleware'],
-            'destroy' => ['AdminMiddleware'],
+            'destroy'=> ['AdminMiddleware'],
         ];
     }
+
     public function index()
     {
-        $limit = 10;
-        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-        $page = ($page < 1) ? 1 : $page;
-        $offset = ($page - 1) * $limit;
+        try {
+            $limit = 10;
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $page = max(1, $page);
 
-        $seats = $this->db->readPaged('seats', $limit, $offset);
-        $totalSeats = count($this->db->readAll('seats'));
-        $totalPages = ceil($totalSeats / $limit);
+            $data = $this->seatService->getSeatsPaged($limit, $page);
 
-        $data = [
-            'seats' => $seats,
-            'page' => $page,
-            'totalPages' => $totalPages
-        ];
-
-        $this->view('admin/seat/add_seat', $data);
+            $this->view('admin/seat/add_seat', $data);
+        } catch (Exception $e) {
+            setMessage('error', 'Failed to load seats: ' . $e->getMessage());
+            redirect('seat');
+        }
     }
 
     public function create()
     {
-        $seats = $this->db->readAll('seats');
+        try {
+            $data = [
+                'seats' => $this->seatService->getAllSeats(),
+                'index' => 'movie',
+            ];
 
-        $data = [
-            'seats' => $seats,
-            'index' => 'movie'
-        ];
-
-        $this->view('admin/seat/add_seat', $data);
+            $this->view('admin/seat/add_seat', $data);
+        } catch (Exception $e) {
+            setMessage('error', 'Failed to prepare create form: ' . $e->getMessage());
+            redirect('seat');
+        }
     }
 
     public function store()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $seat_row = trim($_POST['seat_row']);
-            $seat_number = trim($_POST['seat_number']);
-            $price = trim($_POST['price']);
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                redirect('seat');
+                return;
+            }
 
-            // Optional: Validate values here
+            $success = $this->seatService->createSeat($_POST);
 
-            $seatData = [
-                'seat_row' => $seat_row,
-                'seat_number' => $seat_number,
-                'price' => $price,
-                'status' => 0,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
+            if ($success) {
+                setMessage('success', "Seat added successfully!");
+            } else {
+                setMessage('error', "Failed to add seat!");
+            }
 
-            $this->db->create('seats', $seatData);
-            $_SESSION['success'] = "Seat added successfully!";
-            header("Location: " . URLROOT . "/seat");
-            exit;
+            redirect('seat');
+        } catch (Exception $e) {
+            setMessage('error', 'Error adding seat: ' . $e->getMessage());
+            redirect('seat');
         }
     }
 
     public function edit($id)
     {
+        try {
+            $seat = $this->seatService->getSeatById((int)$id);
 
-        $seat = $this->db->getById('seats', $id);
-        if (!$seat) {
-            setMessage('error', 'Invalid seat ID!');
-            redirect('seat');
-            return;
-        }
-
-        $data = [
-            'seats' => $seat
-        ];
-
-        $this->view('admin/seat/edit_seat', $data);
-    }
-
-    // Uncomment this if you want to enable updates
-    public function update()
-    {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['id'];
-            $seat_row = $_POST['seat_row'];
-            $seat_number = $_POST['seat_number'];
-            $price = $_POST['price'];
-
-            $seatData = [
-                'seat_row' => $seat_row,
-                'seat_number' => $seat_number,
-                'price' => $price,
-                'status' => 0,
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-
-            $isUpdated = $this->db->update('seats', $id, $seatData);
-
-            if ($isUpdated) {
-                setMessage('success', 'Seat updated successfully!');
-            } else {
-                setMessage('error', 'Failed to update seat!');
+            if (!$seat) {
+                throw new Exception('Invalid seat ID!');
             }
 
+            $this->view('admin/seat/edit_seat', ['seats' => $seat]);
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
+            redirect('seat');
+        }
+    }
+
+    public function update()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                redirect('seat');
+                return;
+            }
+
+            $id = $_POST['id'] ?? null;
+            if (!$id) {
+                throw new Exception('Invalid seat ID!');
+            }
+
+            $success = $this->seatService->updateSeat((int)$id, $_POST);
+
+            if ($success) {
+                setMessage('success', 'Seat updated successfully!');
+            } else {
+                throw new Exception('Failed to update seat!');
+            }
+
+            redirect('seat');
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
             redirect('seat');
         }
     }
 
     public function destroy($id)
     {
-        $id = base64_decode($id);
+        try {
+            $decodedId = base64_decode($id);
+            $id = (int) filter_var($decodedId, FILTER_SANITIZE_NUMBER_INT);
 
-        $isDeleted = $this->db->delete('seats', $id);
+            if (!$id) {
+                throw new Exception('Invalid seat ID!');
+            }
 
-        if ($isDeleted) {
-            setMessage('success', 'Seat deleted successfully!');
-        } else {
-            setMessage('error', 'Failed to delete seat!');
+            $success = $this->seatService->deleteSeat($id);
+
+            if ($success) {
+                setMessage('success', 'Seat deleted successfully!');
+            } else {
+                throw new Exception('Failed to delete seat!');
+            }
+
+            redirect('seat');
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
+            redirect('seat');
         }
-
-        redirect('seat');
     }
 }

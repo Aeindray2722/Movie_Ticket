@@ -40,7 +40,7 @@
                     Discover the latest blockbusters and timeless classics. Find showtimes, book your seats,
                     and enjoy a seamless movie-going experience from the comfort of your home.
                 </p>
-                <a href="#" class="btn btn-register">Browse Movies</a>
+                <a href="<?php echo URLROOT; ?>/pages/home"class="btn btn-register">Browse Movies</a>
             </div>
             <div class="hero-graphic">
                 <div class="orange-blob"></div>

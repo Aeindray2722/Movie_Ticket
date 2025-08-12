@@ -8,43 +8,53 @@ class Rating extends Controller
         $this->model('RatingModel'); // optional if you want a model for Rating
         $this->db = new Database();
     }
+
     public function submit()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $user_id = $_SESSION['user_id'] ?? null;
-            $movie_id = (int) $_POST['movie_id'];
-            $count = (int) $_POST['count'];
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $user_id = $_SESSION['user_id'] ?? null;
+                $movie_id = (int) $_POST['movie_id'];
+                $count = (int) $_POST['count'];
 
-            if (!$user_id || $count < 1 || $count > 5) {
-                setMessage('error', 'Invalid request.');
+                if (!$user_id || $count < 1 || $count > 5) {
+                    setMessage('error', 'Invalid request.');
+                    redirect("movie/movieDetail/$movie_id");
+                    return; // prevent further execution
+                }
+
+                // Check if user already rated this movie
+                $existingRating = $this->db->getRatingByUserAndMovie($user_id, $movie_id);
+
+                if ($existingRating) {
+                    // Update existing rating by id
+                    $updateData = [
+                        'count' => $count,
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $this->db->update('ratings', $existingRating['id'], $updateData);
+                } else {
+                    // Insert new rating
+                    $insertData = [
+                        'user_id' => $user_id,
+                        'movie_id' => $movie_id,
+                        'count' => $count,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ];
+                    $this->db->create('ratings', $insertData);
+                }
+
+                setMessage('success', 'Rating submitted successfully.');
                 redirect("movie/movieDetail/$movie_id");
-                exit;
             }
+        } catch (Exception $e) {
+            // Log the error (optional)
+            error_log('Rating submission error: ' . $e->getMessage());
 
-            // Check if user already rated this movie
-            $existingRating = $this->db->getRatingByUserAndMovie($user_id, $movie_id);
-
-            if ($existingRating) {
-                // Update existing rating by id
-                $updateData = [
-                    'count' => $count,
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ];
-                $this->db->update('ratings', $existingRating['id'], $updateData);
-            } else {
-                // Insert new rating
-                $insertData = [
-                    'user_id' => $user_id,
-                    'movie_id' => $movie_id,
-                    'count' => $count,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ];
-                $this->db->create('ratings', $insertData);
-            }
-
-            redirect("movie/movieDetail/$movie_id");
-            exit;
+            // Show user-friendly message
+            setMessage('error', 'Something went wrong while submitting your rating. Please try again.');
+            redirect(isset($movie_id) ? "movie/movieDetail/$movie_id" : 'pages/home');
         }
     }
 }

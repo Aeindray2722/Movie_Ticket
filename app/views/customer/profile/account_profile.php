@@ -11,8 +11,7 @@ require_once __DIR__ . '/../layout/nav.php';
 
                     <div class="card account-info-card mb-4">
                         <div class="card-body">
-                            <h3 class="account-info-title mb-4">Account Info </h3>
-
+                            <h3 class="account-info-title mb-4">Account Info(Customer) </h3>
                             <div class="profile-content">
                                 <div class="profile-image-wrapper">
                                     <img src="<?= URLROOT ?>/images/users/<?= htmlspecialchars($data['user_info']['profile_img']) ?>"

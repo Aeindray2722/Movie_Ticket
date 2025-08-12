@@ -5,85 +5,103 @@ class Contact extends Controller
 
     public function __construct()
     {
-        $this->model('ContactModel'); // Assuming you have a CommentModel 
+        $this->model('ContactModel');
         $this->db = new Database();
     }
+
     public function middleware()
     {
         return [
             'index' => ['AdminMiddleware'],
         ];
     }
-    
+
     public function index()
     {
-        $limit = 10;
-        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-        $page = ($page < 1) ? 1 : $page;
-        $offset = ($page - 1) * $limit;
+        try {
+            $limit = 10;
+            $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+            $page = ($page < 1) ? 1 : $page;
+            $offset = ($page - 1) * $limit;
 
-        $contacts = $this->db->readPaged('contacts', $limit, $offset);
-        $totalcontacts = count($this->db->readAll('contacts'));
-        $totalPages = ceil($totalcontacts / $limit);
-        
-        $data = [
-            'contacts' => $contacts,
-            'page' => $page,
-            'totalPages' => $totalPages
-        ];
+            $contacts = $this->db->readPaged('contacts', $limit, $offset);
+            $totalcontacts = count($this->db->readAll('contacts'));
+            $totalPages = ceil($totalcontacts / $limit);
 
-        $this->view('admin/layout/contact', $data);
+            $data = [
+                'contacts'   => $contacts,
+                'page'       => $page,
+                'totalPages' => $totalPages
+            ];
+
+            $this->view('admin/layout/contact', $data);
+        } catch (Exception $e) {
+            setMessage('error', 'Error loading contacts: ' . $e->getMessage());
+            redirect('pages/home');
+        }
     }
-   
+
     public function store()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // var_dump($_POST); exit;
-            // Validate user login and input
-            if (!isset($_SESSION['user_id'])) {
-                setMessage('error', 'You must be logged in to comment.');
-                redirect('movie/nowShowing');
-                exit;
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new Exception('Invalid request method.');
             }
-            $email = $_POST['email'];
-            $contactText = trim($_POST['contact_text']);
+
+            if (!isset($_SESSION['user_id'])) {
+                throw new Exception('You must be logged in to send a message.');
+            }
+
+            $email = $_POST['email'] ?? '';
+            $contactText = trim($_POST['contact_text'] ?? '');
             $userId = $_SESSION['user_id'] ?? null;
-            // Prepare data to insert
+
+            if (empty($email) || empty($contactText)) {
+                throw new Exception('Email and message are required.');
+            }
+
             $data = [
-                'user_id' => $userId,
-                'message' => $contactText,
-                'email' => $email,
+                'user_id'    => $userId,
+                'message'    => $contactText,
+                'email'      => $email,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
 
-            // $contactModel = new contactModel();
-            $contactCreated = $this->db->create('contacts', $data);
-
-            if ($contactCreated) {
-                setMessage('success',  'Contact send successfully!');
-                redirect("pages/home");
-            } else {
-                setMessage('error', 'Failed to send !');
-                redirect("pages/home");
+            if (!$this->db->create('contacts', $data)) {
+                throw new Exception('Failed to send message.');
             }
-            // redirect('movie/movieDetail/' . $movieId);
-            
+
+            setMessage('success', 'Contact sent successfully!');
+            redirect("pages/home");
+
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
+            redirect("pages/home");
         }
     }
 
     public function destroy($id)
     {
-        $id = base64_decode($id);
+        try {
+            $id = base64_decode($id);
+            if (!$id) {
+                throw new Exception('Invalid contact ID.');
+            }
 
-        $contacts = new ContactModel();
-        $contacts->setId($id);
+            $contacts = new ContactModel();
+            $contacts->setId($id);
 
-        $isdestroy = $this->db->delete('contacts', $contacts->getId());
-        redirect('contact');
+            if (!$this->db->delete('contacts', $contacts->getId())) {
+                throw new Exception('Failed to delete contact.');
+            }
+
+            setMessage('success', 'Contact deleted successfully.');
+            redirect('contact');
+
+        } catch (Exception $e) {
+            setMessage('error', $e->getMessage());
+            redirect('contact');
+        }
     }
-
-
-
 }
-?>

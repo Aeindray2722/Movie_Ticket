@@ -12,6 +12,7 @@ $currentPage = $_SERVER['REQUEST_URI'];
 
 $profileImg = $_SESSION['profile_img'] ?? 'default_profile.jpg';
 $userName = $_SESSION['user_name'] ?? 'Guest';
+$customer_type = $_SESSION['customer_type'] ?? 'Normal';
 ?>
 
 <!DOCTYPE html>
@@ -148,7 +149,10 @@ $userName = $_SESSION['user_name'] ?? 'Guest';
                   <i class="fas fa-user-circle fa-2x"></i>
                 <?php endif; ?>
                 <span class="d-none d-lg-inline">
-                  <?= htmlspecialchars($userName) ?>
+                  <?= htmlspecialchars($userName)?>
+                </span>
+                <span class="d-none d-lg-inline text-success">
+                  (<?= htmlspecialchars($customer_type)?>)
                 </span>
               </a>
               <div class="custom-dropdown-menu" id="customDropdownMenu">

@@ -35,6 +35,8 @@ class Database
     public function create($table, $data)
     {
         try {
+            $this->pdo->beginTransaction();
+
             $column = array_keys($data);
             $columnSql = implode(', ', $column);
             $bindingSql = ':' . implode(',:', $column);
@@ -43,14 +45,13 @@ class Database
             $stm = $this->pdo->prepare($sql);
 
             foreach ($data as $key => $value) {
-                // echo "Binding :$key => $value<br>";
-                // exit();
                 $stm->bindValue(':' . $key, $value);
             }
 
             $status = $stm->execute();
 
             if (!$status) {
+                $this->pdo->rollBack();
                 $errorInfo = $stm->errorInfo();
                 echo "SQLSTATE error code: " . $errorInfo[0] . "<br>";
                 echo "Driver-specific error code: " . $errorInfo[1] . "<br>";
@@ -58,24 +59,31 @@ class Database
                 return false;
             }
 
-            // echo "Insert successful. Last Insert ID: " . $this->pdo->lastInsertId() . "<br>";
-            return $this->pdo->lastInsertId();
+            $lastId = $this->pdo->lastInsertId();
+
+            $this->pdo->commit();
+
+            return $lastId;
 
         } catch (PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             echo "PDOException: " . $e->getMessage();
             exit;
-            return false;
+            // return false;
         }
     }
     // Update Query
     public function update($table, $id, $data)
     {
-        // First, we don't want id from category table
         if (isset($data['id'])) {
             unset($data['id']);
         }
 
         try {
+            $this->pdo->beginTransaction();
+
             $columns = array_keys($data);
             function map($item)
             {
@@ -86,16 +94,24 @@ class Database
             $sql = 'UPDATE ' . $table . ' SET ' . $bindingSql . ' WHERE `id` =:id';
 
             $stm = $this->pdo->prepare($sql);
-            // Now, we assign id to bind
             $data['id'] = $id;
-            // var_dump($data['id']); exit;
             foreach ($data as $key => $value) {
                 $stm->bindValue(':' . $key, $value);
             }
             $status = $stm->execute();
-            // print_r($status);
+
+            if (!$status) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            $this->pdo->commit();
+
             return $status;
         } catch (PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             echo $e;
             exit;
         }
@@ -103,11 +119,29 @@ class Database
     //delete
     public function delete($table, $id)
     {
-        $sql = 'DELETE FROM ' . $table . ' WHERE `id` = :id';
-        $stm = $this->pdo->prepare($sql);
-        $stm->bindValue(':id', $id);
-        $success = $stm->execute();
-        return ($success);
+        try {
+            $this->pdo->beginTransaction();
+
+            $sql = 'DELETE FROM ' . $table . ' WHERE `id` = :id';
+            $stm = $this->pdo->prepare($sql);
+            $stm->bindValue(':id', $id);
+            $success = $stm->execute();
+
+            if (!$success) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            $this->pdo->commit();
+
+            return $success;
+        } catch (PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            echo $e->getMessage();
+            return false;
+        }
     }
 
     public function columnFilter($table, $column, $value)
@@ -573,8 +607,32 @@ class Database
         $this->bind(':movie_id', $movie_id);
         return $this->single();
     }
+    public function uploadTrailerFile(array $file): string
+    {
+        $targetDir = __DIR__ . '/../../public/videos/trailers/';
+        $filename = time() . '_' . basename($file['name']);
+        $targetFile = $targetDir . $filename;
 
+        if (move_uploaded_file($file['tmp_name'], $targetFile)) {
+            return $filename;
+        }
 
-
+        return '';
+    }
+    public function getCurrentUser()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            setMessage('error', 'Please login first.');
+            redirect('pages/login');
+            exit;
+        }
+        $user = $this->getById('users', $_SESSION['user_id']);
+        if (!$user) {
+            setMessage('error', 'User not found.');
+            redirect('pages/login');
+            exit;
+        }
+        return $user;
+    }
 }
 

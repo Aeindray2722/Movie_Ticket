@@ -134,6 +134,9 @@ class Auth extends Controller
                     $_SESSION['profile_img'] = $user['profile_img'];
                     // $_SESSION['user_id'] = base64_encode($user['id']);
                     $_SESSION['user_id'] = (int) $user['id']; // ✅ integer
+                    $_SESSION['customer_type'] = $user['customer_type'];
+                    // var_dump($user);
+                    // var_dump($_SESSION); exit;
 
                     setMessage('id', base64_encode($isLogin['id']));
                     $id = $isLogin['id'];
