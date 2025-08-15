@@ -1,5 +1,10 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
+
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
@@ -166,6 +171,7 @@ require_once __DIR__ . '/../layout/nav.php';
             <div class="card comment-input-card mt-4">
                 <div class="card-body">
                     <form id="commentForm" method="POST" action="<?= URLROOT ?>/comment/store">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="movie_id" value="<?= htmlspecialchars($data['movie']['id']) ?>">
                         <input type="hidden" name="user_id" value="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
                         <textarea name="comment_text" class="form-control comment-textarea" rows="3"
@@ -187,6 +193,7 @@ require_once __DIR__ . '/../layout/nav.php';
             </div>
             <div class="modal-body text-center">
                 <form action="<?= URLROOT ?>/rating/submit" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="source" value="now_showing">  <!-- or "now_showing" -->
                     <input type="hidden" name="movie_id" value="<?= htmlspecialchars($data['movie']['id']) ?>">
                     <input type="hidden" name="user_id" value="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
@@ -261,7 +268,6 @@ require_once __DIR__ . '/../layout/footer.php';
     href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-
 <script>
     $(document).ready(function () {
         $('.related-movies-carousel').owlCarousel({

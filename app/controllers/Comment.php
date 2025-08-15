@@ -7,19 +7,37 @@ class Comment extends Controller
     {
         $this->model('CommentModel'); // Assuming you have a CommentModel
         $this->db = new Database();
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
     }
+    // public function middleware()
+    // {
+    //     return [
+    //         'store' => ['CustomerMiddleware'],
+    //     ];
+    // }
 
     // Store - Add a new comment
     public function store()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('customer/movie/trailer_detail');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception('Invalid request method.');
             }
 
             if (!isset($_SESSION['user_id'])) {
-                throw new Exception('You must be logged in to comment.');
+                setMessage('error', 'You must login first to comment.');
+                redirect('pages/login'); // redirect to login page
+                exit;
             }
+
 
             $commentText = trim($_POST['comment_text'] ?? '');
             $movieId = (int) ($_POST['movie_id'] ?? 0);
@@ -30,9 +48,9 @@ class Comment extends Controller
             }
 
             $data = [
-                'movie_id'   => $movieId,
-                'user_id'    => $userId,
-                'message'    => $commentText,
+                'movie_id' => $movieId,
+                'user_id' => $userId,
+                'message' => $commentText,
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ];

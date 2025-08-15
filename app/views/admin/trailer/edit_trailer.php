@@ -1,13 +1,9 @@
 <?php
-// PHP code to simulate fetching admin data for editing
-// In a real application, you would connect to your database
-// and fetch current admin data here to pre-fill the form.
-
-
-?>
-
-<?php
 require_once __DIR__ . '/../layout/sidebar.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <div class="detail-content-wrapper">
     <?php
@@ -27,12 +23,15 @@ require_once __DIR__ . '/../layout/sidebar.php';
 
                 <div class="profile-edit-form">
                     <form action="<?php echo URLROOT; ?>/trailer/update" method="post" enctype="multipart/form-data">
+                        <!-- CSRF hidden input -->
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="id" value="<?= $data['trailers']['id'] ?>">
                         <div class="mb-3 d-flex align-items-end">
-                            <input type="file" id="trailer_file" name="trailer_file" accept="video/*" onchange="previewFile(event)">
+                            <input type="file" id="trailer_file" name="trailer_file" accept="video/*"
+                                onchange="previewFile(event)">
                             <span id="file-name-display" class="file-name-display mt-2">
-                            <?= !empty($data['trailers']['trailer_vd']) ? htmlspecialchars($data['trailers']['trailer_vd']) : 'No file chosen' ?>
-                        </span>
+                                <?= !empty($data['trailers']['trailer_vd']) ? htmlspecialchars($data['trailers']['trailer_vd']) : 'No file chosen' ?>
+                            </span>
                         </div>
 
                         <div class="mb-3">

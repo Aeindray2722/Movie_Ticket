@@ -215,40 +215,97 @@ class BookingService
         return $this->repo->deleteBooking($bookingId);
     }
 
-    public function getBookingHistoryForAdmin(int $limit = 10, int $page = 1, string $search = '')
-    {
-        $offset = ($page - 1) * $limit;
-        $searchColumns = ['movie_name', 'name', 'booking_date', 'status', 'total_amount', 'seat_row', 'seat_number', 'show_time_list'];
+public function getBookingHistoryForAdmin(
+    int $limit = 10,
+    int $page = 1,
+    string $search = '',
+    array $dateRange = []
+) {
+    $searchColumns = ['movie_name','user_name','booking_date','status','total_amount','seat_row','seat_number','show_time'];
 
-        if ($search !== '') {
-            $rawBookings = $this->repo->searchBookings($search, $searchColumns, 1000, 0)['data'];
-        } else {
-            $rawBookings = $this->repo->readAllBookings();
-        }
+    // Step 1: Get all bookings
+    $allResults = $this->repo->readAllBookings();
 
-        $bookings = $this->repo->readPagedBookings($limit, $offset);
-        $totalRecords = count($this->repo->readAllBookings());
-        $totalPages = ceil($totalRecords / $limit);
+    // Step 2: Enrich bookings
+    foreach ($allResults as &$booking) {
+        $movie = $this->repo->getMovieById($booking['movie_id']);
+        $user = $this->repo->getUserById($booking['user_id']);
+        $showTime = $this->repo->getShowTimeById($booking['show_time_id']);
 
-        foreach ($bookings as &$booking) {
-            $movie = $this->repo->getMovieById($booking['movie_id']);
-            $user = $this->repo->getUserById($booking['user_id']);
-            $showTime = $this->repo->getShowTimeById($booking['show_time_id']);
-
-            $booking['movie_name'] = $movie['movie_name'] ?? 'Unknown';
-            $booking['user_name'] = $user['name'] ?? 'Unknown';
-            $booking['seat_names'] = implode(', ', $this->repo->getReadableSeatNames($booking));
-            $booking['show_time'] = $showTime['show_time'] ?? 'Unknown';
-        }
-        unset($booking);
-
-        return [
-            'bookings' => $bookings,
-            'page' => $page,
-            'totalPages' => $totalPages,
-            'search' => $search,
-        ];
+        $booking['movie_name'] = $movie['movie_name'] ?? 'Unknown';
+        $booking['user_name'] = $user['name'] ?? 'Unknown';
+        $booking['seat_names'] = implode(', ', $this->repo->getReadableSeatNames($booking));
+        $booking['show_time'] = $showTime['show_time'] ?? 'Unknown';
     }
+    unset($booking);
+
+    // Step 3: Apply search filter if provided
+    if (!empty($search)) {
+        $allResults = array_filter($allResults, function ($booking) use ($search, $searchColumns) {
+            foreach ($searchColumns as $col) {
+                if (isset($booking[$col]) && stripos((string)$booking[$col], $search) !== false) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    // Step 4: Apply date range filter safely
+    $start = $dateRange['start'] ?? $dateRange['start_date'] ?? null;
+    $end   = $dateRange['end'] ?? $dateRange['end_date'] ?? null;
+
+    if ($start || $end) {
+        $allResults = array_filter($allResults, function ($booking) use ($start, $end) {
+            $bookingTime = strtotime($booking['booking_date']);
+            $startTime = $start ? strtotime($start) : null;
+            $endTime = $end ? strtotime($end . ' 23:59:59') : null;
+
+            if ($startTime && $endTime) {
+                return $bookingTime >= $startTime && $bookingTime <= $endTime;
+            } elseif ($startTime) {
+                return $bookingTime >= $startTime;
+            } elseif ($endTime) {
+                return $bookingTime <= $endTime;
+            }
+            return true;
+        });
+    }
+
+    // Step 5: Reset array keys
+    $allResults = array_values($allResults);
+
+    // Step 6: Pagination
+    $totalRecords = count($allResults);
+    $totalPages = max(1, ceil($totalRecords / $limit));
+
+    // Reset page to 1 if requested page exceeds total pages
+    if ($page > $totalPages) {
+        $page = 1;
+    }
+
+    // Calculate offset AFTER resetting page
+    $offset = ($page - 1) * $limit;
+
+    // Safety check: ensure offset is within bounds
+    if ($offset >= $totalRecords) {
+        $offset = 0;
+        $page = 1;
+    }
+
+    $bookings = array_slice($allResults, $offset, $limit);
+
+    // Step 7: Return results
+    return [
+        'bookings' => $bookings,
+        'page' => $page,
+        'totalPages' => $totalPages,
+        'search' => $search,
+        'dateRange' => ['start' => $start, 'end' => $end],
+        'totalRecords' => $totalRecords
+    ];
+}
+
 
     public function getBookingHistoryForUser(int $userId)
     {
@@ -263,5 +320,5 @@ class BookingService
 
         return $bookings;
     }
-    
+
 }

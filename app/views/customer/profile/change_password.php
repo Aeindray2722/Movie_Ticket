@@ -1,5 +1,10 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 ?>
 <div class="detail-content-wrapper">
     <div class="container py-4">
@@ -17,6 +22,8 @@ require_once __DIR__ . '/../layout/nav.php';
                     <?php endif; ?>
                     <div class="change-password-form-content">
                         <form action="<?= URLROOT ?>/user/updatePassword" method="post">
+                            <!-- CSRF hidden input -->
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <div class="form-group mb-3">
                                 <input type="password" name="old_password" class="form-control"
                                     placeholder="Enter Old Password">

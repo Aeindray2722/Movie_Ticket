@@ -1,3 +1,11 @@
+<?php
+// session_start();
+
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -91,6 +99,7 @@
                 <h1 class="verification-title ">Verification</h1>
                 <p class="verification-subtitle">Enter OTP code sent to your email</p>
                 <form method="post" action="<?php echo URLROOT; ?>/auth/verifyOtp">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <?php require APPROOT . '/views/components/auth_message.php'; ?>
 
                     <div class="otp-input-group mb-3">

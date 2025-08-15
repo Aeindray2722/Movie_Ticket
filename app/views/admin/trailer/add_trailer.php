@@ -1,7 +1,9 @@
-<?php extract($data); ?>
-
-<?php
+<?php 
+extract($data); 
 require_once __DIR__ . '/../layout/sidebar.php';
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <div class="trailer-content-wrapper">
     <?php
@@ -11,6 +13,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
         <div class="trailer-form-card">
             <!-- <h4>Add Trailer</h4> -->
             <form action="<?php echo URLROOT; ?>/trailer/store" method="post" enctype="multipart/form-data">
+                <!-- CSRF hidden input -->
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <div class=" mb-4">
                     <h4>Add Trailer</h4>
                 </div>

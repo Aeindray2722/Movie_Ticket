@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <style>
     .video-wrapper {
@@ -85,7 +89,8 @@ require_once __DIR__ . '/../layout/nav.php';
                         <div class="col-12 col-md-6 col-lg-4">
                             <div class="d-flex p-3 shadow-sm rounded bg-white h-100">
                                 <img src="<?= URLROOT ?>/images/users/<?= $comment['profile_img'] ?? 'default.png' ?>"
-                                    class="img-fluid rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;" alt="Profile">
+                                    class="img-fluid rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;"
+                                    alt="Profile">
 
                                 <div class="flex-grow-1">
 
@@ -116,6 +121,8 @@ require_once __DIR__ . '/../layout/nav.php';
             <div class="card comment-input-card mt-4">
                 <div class="card-body">
                     <form id="commentForm" method="POST" action="<?= URLROOT ?>/comment/store">
+                        <!-- CSRF hidden input -->
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="movie_id" value="<?= htmlspecialchars($data['movie']['id']) ?>">
                         <input type="hidden" name="user_id" value="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
                         <textarea name="comment_text" class="form-control comment-textarea" rows="3"
@@ -137,11 +144,13 @@ require_once __DIR__ . '/../layout/nav.php';
             </div>
             <div class="modal-body text-center">
                 <form action="<?= URLROOT ?>/rating/submit" method="POST">
+                    <!-- CSRF hidden input -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="movie_id" value="<?= htmlspecialchars($data['movie']['id']) ?>">
                     <input type="hidden" name="user_id" value="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
 
                     <input type="hidden" name="count" id="ratingCount" value="0">
-                    <input type="hidden" name="source" value="trailer">  <!-- or "now_showing" -->
+                    <input type="hidden" name="source" value="trailer"> <!-- or "now_showing" -->
                     <div class="text-center mb-3">
                         <span class="star fs-3 text-secondary" data-value="1">&#9733;</span>
                         <span class="star fs-3 text-secondary" data-value="2">&#9733;</span>

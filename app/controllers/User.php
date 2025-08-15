@@ -14,6 +14,10 @@ class User extends Controller
             $userRepository = new UserRepository($db);
             $this->userService = new UserService($userRepository);
             $this->model('UserModel');
+            // CSRF token generation
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
         } catch (Exception $e) {
             setMessage('error', 'Initialization error: ' . $e->getMessage());
             redirect('error');
@@ -89,6 +93,12 @@ class User extends Controller
     public function update()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('user/editUserProfile');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('user');
                 return;
@@ -123,6 +133,13 @@ class User extends Controller
     public function updatePassword()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('user/UserchangePassword');
+                exit;
+            }
+
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('user');
                 return;

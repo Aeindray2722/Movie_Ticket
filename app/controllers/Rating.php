@@ -7,16 +7,36 @@ class Rating extends Controller
     {
         $this->model('RatingModel'); // optional if you want a model for Rating
         $this->db = new Database();
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
     }
+    // public function middleware()
+    // {
+    //     return [
+    //         'submit' => ['CustomerMiddleware'],
+    //     ];
+    // }
 
     public function submit()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('customer/movie/trailer_detail');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user_id = $_SESSION['user_id'] ?? null;
                 $movie_id = (int) $_POST['movie_id'];
                 $count = (int) $_POST['count'];
                 $source = $_POST['source'] ?? 'movie'; // default to movie
+                if (!isset($_SESSION['user_id'])) {
+                    setMessage('error', 'You must login first to rate.');
+                    redirect('pages/login'); // redirect to login page
+                    exit;
+                }
 
                 if (!$user_id || $count < 1 || $count > 5) {
                     setMessage('error', 'Invalid request.');

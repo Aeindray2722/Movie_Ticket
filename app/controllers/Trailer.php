@@ -11,6 +11,10 @@ class Trailer extends Controller
             $db = new Database();
             $this->model('TrailerModel');
             $this->service = new TrailerService($db);
+            // CSRF token generation
+            if (empty($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
         } catch (Exception $e) {
             setMessage('error', 'Initialization failed: ' . $e->getMessage());
             redirect('error');
@@ -31,7 +35,9 @@ class Trailer extends Controller
 
     public function index()
     {
+
         try {
+            
             $page = max((int) ($_GET['page'] ?? 1), 1);
             $limit = 3;
 
@@ -67,6 +73,12 @@ class Trailer extends Controller
     public function store()
     {
         try {
+                    // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('pages/login');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('trailer');
                 return;
@@ -103,6 +115,12 @@ class Trailer extends Controller
     public function update()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('admin/trailer/edit_trailer');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('trailer');
                 return;
@@ -141,6 +159,12 @@ class Trailer extends Controller
     public function trailer()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('pages/register');
+                exit;
+            }
             $page = max((int) ($_GET['page'] ?? 1), 1);
             $limit = 4;
             $type = $_GET['type'] ?? null;

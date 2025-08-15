@@ -168,6 +168,12 @@ class Movie extends Controller
     public function nowShowing()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('customer/movie/nowshowing');
+                exit;
+            }
             $type = $_GET['type'] ?? null;
             $search = trim($_GET['search'] ?? '');
             $page = max(1, (int) ($_GET['page'] ?? 1));

@@ -1,6 +1,10 @@
-<?php extract($data); ?>
-<?php
+<?php 
+extract($data); 
 require_once __DIR__ . '/../layout/sidebar.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 
 <div class="seat-content-wrapper">
@@ -11,6 +15,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
         <div class="seat-form-card">
             <h4>Add Seat</h4>
             <form action="<?php echo URLROOT; ?>/seat/store" method="post">
+                <!-- CSRF hidden input -->
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <div class="mb-3">
                     <input type="text" class="form-control" id="seat_row" name="seat_row" placeholder="Seat Row"
                         required>

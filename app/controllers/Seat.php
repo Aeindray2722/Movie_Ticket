@@ -12,7 +12,10 @@ class Seat extends Controller
             $db = new Database();
             $seatRepository = new SeatRepository($db);
             $this->seatService = new SeatService($seatRepository);
-
+            // CSRF token generation
+            if (empty($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
             $this->model('SeatModel');
         } catch (Exception $e) {
             setMessage('error', 'Initialization error: ' . $e->getMessage());
@@ -23,8 +26,8 @@ class Seat extends Controller
     public function middleware()
     {
         return [
-            'index'  => ['AdminMiddleware'],
-            'edit'   => ['AdminMiddleware'],
+            'index' => ['AdminMiddleware'],
+            'edit' => ['AdminMiddleware'],
         ];
     }
 
@@ -32,7 +35,7 @@ class Seat extends Controller
     {
         try {
             $limit = 10;
-            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
             $page = max(1, $page);
 
             $data = $this->seatService->getSeatsPaged($limit, $page);
@@ -62,6 +65,12 @@ class Seat extends Controller
     public function store()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('admin/seat/add_seat');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('seat');
                 return;
@@ -85,7 +94,7 @@ class Seat extends Controller
     public function edit($id)
     {
         try {
-            $seat = $this->seatService->getSeatById((int)$id);
+            $seat = $this->seatService->getSeatById((int) $id);
 
             if (!$seat) {
                 throw new Exception('Invalid seat ID!');
@@ -98,9 +107,15 @@ class Seat extends Controller
         }
     }
 
-    public function update() 
+    public function update()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('admin/seat/edit_seat');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('seat');
                 return;
@@ -111,7 +126,7 @@ class Seat extends Controller
                 throw new Exception('Invalid seat ID!');
             }
 
-            $success = $this->seatService->updateSeat((int)$id, $_POST);
+            $success = $this->seatService->updateSeat((int) $id, $_POST);
 
             if ($success) {
                 setMessage('success', 'Seat updated successfully!');

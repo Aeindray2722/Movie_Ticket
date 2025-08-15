@@ -1,3 +1,11 @@
+<?php
+// session_start();
+
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,6 +46,7 @@
             <div class="form-side">
                 <h2 class="text-center mb-4">Forgot Password!</h2>
                 <form method="post" action="<?php echo URLROOT; ?>/auth/sendResetLink">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <?php require APPROOT . '/views/components/auth_message.php'; ?>
 
                     <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
@@ -49,10 +58,10 @@
                     </div>
                     <div class="row mt-4">
                         <div class="col-6 text-center">
-                                <button type="submit" class="btn btn-register w-50 ">Send</button>
+                            <button type="submit" class="btn btn-register w-50 ">Send</button>
                         </div>
                         <div class="col-6 text-center ">
-                                <a href="<?php echo URLROOT; ?>/pages/login" class="btn btn-register ">Cancel</a>
+                            <a href="<?php echo URLROOT; ?>/pages/login" class="btn btn-register ">Cancel</a>
                         </div>
                     </div>
 

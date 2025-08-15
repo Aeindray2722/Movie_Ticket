@@ -3,7 +3,12 @@ $search_query = trim($_GET['search'] ?? '');
 $start_date = $_GET['start_date'] ?? '';
 $end_date = $_GET['end_date'] ?? '';
 $bookings = isset($data['bookings']) && is_array($data['bookings']) ? $data['bookings'] : [];
-
+$bookings   = $data['bookings'] ?? [];
+$page       = $data['page'] ?? 1;
+$totalPages = $data['totalPages'] ?? 1;
+$search     = $data['search'] ?? '';
+$start_date = $data['start_date'] ?? '';
+$end_date   = $data['end_date'] ?? '';
 // Filter bookings by search and/or date range
 if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
     $filtered = [];

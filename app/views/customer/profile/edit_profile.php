@@ -1,6 +1,12 @@
-<?php extract($data); ?>
-<?php
+<?php 
+extract($data); 
 require_once __DIR__ . '/../layout/nav.php';
+
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 ?>
 <div class="detail-content-wrapper">
     <div class="content-area container py-4">
@@ -22,8 +28,8 @@ require_once __DIR__ . '/../layout/nav.php';
                         </div>
                         <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
-                    <form action="<?= URLROOT ?>/user/update" method="post" enctype="multipart/form-data"
-                        id="movieForm">
+                    <form action="<?= URLROOT ?>/user/update" method="post" enctype="multipart/form-data" id="movieForm">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="id" value="<?= $data['users']['id'] ?>">
                         <input type="hidden" name="role" value="<?= $data['users']['role'] ?>">
                         <div

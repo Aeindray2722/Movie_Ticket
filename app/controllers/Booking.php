@@ -8,6 +8,10 @@ class Booking extends Controller
 
     public function __construct(?BookingService $bookingService = null)
     {
+        // CSRF token generation
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
         // Allow injecting a BookingService instance for easier testing or customization
         if ($bookingService !== null) {
             $this->bookingService = $bookingService;
@@ -59,6 +63,12 @@ class Booking extends Controller
     {
         // var_dump($_POST); exit;
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('customer/booking/booking');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('movie/nowShowing');
                 return;
@@ -158,22 +168,42 @@ class Booking extends Controller
         }
     }
 
-    public function bookingHistory()
-    {
-        try {
-            $limit = 10;
-            $page = max(1, (int) ($_GET['page'] ?? 1));
-            $search = trim($_GET['search'] ?? '');
+public function bookingHistory()
+{
+    try {
+        $limit = 10;
+        $page = max(1, (int) ($_GET['page'] ?? 1));
 
-            $data = $this->bookingService->getBookingHistoryForAdmin($limit, $page, $search);
+        // Get filter values from GET
+        $search = trim($_GET['search'] ?? '');
+        $start_date = $_GET['start_date'] ?? '';
+        $end_date = $_GET['end_date'] ?? '';
 
-            $this->view('admin/booking/booking_history', $data);
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-            setMessage('error', 'Unable to load booking history.');
-            redirect('dashboard');
-        }
+        // Prepare date range array
+        $dateRange = [];
+        if ($start_date) $dateRange['start'] = $start_date;
+        if ($end_date) $dateRange['end'] = $end_date;
+
+        // Fetch filtered & paginated bookings
+        $data = $this->bookingService->getBookingHistoryForAdmin($limit, $page, $search, $dateRange);
+
+        // Pass current filters to view for pagination links
+        $data['search'] = $search;
+        $data['start_date'] = $start_date;
+        $data['end_date'] = $end_date;
+
+        // Now $page and $totalPages exist in $data
+        $this->view('admin/booking/booking_history', $data);
+
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        setMessage('error', 'Unable to load booking history.');
+        redirect('dashboard');
     }
+}
+
+
+
 
     public function history()
     {

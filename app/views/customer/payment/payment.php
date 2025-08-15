@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 
 <section class="payment-page-content py-4">
@@ -32,6 +36,8 @@ require_once __DIR__ . '/../layout/nav.php';
                     <div class="card-body">
                         <h3 class="card-title payment-info-title mb-4">Payment Info</h3>
                         <form method="POST" enctype="multipart/form-data" action="<?= URLROOT ?>/payment/storePayment">
+                            <!-- CSRF hidden input -->
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <div class="row">
                                 <div class="col-12 col-sm-6">
                                     <div class="mb-3">

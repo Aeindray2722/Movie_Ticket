@@ -11,8 +11,14 @@ class Auth extends Controller
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
         $this->model('UserModel');
         $this->db = new Database();
+
+        // CSRF token generation
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
     }
 
     public function formRegister()
@@ -34,66 +40,68 @@ class Auth extends Controller
     public function register()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            // Check user exist
-            $email = $_POST['email'];
-            // call columnFilter Method from Database.php
-            $isUserExist = $this->db->columnFilter('users', 'email', $email);
-            if ($isUserExist) {
-                setMessage('error', 'This email is already registered !');
+
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
                 redirect('pages/register');
-            } else {
-                // Validate entries
-                $validation = new UserValidator($_POST);
-                $data = $validation->validateForm();
-                if (count($data) > 0) {
-                    $this->view('pages/register1', $data);
-                } else {
-                    $name = $_POST['name'];
-                    $email = $_POST['email'];
-                    $password = $_POST['password'];
-                    $phone = $_POST['phone'];
+                exit;
+            }
 
-                    $profile_img = 'default_profile.jpg';
-                    $provider_token = bin2hex(random_bytes(50));
+            // 2️⃣ Continue your existing registration logic
+            $email = $_POST['email'];
+            $isUserExist = $this->db->columnFilter('users', 'email', $email);
 
-                    //Hash Password before saving
-                    // $password = base64_encode($password);
-                    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            if ($isUserExist) {
+                setMessage('error', 'This email is already registered!');
+                redirect('pages/register');
+                exit;
+            }
 
+            // Validation
+            $validation = new UserValidator($_POST);
+            $data = $validation->validateForm();
 
-                    $user = new UserModel();
-                    $user->setName($name);
-                    $user->setPhone($phone);
-                    $user->setEmail($email);
-                    $user->setPassword($password);
-                    $user->setProviderToken($provider_token);
-                    $user->setProfileImg($profile_img);
-                    $user->setIsActive(0);
-                    $user->setRole(1);
-                    $user->setCustomerType('Normal');
-                    $user->setCreatedAt(date('Y-m-d H:i:s'));
-                    $user->setUpdatedAt(date('Y-m-d H:i:s'));
-                    $user->setIsLogin(0);
-                    $user->setIsConfirmed(0);
+            if (count($data) > 0) {
+                $this->view('pages/register1', $data);
+                exit;
+            }
 
+            // Create user
+            $name = $_POST['name'];
+            $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+            $phone = $_POST['phone'];
+            $profile_img = 'default_profile.jpg';
+            $provider_token = bin2hex(random_bytes(50));
 
-                    $userCreated = $this->db->create('users', $user->toArray());
-                    //$userCreated="true";
+            $user = new UserModel();
+            $user->setName($name);
+            $user->setPhone($phone);
+            $user->setEmail($email);
+            $user->setPassword($password);
+            $user->setProviderToken($provider_token);
+            $user->setProfileImg($profile_img);
+            $user->setIsActive(0);
+            $user->setRole(1);
+            $user->setCustomerType('Normal');
+            $user->setCreatedAt(date('Y-m-d H:i:s'));
+            $user->setUpdatedAt(date('Y-m-d H:i:s'));
+            $user->setIsLogin(0);
+            $user->setIsConfirmed(0);
 
-                    if ($userCreated) {
-                        //Instatiate mail
-                        $mail = new Mail();
+            $userCreated = $this->db->create('users', $user->toArray());
 
-                        $verify_token = URLROOT . '/auth/verify/' . $provider_token;
-                        $mail->verifyMail($email, $name, $verify_token);
-                        setMessage('success', 'Please check your Mail box !');
-                        redirect('pages/login');
-                    }
-                    redirect('pages/register');
-                } // end of validation check
-            } // end of user-exist
+            if ($userCreated) {
+                $mail = new Mail();
+                $verify_token = URLROOT . '/auth/verify/' . $provider_token;
+                $mail->verifyMail($email, $name, $verify_token);
+
+                setMessage('success', 'Please check your email for verification!');
+                redirect('pages/login');
+            }
         }
     }
+
 
     public function verify($provider_token)
     {
@@ -122,6 +130,12 @@ class Auth extends Controller
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (isset($_POST['email']) && isset($_POST['password'])) {
+                // 1️⃣ CSRF validation
+                if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                    setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                    redirect('pages/login');
+                    exit;
+                }
                 $email = $_POST['email'];
                 $password = $_POST['password']; // ✅ plain password
                 $isLogin = $this->db->loginCheck($email, $password);
@@ -183,7 +197,7 @@ class Auth extends Controller
         $client->setClientId(GOOGLE_CLIENT_ID);
         $client->setClientSecret(GOOGLE_CLIENT_SECRET);
         $client->setRedirectUri(GOOGLE_REDIRECT_URI);
-
+        
         if (isset($_GET['code'])) {
             $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
 
@@ -281,6 +295,12 @@ class Auth extends Controller
     public function sendResetLink()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('auth/forgotPassword');
+                exit;
+            }
             $email = trim($_POST['email'] ?? '');
 
             // Check if the email exists
@@ -320,7 +340,7 @@ class Auth extends Controller
     {
         if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
             setMessage('error', 'Please enter your email first.');
-            redirect('auth/forgotPassword');
+            redirect('auth/sendOtp');
             exit;
         }
 
@@ -348,6 +368,12 @@ class Auth extends Controller
     {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('auth/sendOtp');
+                exit;
+            }
             $otpInput = implode('', array_map('trim', [
                 $_POST['digit1'] ?? '',
                 $_POST['digit2'] ?? '',
@@ -369,6 +395,12 @@ class Auth extends Controller
     public function updatePassword()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('auth/resetPassword');
+                exit;
+            }
             $password = trim($_POST['password'] ?? '');
             $confirmPassword = trim($_POST['con_password'] ?? '');
 

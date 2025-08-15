@@ -12,7 +12,10 @@ class Payment extends Controller
             $db = new Database();
             $paymentRepository = new PaymentRepository($db);
             $this->paymentService = new PaymentService($paymentRepository);
-
+            // CSRF token generation
+            if (empty($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
             $this->model('PaymentModel');
         } catch (Exception $e) {
             setMessage('error', 'Initialization failed: ' . $e->getMessage());
@@ -34,7 +37,7 @@ class Payment extends Controller
     {
         try {
             $limit = 3;
-            $page = isset($_GET['page']) ? max((int)$_GET['page'], 1) : 1;
+            $page = isset($_GET['page']) ? max((int) $_GET['page'], 1) : 1;
 
             $data = $this->paymentService->getPaginatedPayments($limit, $page);
             $this->view('admin/payment/add_payment', $data);
@@ -149,6 +152,13 @@ class Payment extends Controller
     public function storePayment()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('payment/payment');
+                exit;
+            }
+
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user_id = $_SESSION['user_id'] ?? null;
                 if (!$user_id) {

@@ -1,10 +1,13 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
-?>
-<?php
+
 $isLoggedIn = false;
 if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     $isLoggedIn = true;
+}
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
 
@@ -191,13 +194,16 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                 </div>
 
                 <form id="bookingForm" method="POST" action="<?= URLROOT ?>/booking/store" style="display:none;">
+                    <!-- CSRF hidden input -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="movie_id" value="<?= $data['movie']['id'] ?>">
                     <input type="hidden" name="show_time" value="<?= $data['selected_time'] ?>">
                     <input type="hidden" name="booking_date" value="<?= $data['selected_date'] ?>">
                     <input type="hidden" name="selected_seats" id="selectedSeatsInput">
                 </form>
 
-                <a href="#" id="bookNowLink"><button class="btn btn-book-now mt-4 w-auto mx-auto d-block">Book now</button></a>
+                <a href="#" id="bookNowLink"><button class="btn btn-book-now mt-4 w-auto mx-auto d-block">Book
+                        now</button></a>
             </div>
         </div>
     </div>
