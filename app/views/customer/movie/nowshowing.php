@@ -58,7 +58,7 @@
         </div>
 
         <?php if (!empty($_GET['type']) && empty($data['now_showing_movies'])): ?>
-            <div class="alert alert-warning text-center">No <?= htmlspecialchars($_GET['type']) ?> movies today.</div>
+            <div class="alert alert-warning text-center">No <?= htmlspecialchars($_GET['type']) ?> movies found.</div>
         <?php endif; ?>
 
         <?php if ($data['totalPages'] > 1): ?>

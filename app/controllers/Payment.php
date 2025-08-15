@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__ . '/../repositories/PaymentRepository.php';
 require_once __DIR__ . '/../services/PaymentService.php';
 
 class Payment extends Controller
@@ -9,7 +9,10 @@ class Payment extends Controller
     public function __construct()
     {
         try {
-            $this->paymentService = new PaymentService(new Database());
+            $db = new Database();
+            $paymentRepository = new PaymentRepository($db);
+            $this->paymentService = new PaymentService($paymentRepository);
+
             $this->model('PaymentModel');
         } catch (Exception $e) {
             setMessage('error', 'Initialization failed: ' . $e->getMessage());
@@ -21,10 +24,7 @@ class Payment extends Controller
     {
         return [
             'index' => ['AdminMiddleware'],
-            'store' => ['AdminMiddleware'],
             'edit' => ['AdminMiddleware'],
-            'update' => ['AdminMiddleware'],
-            'destroy' => ['AdminMiddleware'],
             'payment' => ['CustomerMiddleware'],
             'storePayment' => ['CustomerMiddleware'],
         ];

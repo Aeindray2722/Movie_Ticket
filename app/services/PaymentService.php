@@ -1,63 +1,61 @@
 <?php
+require_once __DIR__ . '/../interface/PaymentRepositoryInterface.php';
 
 class PaymentService
 {
-    private $db;
+    private PaymentRepositoryInterface $paymentRepository;
 
-    public function __construct(Database $db)
+    public function __construct(PaymentRepositoryInterface $paymentRepository)
     {
-        $this->db = $db;
+        $this->paymentRepository = $paymentRepository;
     }
 
-    public function getPaginatedPayments($limit, $page)
+    public function getPaginatedPayments(int $limit, int $page): array
     {
         $offset = ($page - 1) * $limit;
-        $payments = $this->db->readPaged('payments', $limit, $offset);
-        $totalpayments = count($this->db->readAll('payments'));
-        $totalPages = ceil($totalpayments / $limit);
+        $payments = $this->paymentRepository->getPaginatedPayments($limit, $offset);
+        $totalPayments = $this->paymentRepository->countPayments();
+        $totalPages = ceil($totalPayments / $limit);
 
         return [
             'payments' => $payments,
             'page' => $page,
-            'totalPages' => $totalPages
+            'totalPages' => $totalPages,
         ];
     }
 
-    public function createPayment(array $data)
+    public function createPayment(array $data): bool
     {
-        return $this->db->create('payments', $data);
+        return $this->paymentRepository->createPayment($data);
     }
 
-    public function getPaymentById($id)
+    public function getPaymentById(int $id): ?array
     {
-        return $this->db->getById('payments', $id);
+        return $this->paymentRepository->getPaymentById($id);
     }
 
-    public function updatePayment($id, array $data)
+    public function updatePayment(int $id, array $data): bool
     {
-        return $this->db->update('payments', $id, $data);
+        return $this->paymentRepository->updatePayment($id, $data);
     }
 
-    public function deletePayment($id)
+    public function deletePayment(int $id): bool
     {
-        return $this->db->delete('payments', $id);
+        return $this->paymentRepository->deletePayment($id);
     }
 
-    public function getAllPayments()
+    public function getAllPayments(): array
     {
-        return $this->db->readAll('payments');
+        return $this->paymentRepository->getAllPayments();
     }
 
-    public function getPaymentByMethod($method)
+    public function getPaymentByMethod(string $method): ?array
     {
-        return $this->db->columnFilter('payments', 'payment_method', $method);
+        return $this->paymentRepository->getPaymentByMethod($method);
     }
 
-    public function uploadPayslip($file)
+    public function uploadPayslip(array $file): string
     {
-        if (isset($file) && $file['error'] === 0) {
-            return $this->db->uploadImage($file, '/../../public/images/payslips/');
-        }
-        return '';
+        return $this->paymentRepository->uploadPayslip($file);
     }
 }

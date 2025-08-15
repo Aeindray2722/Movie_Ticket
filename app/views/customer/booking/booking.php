@@ -197,8 +197,7 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
                     <input type="hidden" name="selected_seats" id="selectedSeatsInput">
                 </form>
 
-                <a href="#" id="bookNowLink"><button class="btn btn-book-now mt-4 w-auto mx-auto d-block">Book
-                        now</button></a>
+                <a href="#" id="bookNowLink"><button class="btn btn-book-now mt-4 w-auto mx-auto d-block">Book now</button></a>
             </div>
         </div>
     </div>
@@ -260,10 +259,10 @@ require_once __DIR__ . '/../layout/footer.php';
 
             const isLoggedIn = <?php echo json_encode($isLoggedIn); ?>;
 
-            if (!isLoggedIn) {
-                window.location.href = "<?= URLROOT ?>/pages/login";
-                return;
-            }
+            // if (!isLoggedIn) {
+            //     window.location.href = "<?= URLROOT ?>/pages/login";
+            //     return;
+            // }
 
             document.getElementById('selectedSeatsInput').value = JSON.stringify(seatNumbers);
             document.getElementById('bookingForm').submit();

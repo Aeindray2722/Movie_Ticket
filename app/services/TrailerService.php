@@ -1,128 +1,57 @@
 <?php
+require_once __DIR__ . '/../repositories/TrailerRepository.php';
 
 class TrailerService
 {
-    private $db;
+    private $repo;
 
     public function __construct(Database $db)
     {
-        $this->db = $db;
+        $this->repo = new TrailerRepository($db);
     }
 
-    /** Pagination + list all trailers */
     public function getAllPaged(int $limit, int $page)
     {
-        $offset = ($page - 1) * $limit;
-        $trailers = $this->db->readPaged('trailers', $limit, $offset);
-        $total = count($this->db->readAll('trailers'));
-        return [
-            'data' => $trailers,
-            'totalPages' => ceil($total / $limit)
-        ];
+        return $this->repo->getAllPaged($limit, $page);
     }
 
     public function getTypes()
     {
-        return $this->db->readAll('types');
+        return $this->repo->getTypes();
     }
 
     public function getMovies()
     {
-        return $this->db->readAll('movies');
+        return $this->repo->getMovies();
     }
 
-    /** Create trailer */
     public function create(array $data, array $file)
     {
-        $trailer_vd = '';
-        if (isset($file['trailer_file']) && $file['trailer_file']['error'] === 0) {
-            $trailer_vd = $this->db->uploadTrailerFile($file['trailer_file']);
-        }
-        $data['trailer_vd'] = $trailer_vd;
-        $data['created_at'] = date('Y-m-d H:i:s');
-        $data['updated_at'] = date('Y-m-d H:i:s');
-
-        return $this->db->create('trailers', $data);
+        return $this->repo->create($data, $file);
     }
 
-    /** Find trailer by ID */
     public function findById($id)
     {
-        return $this->db->getById('trailers', $id);
+        return $this->repo->findById($id);
     }
 
-    /** Update trailer */
     public function update(int $id, array $data, array $file)
     {
-        $old_trailer = $this->findById($id);
-        if (!$old_trailer) {
-            return false;
-        }
-
-        $trailer_vd = $old_trailer['trailer_vd'];
-        $targetDir = __DIR__ . '/../../public/videos/trailers/';
-
-        if (isset($file['trailer_file']) && $file['trailer_file']['error'] === 0) {
-            $oldPath = $targetDir . $trailer_vd;
-            if (file_exists($oldPath)) unlink($oldPath);
-            $trailer_vd = $this->db->uploadTrailerFile($file['trailer_file']);
-        }
-
-        $data['trailer_vd'] = $trailer_vd;
-        $data['updated_at'] = date('Y-m-d H:i:s');
-
-        return $this->db->update('trailers', $id, $data);
+        return $this->repo->update($id, $data, $file);
     }
 
-    /** Delete trailer */
     public function delete($id)
     {
-        $trailer = $this->findById($id);
-        if (!$trailer) return false;
-
-        $filePath = __DIR__ . '/../../public/videos/trailers/' . $trailer['trailer_vd'];
-        if (file_exists($filePath)) unlink($filePath);
-
-        return $this->db->delete('trailers', $id);
+        return $this->repo->delete($id);
     }
 
-    /** Customer Trailer List with search/filter */
     public function searchTrailers($type, $search, $limit, $page)
     {
-        $offset = ($page - 1) * $limit;
-        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
-
-        $result = $this->db->search(
-            'trailers JOIN view_movies_info ON trailers.movie_id = view_movies_info.id',
-            $columnsToSearch,
-            $search,
-            $limit,
-            $offset
-        );
-
-        $data = $result['data'];
-        if ($type) {
-            $data = array_filter($data, fn($t) => strtolower($t['type_name']) === strtolower($type));
-        }
-
-        return [
-            'data' => array_values($data),
-            'totalPages' => ceil(count($data) / $limit)
-        ];
+        return $this->repo->searchTrailers($type, $search, $limit, $page);
     }
 
-    /** Get movie details for trailer detail page */
     public function getMovieDetail($id)
     {
-        $movie = $this->db->getById('view_movies_info', $id);
-        if (!$movie) return null;
-
-        $this->db->incrementViewCount($id);
-        return [
-            'movie' => $movie,
-            'avg_rating' => $this->db->getAvgRatingByMovieId($id),
-            'comment' => $this->db->getCommentsWithUserInfo($id),
-            'trailer' => $this->db->getTrailerByMovieId($id)
-        ];
+        return $this->repo->getMovieDetail($id);
     }
 }

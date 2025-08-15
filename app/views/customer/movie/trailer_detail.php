@@ -141,6 +141,7 @@ require_once __DIR__ . '/../layout/nav.php';
                     <input type="hidden" name="user_id" value="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
 
                     <input type="hidden" name="count" id="ratingCount" value="0">
+                    <input type="hidden" name="source" value="trailer">  <!-- or "now_showing" -->
                     <div class="text-center mb-3">
                         <span class="star fs-3 text-secondary" data-value="1">&#9733;</span>
                         <span class="star fs-3 text-secondary" data-value="2">&#9733;</span>

@@ -1,15 +1,29 @@
 <?php
 require_once __DIR__ . '/../services/BookingService.php';
+require_once __DIR__ . '/../repositories/BookingRepository.php';
 
 class Booking extends Controller
 {
-    private $bookingService;
+    private BookingService $bookingService;
 
-    public function __construct()
+    public function __construct(?BookingService $bookingService = null)
     {
-        // $this->bookingService = new BookingService(new Database());
-        $this->bookingService = new BookingService(new BookingRepository(new Database()));
-
+        // Allow injecting a BookingService instance for easier testing or customization
+        if ($bookingService !== null) {
+            $this->bookingService = $bookingService;
+        } else {
+            // Default behavior: create BookingRepository with Database, then BookingService
+            $repository = new BookingRepository(new Database());
+            $this->bookingService = new BookingService($repository);
+        }
+    }
+    public function middleware()
+    {
+        return [
+            'bookingDetail' => ['AdminMiddleware'],
+            'bookingHistory' => ['AdminMiddleware'],
+            'history' => ['CustomerMiddleware'],
+        ];
     }
 
     public function index($id = null)
@@ -43,6 +57,7 @@ class Booking extends Controller
 
     public function store()
     {
+        // var_dump($_POST); exit;
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('movie/nowShowing');
@@ -179,4 +194,5 @@ class Booking extends Controller
             redirect('movie/nowShowing');
         }
     }
+    
 }

@@ -1,5 +1,7 @@
 <?php
+require_once __DIR__ . '/../repositories/UserRepository.php';
 require_once __DIR__ . '/../services/UserService.php';
+
 
 class User extends Controller
 {
@@ -9,11 +11,12 @@ class User extends Controller
     {
         try {
             $db = new Database();
-            $this->userService = new UserService($db);
+            $userRepository = new UserRepository($db);
+            $this->userService = new UserService($userRepository);
             $this->model('UserModel');
         } catch (Exception $e) {
             setMessage('error', 'Initialization error: ' . $e->getMessage());
-            redirect('error'); // your error page
+            redirect('error');
         }
     }
 
@@ -150,7 +153,7 @@ class User extends Controller
     {
         try {
             $searchQuery = trim($_GET['search'] ?? '');
-            $staff = $this->userService->searchUsers('0', $searchQuery);
+            $staff = $this->userService->searchUsersByRole('0', $searchQuery);
 
             $this->view('admin/profile/staff_list', [
                 'staff_members' => $staff,
@@ -166,7 +169,7 @@ class User extends Controller
     {
         try {
             $searchQuery = trim($_GET['search'] ?? '');
-            $users = $this->userService->searchUsers('1', $searchQuery);
+            $users = $this->userService->searchUsersByRole('1', $searchQuery);
 
             $this->view('admin/profile/user_list', [
                 'user_members' => $users,
@@ -186,7 +189,7 @@ class User extends Controller
                 return;
             }
 
-            $created = $this->userService->createUserOrStaff($_POST);
+            $created = $this->userService->create($_POST);
 
             if ($created) {
                 setMessage('success', ((int)$_POST['role'] === 1 ? 'User' : 'Staff') . ' created successfully!');

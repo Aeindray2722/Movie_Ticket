@@ -187,6 +187,7 @@ require_once __DIR__ . '/../layout/nav.php';
             </div>
             <div class="modal-body text-center">
                 <form action="<?= URLROOT ?>/rating/submit" method="POST">
+                    <input type="hidden" name="source" value="now_showing">  <!-- or "now_showing" -->
                     <input type="hidden" name="movie_id" value="<?= htmlspecialchars($data['movie']['id']) ?>">
                     <input type="hidden" name="user_id" value="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
 

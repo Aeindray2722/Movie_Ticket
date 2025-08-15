@@ -1,87 +1,47 @@
 <?php
+// services/UserService.php
+require_once __DIR__ . '/../interface/UserRepositoryInterface.php';
+require_once __DIR__ . '/../helpers/UserValidator.php';
+require_once __DIR__ . '/../models/UserModel.php';
 
 class UserService
 {
-    private $db;
+    private UserRepositoryInterface $userRepository;
 
-    public function __construct(Database $db)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
-        $this->db = $db;
+        $this->userRepository = $userRepository;
     }
 
-    public function getCurrentUser()
+    public function getCurrentUser(): ?array
     {
-        return $this->db->getCurrentUser();
+        return $this->userRepository->getCurrentUser();
     }
 
-    public function getUserById($id)
+    public function getUserById($id): ?array
     {
-        return $this->db->getById('users', $id);
+        return $this->userRepository->getUserById((int)$id);
     }
-
-    public function validateUpdateData(array $postData): array
-    {
-        require_once __DIR__ . '/../helpers/UserValidator.php';
-
-        $validationData = [
-            'name' => trim($postData['name'] ?? ''),
-            'email' => trim($postData['email'] ?? ''),
-            'phone' => trim($postData['phone'] ?? ''),
-            'password' => 'dummy_password_for_validation',
-        ];
-
-        $validator = new UserValidator($validationData);
-        return $validator->validateFormForUpdate();
-    }
-
-    public function isEmailTaken($email, $excludeUserId = null): bool
-    {
-        $existingUser = $this->db->columnFilter('users', 'email', $email);
-        if ($existingUser) {
-            if ($excludeUserId === null) {
-                return true;
-            }
-            return $existingUser['id'] != $excludeUserId;
-        }
-        return false;
-    }
-
-    public function handleProfileImageUpload(string $oldImage): string
-    {
-        $profile_img = $oldImage;
-
-        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === 0) {
-            // Delete old image if exists and not default
-            $oldImagePath = __DIR__ . '/../../public/images/users/' . $oldImage;
-            if (file_exists($oldImagePath) && $oldImage !== 'default_profile.jpg') {
-                unlink($oldImagePath);
-            }
-
-            // Use Database's uploadImage method
-            $uploadedFilename = $this->db->uploadImage($_FILES['profile_image'], '/../../public/images/users/');
-
-            if ($uploadedFilename !== null) {
-                $profile_img = $uploadedFilename;
-            }
-        }
-
-        return $profile_img;
-    }
-
 
     public function updateUser(array $postData): bool
     {
         $id = $postData['id'] ?? null;
-        if (!$id) {
-            return false;
-        }
+        if (!$id) return false;
 
         $oldProfile = $this->getUserById($id);
-        if (!$oldProfile) {
-            return false;
-        }
+        if (!$oldProfile) return false;
 
-        $errors = $this->validateUpdateData($postData);
+        // Validate data
+        $validationData = [
+            'name' => trim($postData['name'] ?? ''),
+            'email' => trim($postData['email'] ?? ''),
+            'phone' => trim($postData['phone'] ?? ''),
+            // Provide dummy password because update validation might expect it
+            'password' => 'dummy_password_for_validation',
+        ];
+        $validator = new UserValidator($validationData);
+        $errors = $validator->validateFormForUpdate();
+
         if (!empty($errors)) {
             foreach ($errors as $error) {
                 setMessage('error', $error);
@@ -89,24 +49,27 @@ class UserService
             return false;
         }
 
-        $email = trim($postData['email'] ?? '');
-        if ($email !== $oldProfile['email'] && $this->isEmailTaken($email, $id)) {
+        // Check if email is taken by another user
+        $email = trim($postData['email']);
+        if ($email !== $oldProfile['email'] && $this->userRepository->isEmailTaken($email, (int)$id)) {
             setMessage('error', 'This email is already registered!');
             return false;
         }
 
-        $profile_img = $this->handleProfileImageUpload($oldProfile['profile_img']);
+        // Handle profile image upload
+        $profile_img = $this->userRepository->uploadProfileImage($_FILES['profile_image'] ?? null, $oldProfile['profile_img']);
 
+        // Prepare user model for update
         $userModel = new UserModel();
-        $userModel->setId($id);
-        $userModel->setName(trim($postData['name']));
+        $userModel->setId((int)$id);
+        $userModel->setName($validationData['name']);
         $userModel->setEmail($email);
-        $userModel->setPhone(trim($postData['phone']));
+        $userModel->setPhone($validationData['phone']);
         $userModel->setProviderToken($oldProfile['provider_token']);
         $userModel->setIsActive($oldProfile['is_active']);
         $userModel->setIsLogin($oldProfile['is_login']);
         $userModel->setIsConfirmed($oldProfile['is_confirmed']);
-        $userModel->setRole(isset($postData['role']) ? (int) $postData['role'] : $oldProfile['role']);
+        $userModel->setRole(isset($postData['role']) ? (int)$postData['role'] : (int)$oldProfile['role']);
         $userModel->setProfileImg($profile_img);
         $userModel->setPassword($oldProfile['password']);
         $userModel->setUpdatedAt(date('Y-m-d H:i:s'));
@@ -115,17 +78,14 @@ class UserService
         $data = $userModel->toArray();
         unset($data['created_at']);
 
-        return $this->db->update('users', $id, $data);
+        return $this->userRepository->updateUser((int)$id, $data);
     }
 
     public function updatePassword(int $userId, array $postData): array
     {
         $user = $this->getUserById($userId);
-        if (!$user) {
-            return ['error' => 'User not found.'];
-        }
+        if (!$user) return ['error' => 'User not found.'];
 
-        require_once __DIR__ . '/../helpers/UserValidator.php';
         $validator = new UserValidator($postData);
         $errors = $validator->validatePasswordChange();
 
@@ -139,12 +99,7 @@ class UserService
 
         $hashedPassword = password_hash($postData['new_password'], PASSWORD_DEFAULT);
 
-        $data = [
-            'password' => $hashedPassword,
-            'updated_at' => date('Y-m-d H:i:s'),
-        ];
-
-        $updated = $this->db->update('users', $userId, $data);
+        $updated = $this->userRepository->updatePassword($userId, $hashedPassword);
         if (!$updated) {
             return ['error' => 'Failed to update password.'];
         }
@@ -152,38 +107,25 @@ class UserService
         return [];
     }
 
-    public function searchUsers(string $role, string $searchQuery = ''): array
+    public function searchUsersByRole(string $role, string $searchQuery = ''): array
     {
-        if ($searchQuery !== '') {
-            $result = $this->db->search(
-                'users',
-                ['name', 'email', 'phone', 'customer_type'],
-                $searchQuery,
-                100,
-                0
-            );
-            return array_filter($result['data'], fn($user) => (string) $user['role'] === $role);
-        }
-
-        return $this->db->readWithCondition('users', 'role = ' . (int) $role);
+        return $this->userRepository->searchUsersByRole((int)$role, $searchQuery);
     }
 
-    public function createUserOrStaff(array $postData): bool
+    public function create(array $postData): bool
     {
         $name = trim($postData['name'] ?? '');
         $email = trim($postData['email'] ?? '');
-        $password = $postData['password'] ?? '';
         $phone = trim($postData['phone'] ?? '');
+        $password = $postData['password'] ?? '';
         $role = (int) ($postData['role'] ?? 1);
 
-        require_once __DIR__ . '/../helpers/UserValidator.php';
         $validator = new UserValidator([
             'name' => $name,
             'email' => $email,
             'phone' => $phone,
             'password' => $password,
         ]);
-
         $errors = $validator->validateForm();
 
         if (!empty($errors)) {
@@ -193,7 +135,7 @@ class UserService
             return false;
         }
 
-        if ($this->isEmailTaken($email)) {
+        if ($this->userRepository->isEmailTaken($email)) {
             setMessage('error', 'This email is already registered!');
             return false;
         }
@@ -218,16 +160,11 @@ class UserService
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        return $this->db->create('users', $data);
+        return $this->userRepository->createUser($data);
     }
 
     public function deleteUser(int $id): bool
     {
-        $user = $this->getUserById($id);
-        if (!$user) {
-            return false;
-        }
-
-        return $this->db->delete('users', $id);
+        return $this->userRepository->deleteUser($id);
     }
 }

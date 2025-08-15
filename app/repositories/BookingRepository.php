@@ -1,5 +1,7 @@
 <?php
-class BookingRepository
+require_once __DIR__ . '/../interface/BookingRepositoryInterface.php';
+
+class BookingRepository implements BookingRepositoryInterface
 {
     private $db;
 
@@ -7,13 +9,14 @@ class BookingRepository
     {
         $this->db = $db;
     }
+
     public function getDb()
     {
         return $this->db;
     }
 
+    // Implement all interface methods exactly as before...
 
-    // ===== Movie / Seats / Showtimes =====
     public function findMovieWithDetails(int $movieId)
     {
         return $this->db->getById('view_movies_info', $movieId);
@@ -39,7 +42,6 @@ class BookingRepository
         return $this->db->getBookingsByMovieDateShowtime($movieId, $showTimeId, $date);
     }
 
-    // ===== Bookings =====
     public function createBooking(array $data)
     {
         return $this->db->create('bookings', $data);
@@ -80,7 +82,6 @@ class BookingRepository
         return $this->db->getBookingsByUser($userId);
     }
 
-    // ===== Payments =====
     public function getPaymentByBookingId(int $bookingId)
     {
         return $this->db->columnFilter('payment_history', 'booking_id', $bookingId);
@@ -93,7 +94,6 @@ class BookingRepository
         return $this->db->stmt->execute();
     }
 
-    // ===== Utility =====
     public function getSeatNamesByIds(array $seatIds)
     {
         return $this->db->getSeatNamesByIds($seatIds);
@@ -118,4 +118,5 @@ class BookingRepository
     {
         return $this->db->getById('show_times', $showTimeId);
     }
+    
 }

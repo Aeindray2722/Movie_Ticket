@@ -16,25 +16,23 @@ class Rating extends Controller
                 $user_id = $_SESSION['user_id'] ?? null;
                 $movie_id = (int) $_POST['movie_id'];
                 $count = (int) $_POST['count'];
+                $source = $_POST['source'] ?? 'movie'; // default to movie
 
                 if (!$user_id || $count < 1 || $count > 5) {
                     setMessage('error', 'Invalid request.');
-                    redirect("movie/movieDetail/$movie_id");
-                    return; // prevent further execution
+                    redirect($this->getRedirectUrl($source, $movie_id));
+                    return;
                 }
 
-                // Check if user already rated this movie
                 $existingRating = $this->db->getRatingByUserAndMovie($user_id, $movie_id);
 
                 if ($existingRating) {
-                    // Update existing rating by id
                     $updateData = [
                         'count' => $count,
                         'updated_at' => date('Y-m-d H:i:s'),
                     ];
                     $this->db->update('ratings', $existingRating['id'], $updateData);
                 } else {
-                    // Insert new rating
                     $insertData = [
                         'user_id' => $user_id,
                         'movie_id' => $movie_id,
@@ -46,15 +44,22 @@ class Rating extends Controller
                 }
 
                 setMessage('success', 'Rating submitted successfully.');
-                redirect("movie/movieDetail/$movie_id");
+                redirect($this->getRedirectUrl($source, $movie_id));
             }
         } catch (Exception $e) {
-            // Log the error (optional)
             error_log('Rating submission error: ' . $e->getMessage());
-
-            // Show user-friendly message
             setMessage('error', 'Something went wrong while submitting your rating. Please try again.');
-            redirect(isset($movie_id) ? "movie/movieDetail/$movie_id" : 'pages/home');
+            redirect(isset($movie_id) ? $this->getRedirectUrl($source ?? 'movie', $movie_id) : 'pages/home');
         }
     }
+
+    private function getRedirectUrl($source, $movie_id)
+    {
+        if ($source === 'trailer') {
+            return "trailer/movieDetail/$movie_id";
+        }
+        // Default to movie detail for now_showing or unknown sources
+        return "movie/movieDetail/$movie_id";
+    }
+
 }

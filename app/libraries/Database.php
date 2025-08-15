@@ -225,16 +225,26 @@ class Database
     //     return ($success) ? $row : [];
     // }
     //pagination
-    public function readPaged($table, $limit, $offset)
+    /* public function readPaged($table, $limit, $offset)
+     {
+         $sql = "SELECT * FROM {$table} LIMIT :limit OFFSET :offset";
+         $stm = $this->pdo->prepare($sql);
+         $stm->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+         $stm->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+         $success = $stm->execute();
+         $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
+         return $success ? $rows : [];
+     }*/
+    public function readPaged(string $table, int $limit, int $offset): array
     {
-        $sql = "SELECT * FROM {$table} LIMIT :limit OFFSET :offset";
-        $stm = $this->pdo->prepare($sql);
-        $stm->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
-        $stm->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
-        $success = $stm->execute();
-        $rows = $stm->fetchAll(PDO::FETCH_ASSOC);
-        return $success ? $rows : [];
+        $sql = "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     //readWithCondition
     public function readWithCondition($table, $condition)
     {
@@ -428,8 +438,13 @@ class Database
         // WHERE clause array
         $whereClauses = [];
 
+        // // Type filtering
+        // if ($type !== null) {
+        //     $whereClauses[] = "LOWER(type_name) = :type";
+        //     $params[':type'] = strtolower($type);
+        // }
         // Type filtering
-        if ($type !== null) {
+        if (!empty($type)) { // ✅ only filter if actually provided
             $whereClauses[] = "LOWER(type_name) = :type";
             $params[':type'] = strtolower($type);
         }
@@ -437,18 +452,33 @@ class Database
         // Additional custom where conditions (e.g., CURDATE() BETWEEN ...)
         foreach ($additionalWhere as $index => $condition) {
             if (is_array($condition) && count($condition) === 2) {
-                // condition with parameter
                 [$condStr, $val] = $condition;
-                $placeholder = ":param_$index";
-                // replace ? in condition with placeholder if needed
-                $condStr = str_replace('?', $placeholder, $condStr);
-                $whereClauses[] = $condStr;
-                $params[$placeholder] = $val;
+
+                if (is_array($val)) {
+                    // Multiple values for one condition (e.g., OR search)
+                    $placeholders = [];
+                    foreach ($val as $vIndex => $v) {
+                        $placeholder = ":param_{$index}_{$vIndex}";
+                        $placeholders[] = $placeholder;
+                        $params[$placeholder] = $v;
+                    }
+                    // Replace ? with sequential placeholders
+                    foreach ($placeholders as $ph) {
+                        $condStr = preg_replace('/\?/', $ph, $condStr, 1);
+                    }
+                    $whereClauses[] = $condStr;
+                } else {
+                    // Single value condition
+                    $placeholder = ":param_$index";
+                    $condStr = str_replace('?', $placeholder, $condStr);
+                    $whereClauses[] = $condStr;
+                    $params[$placeholder] = $val;
+                }
             } else {
-                // Just a plain condition string, no parameter
                 $whereClauses[] = $condition;
             }
         }
+
 
 
         $whereSql = count($whereClauses) ? 'WHERE ' . implode(' AND ', $whereClauses) : '';

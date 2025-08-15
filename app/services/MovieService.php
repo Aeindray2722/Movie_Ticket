@@ -1,33 +1,27 @@
 <?php
+require_once __DIR__ . '/../repositories/MovieRepository.php';
+require_once __DIR__ . '/../interface/MovieRepositoryInterface.php';
 
 class MovieService
 {
+    private $repo;
     private $db;
-    public function __construct(Database $db)
+
+    public function __construct(MovieRepository $repo, Database $db)
     {
-        $this->db = $db;
+        $this->repo = $repo;
+        $this->db = $db; // still needed for uploadImage
     }
 
-    public function getMoviesWithPagination(string $search = '', int $limit = 5, int $page = 1): array
+    public function getMoviesWithPagination(string $search, int $limit, int $page): array
     {
-        $offset = ($page - 1) * $limit;
-        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
-
-        if ($search !== '') {
-            $result = $this->db->search('view_movies_info', $columnsToSearch, $search, $limit, $offset);
-            $movies = $result['data'] ?? [];
-            $totalMovies = $result['total'] ?? 0;
-        } else {
-            $movies = $this->db->readPaged('view_movies_info', $limit, $offset);
-            $totalMovies = count($this->db->readAll('view_movies_info'));
-        }
-
-        $totalPages = ceil($totalMovies / $limit);
+        $data = $this->repo->getMoviesWithPagination($search, $limit, $page);
+        $totalPages = ceil($data['totalMovies'] / $limit);
 
         return [
-            'movies' => $movies,
+            'movies' => $data['movies'],
             'totalPages' => $totalPages,
-            'totalMovies' => $totalMovies,
+            'totalMovies' => $data['totalMovies'],
             'page' => $page,
             'limit' => $limit,
             'search' => $search
@@ -36,23 +30,22 @@ class MovieService
 
     public function getTypes(): array
     {
-        return $this->db->readAll('types');
+        return $this->repo->getTypes();
     }
 
     public function getShowTimes(): array
     {
-        return $this->db->readAll('show_times');
+        return $this->repo->getShowTimes();
     }
 
     public function getMovieById(int $id): ?array
     {
-        return $this->db->getById('movies', $id);
+        return $this->repo->getMovieById($id);
     }
 
     public function createMovie(array $data, array $files): bool
     {
         $movie_img = '';
-
         if (isset($files['movie_image']) && $files['movie_image']['error'] === 0) {
             $movie_img = $this->db->uploadImage($files['movie_image'], '/../../public/images/movies/');
         }
@@ -71,13 +64,13 @@ class MovieService
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        return $this->db->create('movies', $movieData);
+        return $this->repo->createMovie($movieData);
     }
 
     public function updateMovie(array $data, array $files): bool
     {
         $id = $data['id'];
-        $old_movie = $this->getMovieById($id);
+        $old_movie = $this->repo->getMovieById($id);
 
         if (!$old_movie) {
             return false;
@@ -90,11 +83,7 @@ class MovieService
             if (file_exists($oldImagePath)) {
                 unlink($oldImagePath);
             }
-
-            $newFilename = $this->db->uploadImage($files['movie_image'], '/../../public/images/movies/');
-            if ($newFilename !== null) {
-                $movie_img = $newFilename;
-            }
+            $movie_img = $this->db->uploadImage($files['movie_image'], '/../../public/images/movies/');
         }
 
         $movieData = [
@@ -110,36 +99,29 @@ class MovieService
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        return $this->db->update('movies', $id, $movieData);
+        return $this->repo->updateMovie($id, $movieData);
     }
 
     public function deleteMovie(int $id): bool
     {
-        $movie = $this->getMovieById($id);
-
+        $movie = $this->repo->getMovieById($id);
         if (!$movie) {
             return false;
         }
 
-        $movieImg = $movie['movie_img'];
-        $imagePath = __DIR__ . '/../../public/images/movies/' . $movieImg;
-
+        $imagePath = __DIR__ . '/../../public/images/movies/' . $movie['movie_img'];
         if (file_exists($imagePath)) {
             unlink($imagePath);
         }
 
-        return $this->db->delete('movies', $id);
+        return $this->repo->deleteMovie($id);
     }
 
     public function getRecentBookings(int $limit = 5): array
     {
-        // Get all seat data for recent bookings
-        $recentBookings = $this->db->readWithCondition(
-            'view_bookings_info',
-            "1 ORDER BY booking_date DESC"
-        );
+        $recentBookings = $this->repo->getRecentBookings();
 
-        // Group seats by booking_id
+        // Group by booking_id
         $grouped = [];
         foreach ($recentBookings as $booking) {
             $id = $booking['booking_id'];
@@ -150,78 +132,71 @@ class MovieService
             $grouped[$id]['seats'][] = $booking['seat_row'] . $booking['seat_number'];
         }
 
-        // Convert seats array to "A1,A2,A3"
-        foreach ($grouped as &$booking) {
-            $booking['seats'] = implode(',', $booking['seats']);
-        }
-
-        // Limit to latest $limit bookings
-        $grouped = array_slice(array_values($grouped), 0, $limit);
-
-        // Map status code to text
+        // Format seats & status
         $statusMap = [0 => 'Confirmed', 1 => 'Pending', 2 => 'Rejected'];
         foreach ($grouped as &$booking) {
+            $booking['seats'] = implode(',', $booking['seats']);
             $booking['status_text'] = $statusMap[$booking['status']] ?? 'Unknown';
         }
 
-        return $grouped;
+        return array_slice(array_values($grouped), 0, $limit);
     }
-
-    public function getAllMovies(): array
-    {
-        return $this->db->readAll('movies');
-    }
-
 
     public function getMonthlySummary()
     {
-        return $this->db->getMonthlySummary();
+        return $this->repo->getMonthlySummary();
     }
 
-    public function getNowShowingMovies(?string $type = null, string $search = '', int $page = 1, int $limit = 4): array
+    public function getNowShowingMovies(?string $type, string $search, int $page, int $limit): array
     {
-        $offset = ($page - 1) * $limit;
-        $types = $this->getTypes();
-        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
+        $types = $this->repo->getTypes();
+        $today = date('Y-m-d');
 
-        $filteredMovies = [];
-        $total = 0;
+        // ✅ Normalize empty type to null
+        $type = !empty($type) ? $type : null;
 
+        // Extra WHERE for "now showing"
+        $additionalWhere = ['CURDATE() BETWEEN start_date AND end_date'];
+
+        // If searching
         if ($search !== '') {
-            $result = $this->db->search('view_movies_info', $columnsToSearch, $search, $limit, $offset);
+            // We use LIKE matching inside paginateByType
+            $additionalWhere[] = [
+                "(movie_name LIKE ? OR type_name LIKE ? OR actor_name LIKE ?)",
+                [$searchLike = "%$search%", $searchLike, $searchLike]
+            ];
 
-            $today = date('Y-m-d');
-            $filtered = array_filter($result['data'], function ($movie) use ($today, $type) {
-                $isShowing = ($movie['start_date'] <= $today && $movie['end_date'] >= $today);
-                $isTypeMatch = !$type || strtolower($movie['type_name']) === strtolower($type);
-                return $isShowing && $isTypeMatch;
-            });
-
-            $total = count($filtered);
-            $movies = array_slice(array_values($filtered), $offset, $limit);
-        } else {
-            $result = $this->db->paginateByType(
+            $result = $this->repo->paginateByType(
                 'view_movies_info',
                 $limit,
                 $page,
                 $type,
-                ['CURDATE() BETWEEN start_date AND end_date']
+                $additionalWhere
             );
-            $movies = $result['data'];
-            $total = $result['total'] ?? count($movies);
+
+        } else {
+            // No search → just filter by now showing
+            $result = $this->repo->paginateByType(
+                'view_movies_info',
+                $limit,
+                $page,
+                $type,
+                $additionalWhere
+            );
         }
 
-        $totalPages = ceil($total / $limit);
-
         return [
-            'movies' => $movies,
-            'page' => $page,
-            'totalPages' => $totalPages,
+            'movies' => $result['data'],
+            'page' => $result['page'],
+            'totalPages' => $result['totalPages'],
             'type' => $type,
             'types' => $types,
-            'search' => $search,
+            'search' => $search
         ];
     }
+
+
+
 
     public function getMovieDetail(int $id): ?array
     {
@@ -230,21 +205,17 @@ class MovieService
             return null;
         }
 
-        $this->db->incrementViewCount($id);
-
-        $avg_rating = $this->db->getAvgRatingByMovieId($id);
-        $comments = $this->db->getCommentsWithUserInfo($id);
-        // var_dump($comments); exit;
-        $relatedMovies = $this->db->readWithCondition(
-            'view_movies_info',
-            "type_name = '{$movie['type_name']}' AND id != {$movie['id']} LIMIT 6"
-        );
+        $this->repo->incrementViewCount($id);
 
         return [
             'movie' => $movie,
-            'avg_rating' => $avg_rating,
-            'comments' => $comments,
-            'related_movies' => $relatedMovies,
+            'avg_rating' => $this->repo->getAvgRatingByMovieId($id),
+            'comments' => $this->repo->getCommentsWithUserInfo($id),
+            'related_movies' => $this->repo->getRelatedMovies($movie['type_name'], $movie['id'])
         ];
+    }
+    public function getAllMovies(): array
+    {
+        return $this->db->readAll('movies');
     }
 }

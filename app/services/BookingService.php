@@ -9,10 +9,10 @@ require_once __DIR__ . '/../libraries/Mail.php';
 class BookingService
 {
     // private $repo;
+    private BookingRepositoryInterface $repo;
     private $bookingModel;
-    private BookingRepository $repo;
 
-    public function __construct(BookingRepository $repo)
+    public function __construct(BookingRepositoryInterface $repo)
     {
         $this->repo = $repo;
         $this->bookingModel = new BookingModel();
@@ -263,4 +263,5 @@ class BookingService
 
         return $bookings;
     }
+    
 }

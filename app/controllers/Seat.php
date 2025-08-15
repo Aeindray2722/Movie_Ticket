@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../repositories/SeatRepository.php';
 require_once __DIR__ . '/../services/SeatService.php';
 
 class Seat extends Controller
@@ -8,11 +9,14 @@ class Seat extends Controller
     public function __construct()
     {
         try {
-            $this->seatService = new SeatService(new Database());
+            $db = new Database();
+            $seatRepository = new SeatRepository($db);
+            $this->seatService = new SeatService($seatRepository);
+
             $this->model('SeatModel');
         } catch (Exception $e) {
             setMessage('error', 'Initialization error: ' . $e->getMessage());
-            redirect('error'); // Or wherever is appropriate
+            redirect('error');
         }
     }
 
@@ -20,11 +24,7 @@ class Seat extends Controller
     {
         return [
             'index'  => ['AdminMiddleware'],
-            'create' => ['AdminMiddleware'],
-            'store'  => ['AdminMiddleware'],
             'edit'   => ['AdminMiddleware'],
-            'update' => ['AdminMiddleware'],
-            'destroy'=> ['AdminMiddleware'],
         ];
     }
 
@@ -98,7 +98,7 @@ class Seat extends Controller
         }
     }
 
-    public function update()
+    public function update() 
     {
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

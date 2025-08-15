@@ -9,8 +9,8 @@ class Auth extends Controller
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+            session_start();
+        }
         $this->model('UserModel');
         $this->db = new Database();
     }
@@ -316,9 +316,31 @@ class Auth extends Controller
         }
         $this->view('pages/sendOtp'); // show OTP form
     }
+    public function resendOtp()
+    {
+        if (!isset($_SESSION['email']) || empty($_SESSION['email'])) {
+            setMessage('error', 'Please enter your email first.');
+            redirect('auth/forgotPassword');
+            exit;
+        }
+
+        $email = $_SESSION['email'];
+
+        // Generate a new 4-digit OTP
+        $otp = rand(1000, 9999);
+        $_SESSION['otp'] = $otp;
+
+        // Send OTP Email
+        $mail = new Mail();
+        $mail->sendOtpMail($email, $otp);
+
+        setMessage('success', 'A new OTP has been sent to your email.');
+        redirect('auth/sendOtp'); // redirect to the OTP page
+    }
 
 
- public function resetPassword()
+
+    public function resetPassword()
     {
         $this->view('pages/newPass'); // show OTP form
     }
@@ -345,46 +367,46 @@ class Auth extends Controller
 
     }
     public function updatePassword()
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $password = trim($_POST['password'] ?? '');
-        $confirmPassword = trim($_POST['con_password'] ?? '');
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $password = trim($_POST['password'] ?? '');
+            $confirmPassword = trim($_POST['con_password'] ?? '');
 
-        if (empty($password) || empty($confirmPassword)) {
-            setMessage('error', 'Both password fields are required.');
-            redirect('auth/resetPassword');
-            return;
-        }
+            if (empty($password) || empty($confirmPassword)) {
+                setMessage('error', 'Both password fields are required.');
+                redirect('auth/resetPassword');
+                return;
+            }
 
-        if ($password !== $confirmPassword) {
-            setMessage('error', 'Passwords do not match.');
-            redirect('auth/resetPassword');
-            return;
-        }
+            if ($password !== $confirmPassword) {
+                setMessage('error', 'Passwords do not match.');
+                redirect('auth/resetPassword');
+                return;
+            }
 
-        if (!isset($_SESSION['email'])) {
-            setMessage('error', 'Session expired. Please restart password reset process.');
-            redirect('auth/forgotPassword');
-            return;
-        }
+            if (!isset($_SESSION['email'])) {
+                setMessage('error', 'Session expired. Please restart password reset process.');
+                redirect('auth/forgotPassword');
+                return;
+            }
 
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $email = $_SESSION['email'];
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $email = $_SESSION['email'];
 
-        $updated = $this->db->updatePasswordByEmail($email, $hashedPassword);
+            $updated = $this->db->updatePasswordByEmail($email, $hashedPassword);
 
-        if ($updated) {
-            unset($_SESSION['otp']);
-            unset($_SESSION['email']);
-            setMessage('success', 'Password updated successfully. You can now login.');
-            redirect('pages/login');
-        } else {
-            setMessage('error', 'Failed to update password. Try again.');
-            redirect('auth/resetPassword');
+            if ($updated) {
+                unset($_SESSION['otp']);
+                unset($_SESSION['email']);
+                setMessage('success', 'Password updated successfully. You can now login.');
+                redirect('pages/login');
+            } else {
+                setMessage('error', 'Failed to update password. Try again.');
+                redirect('auth/resetPassword');
+            }
         }
     }
-}
 
-    
+
 
 }

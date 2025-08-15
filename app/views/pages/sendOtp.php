@@ -11,23 +11,26 @@
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/new.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .verification-title {
+    <style>
+        .verification-title {
             font-size: 1.8rem;
             font-weight: 700;
             color: #333;
             margin-bottom: 5px;
         }
+
         .verification-subtitle {
             font-size: 1rem;
             color: #666;
             margin-bottom: 30px;
         }
+
         .otp-input-group {
             display: flex;
             justify-content: space-between;
             margin-bottom: 30px;
         }
+
         .otp-input {
             width: 45px;
             height: 45px;
@@ -39,24 +42,28 @@
             background-color: #f9f9f9;
             color: #333;
         }
+
         .otp-input:focus {
             border-color: #b57d84;
             box-shadow: 0 0 0 0.25rem rgba(181, 125, 132, 0.25);
         }
+
         .resend-text {
             font-size: 0.9rem;
             color: #999;
             margin-top: 20px;
         }
+
         .resend-text a {
             color: #b57d84;
             font-weight: 600;
             text-decoration: none;
         }
+
         .resend-text a:hover {
             text-decoration: underline;
         }
-</style>
+    </style>
 </head>
 
 <body>
@@ -95,13 +102,34 @@
                     <button type="submit" class="btn btn-register w-50 justify-content-center">Continue</button>
                 </form>
                 <div class="resend-text">
-                    The code will expire in 60s. <a href="#">Send again</a>
+                    The code will expire in <span id="timer">60</span>s.
+                    <a href="<?php echo URLROOT; ?>/auth/resendOtp" id="resend-link">Send again</a>
                 </div>
+
             </div>
         </div>
     </div>
     </div>
     <?php require_once APPROOT . '/views/inc/footer.php'; ?>
+    <script>
+        let timeLeft = 60;
+        const timerEl = document.getElementById('timer');
+        const resendLink = document.getElementById('resend-link');
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                resendLink.style.pointerEvents = 'auto';
+                resendLink.style.opacity = 1;
+            }
+        }, 1000);
+
+        // Disable link until timer ends
+        resendLink.style.pointerEvents = 'none';
+        resendLink.style.opacity = 0.5;
+    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const inputs = document.querySelectorAll('.otp-input');

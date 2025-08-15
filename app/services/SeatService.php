@@ -1,19 +1,22 @@
 <?php
+// app/services/SeatService.php
+
+require_once __DIR__ . '/../interface/SeatRepositoryInterface.php';
 
 class SeatService
 {
-    private $db;
+    private SeatRepositoryInterface $seatRepository;
 
-    public function __construct(Database $db)
+    public function __construct(SeatRepositoryInterface $seatRepository)
     {
-        $this->db = $db;
+        $this->seatRepository = $seatRepository;
     }
 
     public function getSeatsPaged(int $limit, int $page): array
     {
         $offset = ($page - 1) * $limit;
-        $seats = $this->db->readPaged('seats', $limit, $offset);
-        $totalSeats = count($this->db->readAll('seats'));
+        $seats = $this->seatRepository->getSeatsPaged($limit, $offset);
+        $totalSeats = $this->seatRepository->countSeats();
         $totalPages = ceil($totalSeats / $limit);
 
         return [
@@ -22,15 +25,16 @@ class SeatService
             'totalPages' => $totalPages,
         ];
     }
+    
 
     public function getAllSeats(): array
     {
-        return $this->db->readAll('seats');
+        return $this->seatRepository->getAllSeats();
     }
 
     public function getSeatById(int $id): ?array
     {
-        return $this->db->getById('seats', $id);
+        return $this->seatRepository->getSeatById($id);
     }
 
     public function createSeat(array $data): bool
@@ -44,9 +48,9 @@ class SeatService
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        // Optional: Add validation here or throw exceptions
+        // Add validation here if you want
 
-        return $this->db->create('seats', $seatData);
+        return $this->seatRepository->createSeat($seatData);
     }
 
     public function updateSeat(int $id, array $data): bool
@@ -59,11 +63,11 @@ class SeatService
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
-        return $this->db->update('seats', $id, $seatData);
+        return $this->seatRepository->updateSeat($id, $seatData);
     }
 
     public function deleteSeat(int $id): bool
     {
-        return $this->db->delete('seats', $id);
+        return $this->seatRepository->deleteSeat($id);
     }
 }

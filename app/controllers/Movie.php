@@ -1,15 +1,19 @@
 <?php
-require_once __DIR__ . '/../services/MovieService.php'; 
+require_once __DIR__ . '/../interface/MovieRepositoryInterface.php';
+require_once __DIR__ . '/../repositories/MovieRepository.php';
+require_once __DIR__ . '/../services/MovieService.php';
 
 class Movie extends Controller
 {
-    private $movieService;
+    private MovieService $movieService;
 
     public function __construct()
     {
         try {
             $db = new Database();
-            $this->movieService = new MovieService($db);
+            // Use the interface type hint but instantiate concrete class here
+            $repo = new MovieRepository($db); 
+            $this->movieService = new MovieService($repo, $db);
             $this->model('MovieModel');
         } catch (Exception $e) {
             setMessage('error', 'Failed to initialize Movie Controller: ' . $e->getMessage());
@@ -17,15 +21,13 @@ class Movie extends Controller
         }
     }
 
+
     public function middleware()
     {
         return [
             'index' => ['AdminMiddleware'],
             'create' => ['AdminMiddleware'],
-            'store' => ['AdminMiddleware'],
             'edit' => ['AdminMiddleware'],
-            'update' => ['AdminMiddleware'],
-            'destroy' => ['AdminMiddleware'],
             'dashboard' => ['AdminMiddleware'],
         ];
     }
@@ -91,7 +93,7 @@ class Movie extends Controller
     public function edit($id)
     {
         try {
-            $movie = $this->movieService->getMovieById((int)$id);
+            $movie = $this->movieService->getMovieById((int) $id);
 
             if (!$movie) {
                 throw new Exception('Movie not found');
@@ -136,7 +138,7 @@ class Movie extends Controller
                 throw new Exception('Invalid movie ID.');
             }
 
-            $deleted = $this->movieService->deleteMovie((int)$id);
+            $deleted = $this->movieService->deleteMovie((int) $id);
             setMessage($deleted ? 'success' : 'error', $deleted ? 'Movie and image deleted successfully!' : 'Failed to delete movie.');
             redirect('movie');
         } catch (Exception $e) {
@@ -192,7 +194,7 @@ class Movie extends Controller
     public function movieDetail($id)
     {
         try {
-            $detail = $this->movieService->getMovieDetail((int)$id);
+            $detail = $this->movieService->getMovieDetail((int) $id);
 
             if (!$detail) {
                 throw new Exception('Movie not found!');

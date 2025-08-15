@@ -30,8 +30,6 @@ require_once __DIR__ . '/../layout/sidebar.php';
                         </thead>
                         <tbody>
                             <?php
-
-
                             if (!empty($data['movieData'])) {
                                 foreach ($data['movieData'] as $type) {
                                     echo '<tr>';
