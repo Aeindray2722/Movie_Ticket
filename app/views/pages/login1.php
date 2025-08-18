@@ -80,11 +80,11 @@ if (!isset($_SESSION['csrf_token'])) {
                                     <i class="fab fa-google me-2"></i> Google
                                 </a>
                             </div>
-
                             <div class="col-auto">
-                                <button type="button" class="btn btn-outline-primary">
-                                    <i class="fab fa-facebook-f me-2"></i> Facebook
-                                </button>
+                                <a href="<?php echo URLROOT; ?>/auth/githubLogin" class="btn btn-outline-dark">
+                                    <i class="fa-brands fa-github me-2"></i> GitHub
+                                </a>
+
                             </div>
                         </div>
                     </div>

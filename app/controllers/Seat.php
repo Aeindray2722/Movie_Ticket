@@ -68,7 +68,7 @@ class Seat extends Controller
             // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
-                redirect('admin/seat/add_seat');
+                redirect('seat/create');
                 exit;
             }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

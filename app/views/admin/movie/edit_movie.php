@@ -1,5 +1,11 @@
 <?php require_once __DIR__ . '/../layout/sidebar.php'; ?>
-<?php extract($data); ?>
+<?php 
+extract($data); 
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 
 <div class="main-content-wrapper">
     <?php require_once __DIR__ . '/../layout/nav.php'; ?>
@@ -10,6 +16,8 @@
         </div>
     <div class="form-card">
         <form action="<?= URLROOT ?>/movie/update" method="post" enctype="multipart/form-data" id="movieForm" novalidate>
+              <!-- CSRF hidden input -->
+          <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="id" value="<?= $movies['id'] ?>">
 
             <div class="row mb-3">

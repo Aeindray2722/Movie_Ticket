@@ -1,9 +1,5 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
-// Generate CSRF token if not set
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
 ?>
 
 <section class="now-showing-page-content py-4">
@@ -14,8 +10,6 @@ if (!isset($_SESSION['csrf_token'])) {
             </div>
             <div class="search-bar-on-page">
                 <form class="d-flex" method="get" action="<?= URLROOT ?>/trailer/trailer">
-                     <!-- CSRF hidden input -->
-          <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input class="form-control me-2" type="search" name="search" placeholder="Search"
                         aria-label="Search" value="<?= htmlspecialchars($data['search']) ?>">
                     <?php if (!empty($data['type'])): ?>

@@ -50,6 +50,13 @@ class Payment extends Controller
     public function store()
     {
         try {
+            // var_dump($_SESSION); var_dump($_POST); exit;
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('payment');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $paymentData = [
                     'payment_method' => trim($_POST['payment_method']),
@@ -86,6 +93,12 @@ class Payment extends Controller
     public function update()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('payment/edit');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $id = $_POST['id'];
                 $paymentData = [

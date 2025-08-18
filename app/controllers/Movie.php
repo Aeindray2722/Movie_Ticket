@@ -15,6 +15,10 @@ class Movie extends Controller
             $repo = new MovieRepository($db); 
             $this->movieService = new MovieService($repo, $db);
             $this->model('MovieModel');
+            // CSRF token generation
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
         } catch (Exception $e) {
             setMessage('error', 'Failed to initialize Movie Controller: ' . $e->getMessage());
             redirect('pages/home');
@@ -35,6 +39,7 @@ class Movie extends Controller
     public function index()
     {
         try {
+            
             $search = trim($_GET['search'] ?? '');
             $page = max(1, (int) ($_GET['page'] ?? 1));
             $limit = 5;
@@ -77,6 +82,12 @@ class Movie extends Controller
     public function store()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('movie');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception('Invalid request method.');
             }
@@ -117,6 +128,11 @@ class Movie extends Controller
     public function update()
     {
         try {
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('movie/edit');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 throw new Exception('Invalid request method.');
             }
@@ -168,12 +184,7 @@ class Movie extends Controller
     public function nowShowing()
     {
         try {
-            // 1️⃣ CSRF validation
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
-                redirect('customer/movie/nowshowing');
-                exit;
-            }
+            
             $type = $_GET['type'] ?? null;
             $search = trim($_GET['search'] ?? '');
             $page = max(1, (int) ($_GET['page'] ?? 1));

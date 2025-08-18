@@ -39,6 +39,10 @@ if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
 
     $bookings = $filtered;
 }
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 
 <body>

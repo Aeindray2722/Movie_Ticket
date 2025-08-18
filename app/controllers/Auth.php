@@ -197,7 +197,7 @@ class Auth extends Controller
         $client->setClientId(GOOGLE_CLIENT_ID);
         $client->setClientSecret(GOOGLE_CLIENT_SECRET);
         $client->setRedirectUri(GOOGLE_REDIRECT_URI);
-        
+
         if (isset($_GET['code'])) {
             $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
 
@@ -246,7 +246,7 @@ class Auth extends Controller
             $_SESSION['user_id'] = (int) $user['id'];
             $this->db->setLogin($user['id']);
 
-            // Role ပေါ် မူတည်ပြီး redirect
+
             if ($user['role'] == 0) {
                 redirect('movie/dashboard');
             } else {
@@ -257,19 +257,114 @@ class Auth extends Controller
             redirect('pages/login');
         }
     }
+    public function githubLogin()
+    {
+        $clientId = GITHUB_CLIENT_ID;
+        $redirectUri = GITHUB_REDIRECT_URI;
 
+        $authUrl = "https://github.com/login/oauth/authorize?client_id={$clientId}&redirect_uri={$redirectUri}&scope=user:email";
+        header("Location: $authUrl");
+        exit;
+    }
 
+    public function githubCallback()
+    {
+        if (!isset($_GET['code'])) {
+            setMessage('error', 'GitHub login failed.');
+            redirect('pages/login');
+            return;
+        }
 
+        $code = $_GET['code'];
 
-    // function logout($id)
-    // {
-    //     // session_start();
-    //     // $this->db->unsetLogin(base64_decode($_SESSION['id']));
+        // 1️⃣ Exchange code for access token
+        $tokenUrl = "https://github.com/login/oauth/access_token";
+        $postFields = [
+            'client_id' => GITHUB_CLIENT_ID,
+            'client_secret' => GITHUB_CLIENT_SECRET,
+            'code' => $code,
+            'redirect_uri' => GITHUB_REDIRECT_URI,
+        ];
 
-    //     //$this->db->unsetLogin($this->auth->getAuthId());
-    //     $this->db->unsetLogin($id);
-    //     redirect('pages/login');
-    // }
+        $ch = curl_init($tokenUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $tokenData = json_decode($response, true);
+
+        if (!isset($tokenData['access_token'])) {
+            setMessage('error', 'GitHub token exchange failed.');
+            redirect('pages/login');
+            return;
+        }
+
+        $accessToken = $tokenData['access_token'];
+
+        // 2️⃣ Get user info
+        $ch = curl_init("https://api.github.com/user");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            "Authorization: token {$accessToken}",
+            "User-Agent: MovieFlow-App"
+        ]);
+        $userResponse = curl_exec($ch);
+        curl_close($ch);
+
+        $githubUser = json_decode($userResponse, true);
+
+        if (!isset($githubUser['id'])) {
+            setMessage('error', 'Failed to fetch GitHub user info.');
+            redirect('pages/login');
+            return;
+        }
+
+        $email = $githubUser['email'] ?? ($githubUser['login'] . "@github.com");
+        $name = $githubUser['name'] ?? $githubUser['login'];
+        $profile_img = $githubUser['avatar_url'] ?? 'default_profile.jpg';
+
+        // 3️⃣ Check if user exists
+        $existingUser = $this->db->columnFilter('users', 'email', $email);
+
+        if ($existingUser) {
+            $user = $existingUser;
+        } else {
+            $provider_token = bin2hex(random_bytes(50));
+            $user = [
+                'name' => $name,
+                'email' => $email,
+                'password' => '',
+                'phone' => '',
+                'profile_img' => $profile_img,
+                'provider_token' => $provider_token,
+                'role' => 1,
+                'customer_type' => 'Normal',
+                'is_active' => 1,
+                'is_confirmed' => 1,
+                'is_login' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+            $this->db->create('users', $user);
+            $user['id'] = $this->db->lastInsertId();
+        }
+
+        // 4️⃣ Set session
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['role'] = $user['role'];
+        $_SESSION['profile_img'] = $user['profile_img'];
+        $_SESSION['user_id'] = (int) $user['id'];
+        $this->db->setLogin($user['id']);
+
+        if ($user['role'] == 0) {
+            redirect('movie/dashboard');
+        } else {
+            redirect('pages/home');
+        }
+    }
 
     public function logout()
     {

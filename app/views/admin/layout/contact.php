@@ -86,3 +86,15 @@
             });
         }
     </script>
+    <?php if (isset($_SESSION['success'])): ?>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '<?= $_SESSION['success'] ?>',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>

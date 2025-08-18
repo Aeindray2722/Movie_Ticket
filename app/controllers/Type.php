@@ -13,6 +13,10 @@ class Type extends Controller
             $db = new Database();
             $repo = new TypeRepository($db);
             $this->typeService = new TypeService($repo);
+            // CSRF token generation
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
         } catch (Exception $e) {
             setMessage('error', 'Initialization error: ' . $e->getMessage());
             redirect('error');
@@ -47,6 +51,12 @@ class Type extends Controller
     public function store()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('type');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('type');
                 return;
@@ -65,6 +75,12 @@ class Type extends Controller
     public function update()
     {
         try {
+            // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('type/editType');
+                exit;
+            }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('type');
                 return;

@@ -15,6 +15,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     }
     $staff_members = $filtered_staff;
 }
+
 ?>
 
 <?php

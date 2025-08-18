@@ -1,7 +1,9 @@
-
-
 <?php
 require_once __DIR__ . '/../layout/sidebar.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <div class="detail-content-wrapper">
     <?php
@@ -20,6 +22,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
             <div class="profile-content">
 
                 <form action="<?php echo URLROOT; ?>/type/update" method="post">
+                    <!-- CSRF hidden input -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="id" value="<?php echo $data['editData']['id']; ?>">
                     <div class="profile-edit-form">
                         <div class="form-group-inline">

@@ -16,6 +16,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     }
     $user_members = $filtered_user;
 }
+
 ?>
 <?php
 require_once __DIR__ . '/../layout/sidebar.php';

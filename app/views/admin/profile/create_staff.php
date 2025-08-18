@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../layout/sidebar.php';
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <div class="list-content-wrapper">
     <?php
@@ -20,6 +24,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
                 <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
             <form action="<?php echo URLROOT; ?>/user/storeUserOrStaff" method="POST">
+            <!-- CSRF hidden input -->
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <input type="hidden" name="role" value="0"> <!-- Staff -->
                 <div class="create-staff-form-content">
                     <div class="form-group">

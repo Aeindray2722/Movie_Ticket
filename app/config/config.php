@@ -21,6 +21,10 @@ define('GOOGLE_CLIENT_ID', $_ENV['GOOGLE_CLIENT_ID'] ?? '');
 define('GOOGLE_CLIENT_SECRET', $_ENV['GOOGLE_CLIENT_SECRET'] ?? '');
 define('GOOGLE_REDIRECT_URI', $_ENV['GOOGLE_REDIRECT_URI'] ?? '');
 
+define('GITHUB_CLIENT_ID', $_ENV['GITHUB_CLIENT_ID'] ?? '');
+define('GITHUB_CLIENT_SECRET', $_ENV['GITHUB_CLIENT_SECRET'] ?? '');
+define('GITHUB_REDIRECT_URI', $_ENV['GITHUB_REDIRECT_URI'] ?? '');
+
 
 // var_dump(getenv('GOOGLE_CLIENT_ID'));
 // var_dump(GOOGLE_CLIENT_ID);

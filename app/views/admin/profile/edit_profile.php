@@ -1,5 +1,9 @@
-<?php extract($data); ?>
-
+<?php extract($data); 
+// Generate CSRF token if not set
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+?>
 
 <?php
 require_once __DIR__ . '/../layout/sidebar.php';
@@ -25,6 +29,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
                 <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
             <form action="<?= URLROOT ?>/user/update" method="post" enctype="multipart/form-data" id="movieForm">
+                 <!-- CSRF hidden input -->
+          <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <input type="hidden" name="id" value="<?= $data['users']['id'] ?>">
                 <input type="hidden" name="role" value="<?= $data['users']['role'] ?>">
                 <div class="profile-content">

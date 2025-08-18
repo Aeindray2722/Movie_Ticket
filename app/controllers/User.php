@@ -96,7 +96,12 @@ class User extends Controller
             // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
-                redirect('user/editUserProfile');
+                $role = (int) ($_POST['role'] ?? 0);
+                if ($role === 0) {
+                    redirect('user/editProfile');
+                } else {
+                    redirect('user/editUserProfile');
+                }
                 exit;
             }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -136,7 +141,8 @@ class User extends Controller
             // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
-                redirect('user/UserchangePassword');
+                $redirectRoute = ((int) ($user['role'] ?? 0) === 1) ? 'user/UserchangePassword' : 'user/changePassword';
+                redirect($redirectRoute);
                 exit;
             }
 
@@ -200,12 +206,18 @@ class User extends Controller
 
     public function storeUserOrStaff()
     {
+        // 1️⃣ CSRF validation
+            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+                redirect('user/addstaff');
+                exit;
+            }
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('user');
                 return;
             }
-
+            // var_dump($_POST); exit;
             $created = $this->userService->create($_POST);
 
             if ($created) {

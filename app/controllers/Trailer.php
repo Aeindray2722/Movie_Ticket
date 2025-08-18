@@ -159,12 +159,7 @@ class Trailer extends Controller
     public function trailer()
     {
         try {
-            // 1️⃣ CSRF validation
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
-                redirect('pages/register');
-                exit;
-            }
+            
             $page = max((int) ($_GET['page'] ?? 1), 1);
             $limit = 4;
             $type = $_GET['type'] ?? null;

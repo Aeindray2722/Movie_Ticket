@@ -1,4 +1,6 @@
-<?php extract($data); ?>
+<?php extract($data); 
+
+?>
 <?php require_once __DIR__ . '/../layout/sidebar.php'; ?>
 
 <div class="list-content-wrapper">
@@ -7,6 +9,7 @@
     <div class="movie-list-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <form class="d-flex" action="<?= URLROOT ?>/movie/index" method="get">
+                
                 <input class="form-control me-2" type="search" placeholder="Search" name="search"
                     value="<?= htmlspecialchars($search ?? '') ?>">
                 <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
