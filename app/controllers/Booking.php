@@ -45,6 +45,7 @@ class Booking extends Controller
                 $_GET['date'] ?? null,
                 $_GET['time'] ?? null
             );
+            
 
             if (!$movieData) {
                 redirect('movie/nowShowing');
@@ -156,7 +157,7 @@ class Booking extends Controller
             }
 
             if ($this->bookingService->deleteBooking($bookingId)) {
-                redirect('booking');
+                redirect('booking/bookingHistory');
             } else {
                 setMessage('error', 'Failed to delete booking.');
                 redirect('booking');
@@ -168,41 +169,100 @@ class Booking extends Controller
         }
     }
 
-public function bookingHistory()
-{
-    try {
-        $limit = 10;
-        $page = max(1, (int) ($_GET['page'] ?? 1));
+    public function bookingHistory()
+    {
+        try {
+            $limit = 10;
+            $page = max(1, (int) ($_GET['page'] ?? 1));
 
-        // Get filter values from GET
-        $search = trim($_GET['search'] ?? '');
-        $start_date = $_GET['start_date'] ?? '';
-        $end_date = $_GET['end_date'] ?? '';
+            // Get filter values from GET
+            $search = trim($_GET['search'] ?? '');
+            $start_date = $_GET['start_date'] ?? '';
+            $end_date = $_GET['end_date'] ?? '';
 
-        // Prepare date range array
-        $dateRange = [];
-        if ($start_date) $dateRange['start'] = $start_date;
-        if ($end_date) $dateRange['end'] = $end_date;
+            // Prepare date range array
+            $dateRange = [];
+            if ($start_date)
+                $dateRange['start'] = $start_date;
+            if ($end_date)
+                $dateRange['end'] = $end_date;
 
-        // Fetch filtered & paginated bookings
-        $data = $this->bookingService->getBookingHistoryForAdmin($limit, $page, $search, $dateRange);
+            // Fetch filtered & paginated bookings
+            $data = $this->bookingService->getBookingHistoryForAdmin($limit, $page, $search, $dateRange);
 
-        // Pass current filters to view for pagination links
-        $data['search'] = $search;
-        $data['start_date'] = $start_date;
-        $data['end_date'] = $end_date;
+            // Pass current filters to view for pagination links
+            $data['search'] = $search;
+            $data['start_date'] = $start_date;
+            $data['end_date'] = $end_date;
 
-        // Now $page and $totalPages exist in $data
-        $this->view('admin/booking/booking_history', $data);
+            // Now $page and $totalPages exist in $data
+            $this->view('admin/booking/booking_history', $data);
 
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        setMessage('error', 'Unable to load booking history.');
-        redirect('dashboard');
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            setMessage('error', 'Unable to load booking history.');
+            redirect('dashboard');
+        }
+
     }
-}
+
+    public function export()
+    {
+        try {
+            // 1️⃣ Get filters from GET
+            $search = trim($_GET['search'] ?? '');
+            $start_date = $_GET['start_date'] ?? '';
+            $end_date = $_GET['end_date'] ?? '';
+
+            $dateRange = [];
+            if ($start_date)
+                $dateRange['start'] = $start_date;
+            if ($end_date)
+                $dateRange['end'] = $end_date;
+
+            // 2️⃣ Fetch all filtered bookings (no pagination for export)
+            $bookings = $this->bookingService->getBookingHistoryForAdmin(null, null, $search, $dateRange);
+
+            // CSV headers
+            header('Content-Type: text/csv; charset=UTF-8');
+            header('Content-Disposition: attachment; filename="bookings_' . date('Y-m-d_H-i-s') . '.csv"');
+
+            // Add UTF-8 BOM at the start
+            echo "\xEF\xBB\xBF";
+
+            $output = fopen('php://output', 'w');
+
+            // Column headers
+            fputcsv($output, ['User Name', 'Movie Name', 'Showtime', 'Date', 'Seat', 'Total Amount', 'Status']);
+
+            // Your loop
+            foreach ($bookings as $b) {
+                fputcsv($output, [
+                    $b['user_name'] ?? '',
+                    $b['movie_name'] ?? '',
+                    $b['show_time'] ?? '',
+                    $b['booking_date'] ?? '',
+                    $b['seat_names'] ?? '',
+                    $b['total_amount'] ?? '',
+                    match ($b['status'] ?? 0) {
+                        0 => 'Confirmed',
+                        1 => 'Pending',
+                        2 => 'Cancelled',
+                        default => 'Unknown',
+                    },
+                ]);
+            }
+
+            fclose($output);
+            exit;
 
 
+        } catch (Exception $e) {
+            error_log($e->getMessage());
+            setMessage('error', 'Failed to export bookings.');
+            redirect('booking/bookingHistory');
+        }
+    }
 
 
     public function history()
@@ -224,5 +284,5 @@ public function bookingHistory()
             redirect('movie/nowShowing');
         }
     }
-    
+
 }

@@ -84,7 +84,7 @@ class Seat extends Controller
                 setMessage('error', "Failed to add seat!");
             }
 
-            redirect('seat');
+            redirect('seat/index');
         } catch (Exception $e) {
             setMessage('error', 'Error adding seat: ' . $e->getMessage());
             redirect('seat');
@@ -134,7 +134,7 @@ class Seat extends Controller
                 throw new Exception('Failed to update seat!');
             }
 
-            redirect('seat');
+            redirect('seat/index');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
             redirect('seat');
@@ -159,7 +159,7 @@ class Seat extends Controller
                 throw new Exception('Failed to delete seat!');
             }
 
-            redirect('seat');
+            redirect('seat/index');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
             redirect('seat');

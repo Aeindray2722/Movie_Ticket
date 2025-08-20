@@ -117,7 +117,7 @@ class Contact extends Controller
             }
 
             setMessage('success', 'Contact deleted successfully.');
-            redirect('contact');
+            redirect('contact/index');
 
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());

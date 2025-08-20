@@ -19,7 +19,24 @@ if (!isset($_SESSION['csrf_token'])) {
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/new.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.header {
+    position: fixed;       /* Always visible */
+    top: 0;
+    left: 0;
+    width: 100%;           /* Stretch across screen */
+    z-index: 1000;         /* Stay above everything */
+    background-color: #f2e6f2; /* Your existing bg color */
+    height: 70px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
+/* Push page content below fixed header */
+body {
+    padding-top: 10px; /* same as header height */
+}
+
+</style>
 
 </head>
 
@@ -40,7 +57,6 @@ if (!isset($_SESSION['csrf_token'])) {
     </header>
     <div class="dashboard-content-area">
         <div class="background-overlay"></div>
-
         <div class="login-box">
             <div class="image-side"></div>
             <div class="form-side">
@@ -48,10 +64,11 @@ if (!isset($_SESSION['csrf_token'])) {
                 <form method="post" action="<?php echo URLROOT; ?>/auth/login" class="validate-form">
                     <!-- CSRF hidden input -->
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
                     <?php require APPROOT . '/views/components/auth_message.php'; ?>
 
-                    <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
-                        <input type="email" name="email" class="input100" placeholder="Email Address">
+                    <div class="wrap-input100 validate-input " data-validate="Valid email is required: ex@abc.xyz">
+                        <input type="email" name="email" class="input100 mb-3" placeholder="Email Address">
                         <span class="focus-input100"></span>
                         <span class="symbol-input100">
                             <i class="fa fa-envelope" aria-hidden="true"></i>
@@ -74,8 +91,8 @@ if (!isset($_SESSION['csrf_token'])) {
                     </div>
 
                     <div class="mb-3 mt-3 text-center">
-                        <div class="row justify-content-center">
-                            <div class="col-auto">
+                        <div class="row offset-2">
+                            <div class="col-auto ">
                                 <a href="<?php echo URLROOT; ?>/auth/googleLogin" class="btn btn-outline-danger">
                                     <i class="fab fa-google me-2"></i> Google
                                 </a>
@@ -84,22 +101,22 @@ if (!isset($_SESSION['csrf_token'])) {
                                 <a href="<?php echo URLROOT; ?>/auth/githubLogin" class="btn btn-outline-dark">
                                     <i class="fa-brands fa-github me-2"></i> GitHub
                                 </a>
-
                             </div>
                         </div>
                     </div>
 
-                    <div class="text-center mt-2">
+                    <div class="text-center mt-2 mb-3">
                         Don't have an account <a href="<?php echo URLROOT; ?>/pages/register">Register</a>
                     </div>
-
+                    <!-- reCAPTCHA widget -->
+                    <div class="g-recaptcha offset-2" data-sitekey="<?= GOOGLE_RECAPTCHA_SITE_KEY ?>"></div>
                 </form>
             </div>
         </div>
     </div>
     </div>
     <?php require_once APPROOT . '/views/inc/footer.php'; ?>
-
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
         // Show Password
         function myFunction() {

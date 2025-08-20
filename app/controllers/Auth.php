@@ -2,6 +2,7 @@
 //for user login and logout
 use Google\Client as GoogleClient;
 use Google\Service\Oauth2;
+require_once __DIR__ . '/../helpers/RateLimiter.php';
 
 class Auth extends Controller
 {
@@ -47,6 +48,19 @@ class Auth extends Controller
                 redirect('pages/register');
                 exit;
             }
+            // 2️⃣ reCAPTCHA validation
+                $recaptchaResponse = $_POST['g-recaptcha-response'] ?? '';
+                $remoteIp = $_SERVER['REMOTE_ADDR'];
+                $secret = GOOGLE_RECAPTCHA_SECRET;
+
+                $verifyUrl = "https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$recaptchaResponse}&remoteip={$remoteIp}";
+                $response = file_get_contents($verifyUrl);
+                $responseData = json_decode($response);
+                if (!$responseData->success) {
+                    setMessage('error', ' Please confirm you are human.');
+                    redirect('pages/register');
+                    exit;
+                }
 
             // 2️⃣ Continue your existing registration logic
             $email = $_POST['email'];
@@ -105,16 +119,25 @@ class Auth extends Controller
 
     public function verify($provider_token)
     {
-        $user = $this->db->columnFilter('users', 'token', $provider_token);
+        // $user = $this->db->columnFilter('users', 'token', $provider_token);
+        $user = $this->db->columnFilter('users', 'provider_token', $provider_token);
 
         if ($user) {
-            $success = $this->db->setLogin($user[0]['id']);
+            // Case: If result is an array of rows
+            if (isset($user[0])) {
+                $userId = $user[0]['id'];
+            } else {
+                // Case: If result is a single row
+                $userId = $user['id'];
+            }
 
+            $success = $this->db->setLogin($userId);
             if ($success) {
                 setMessage(
                     'success',
                     'Successfully Verified . Please log in !'
                 );
+                redirect('pages/login');
             } else {
                 setMessage('error', 'Fail to Verify . Please try again!');
             }
@@ -127,51 +150,76 @@ class Auth extends Controller
 
     public function login()
     {
-
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (isset($_POST['email']) && isset($_POST['password'])) {
+
                 // 1️⃣ CSRF validation
                 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                     setMessage('error', 'Invalid CSRF token. Please refresh the page.');
                     redirect('pages/login');
                     exit;
                 }
+
+                // 2️⃣ reCAPTCHA validation
+                $recaptchaResponse = $_POST['g-recaptcha-response'] ?? '';
+                $remoteIp = $_SERVER['REMOTE_ADDR'];
+                $secret = GOOGLE_RECAPTCHA_SECRET;
+
+                $verifyUrl = "https://www.google.com/recaptcha/api/siteverify?secret={$secret}&response={$recaptchaResponse}&remoteip={$remoteIp}";
+                $response = file_get_contents($verifyUrl);
+                $responseData = json_decode($response);
+
+                if (!$responseData->success) {
+                    // var_dump("ok"); exit;
+                    setMessage('error', ' Please confirm you are human.');
+                    redirect('pages/login');
+                    exit;
+                }
+
+                // 3️⃣ Rate limiter
                 $email = $_POST['email'];
-                $password = $_POST['password']; // ✅ plain password
+                $ip = $_SERVER['REMOTE_ADDR'];
+                $limiter = new RateLimiter($ip . '_' . $email, 5, 60);
+                if ($limiter->tooManyAttempts()) {
+                    setMessage('error', 'Too many login attempts. Try again in ' . $limiter->availableIn() . ' seconds.');
+                    redirect('pages/login');
+                    exit;
+                }
+
+                // 4️⃣ Login logic
+                $password = $_POST['password'];
                 $isLogin = $this->db->loginCheck($email, $password);
 
                 if ($isLogin) {
-                    $user = $isLogin; // Already a single row
-
+                    $user = $isLogin;
+                    // Check if the account is confirmed
+                    if ($user['is_confirmed'] == 0) {
+                        setMessage('error', 'Please verify your email address first!');
+                        redirect('pages/login');
+                        return;
+                    }
                     $_SESSION['user_name'] = $user['name'];
                     $_SESSION['role'] = $user['role'];
                     $_SESSION['profile_img'] = $user['profile_img'];
-                    // $_SESSION['user_id'] = base64_encode($user['id']);
-                    $_SESSION['user_id'] = (int) $user['id']; // ✅ integer
+                    $_SESSION['user_id'] = (int) $user['id'];
                     $_SESSION['customer_type'] = $user['customer_type'];
-                    // var_dump($user);
-                    // var_dump($_SESSION); exit;
 
-                    setMessage('id', base64_encode($isLogin['id']));
-                    $id = $isLogin['id'];
-                    $setLogin = $this->db->setLogin($id);
-                    if ($isLogin['role'] == 0) {
+                    $this->db->setLogin($user['id']);
+
+                    if ($user['role'] == 0) {
                         redirect('movie/dashboard');
-                    } elseif ($isLogin['role'] == 1) {
-                        redirect('pages/home');
                     } else {
-                        // Optional fallback if role is unknown
-                        setMessage('error', 'Unknown role.');
-                        redirect('pages/login');
+                        redirect('pages/home');
                     }
                 } else {
+                    $limiter->hit();
                     setMessage('error', 'Login Fail!');
                     redirect('pages/login');
                 }
-
             }
         }
     }
+
 
     public function googleLogin()
     {
@@ -199,6 +247,7 @@ class Auth extends Controller
         $client->setRedirectUri(GOOGLE_REDIRECT_URI);
 
         if (isset($_GET['code'])) {
+            
             $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
 
             if (isset($token['error'])) {
@@ -397,6 +446,17 @@ class Auth extends Controller
                 exit;
             }
             $email = trim($_POST['email'] ?? '');
+            $ip = $_SERVER['REMOTE_ADDR'];
+            $limiter = new RateLimiter($ip . '_otp', 3, 60); // max 3 OTP per minute
+
+            if ($limiter->tooManyAttempts()) {
+                setMessage('error', 'Too many OTP requests. Please wait ' . $limiter->availableIn() . ' seconds.');
+                redirect('auth/sendOtp');
+                exit;
+            }
+
+            $limiter->hit(); // count OTP request
+
 
             // Check if the email exists
             $user = $this->db->columnFilter('users', 'email', $email);

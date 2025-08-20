@@ -234,13 +234,13 @@ $unique_related_movies = array_values($unique_related_movies);
         <h3 class="fw-bold mb-4">Related Movies</h3>
         <div class="owl-carousel related-movies-carousel ms-4 me-4">
             <?php foreach ($unique_related_movies as $item): ?>
-                <div class="border border-primary rounded position-relative movie-item me-3">
+                <div class="border  rounded position-relative movie-item me-3">
                     <div class="movie-img">
                         <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($item['movie_img']) ?>"
                              class="img-fluid w-100 rounded-top" style="height: 250px; object-fit: cover;"
                              alt="<?= htmlspecialchars($item['movie_name']) ?>">
                     </div>
-                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">
+                    <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">
                         <?= htmlspecialchars($item['type_name']) ?>
                     </div>
                     <div class="p-4 pb-0 rounded-bottom">

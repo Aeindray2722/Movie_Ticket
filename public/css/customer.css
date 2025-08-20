@@ -113,6 +113,24 @@ body {
     height: 225px; /* Fixed height for consistent image size */
     object-fit: cover; /* Ensure images cover the area */
 }
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-movie-carousel .carousel-item .row {
+        flex-direction: column;
+    }
+    .main-movie-carousel .col-md-4, .main-movie-carousel .col-md-8 {
+        text-align: center !important;
+    }
+    .main-movie-carousel .movie-title {
+        font-size: 1.8rem;
+    }
+    .main-movie-carousel .movie-type {
+        font-size: 1rem;
+    }
+    .footer .meet-us-col, .footer .contact-us-col {
+        margin-bottom: 30px;
+    }
+}
 
 /* Footer Styling */
 .footer {
@@ -224,24 +242,7 @@ body {
     border-radius: 50%; /* Circle shape */
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .main-movie-carousel .carousel-item .row {
-        flex-direction: column;
-    }
-    .main-movie-carousel .col-md-4, .main-movie-carousel .col-md-8 {
-        text-align: center !important;
-    }
-    .main-movie-carousel .movie-title {
-        font-size: 1.8rem;
-    }
-    .main-movie-carousel .movie-type {
-        font-size: 1rem;
-    }
-    .footer .meet-us-col, .footer .contact-us-col {
-        margin-bottom: 30px;
-    }
-}
+
 
 /* --- New Styles for "Now Showing" Page Content (Screenshot 242) --- */
 
@@ -581,145 +582,6 @@ body {
 .btn-send-comment:hover {
     background-color: #7a60b9;
 }
-
-/*booking
-
-/* Date and Time Selection Styles */
-.selection-section {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.btn-date,
-.btn-time {
-    background-color: #f0f0f0;
-    color: #555;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 8px 15px;
-    font-size: 0.9rem;
-    min-width: 80px; /* Ensure buttons have a minimum width */
-    text-align: center;
-    transition: all 0.2s ease;
-}
-
-.btn-date.active,
-.btn-time.active,
-.btn-date:hover,
-.btn-time:hover {
-    background-color: #8c72cf; /* Your purple color */
-    color: white;
-    border-color: #8c72cf;
-}
-
-/* Cost Info Cards */
-.cost-info {
-    border: 1px solid #eee;
-    background-color: #f8f8f8;
-    border-radius: 8px;
-    font-size: 0.9rem;
-}
-.cost-info p {
-    margin-bottom: 0;
-}
-
-/* Seating Chart Styles */
-.seating-chart-container {
-    padding: 20px 0;
-}
-
-.seating-legend {
-    margin-bottom: 25px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.legend-color-box {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    margin-right: 8px;
-    border: 1px solid rgba(0,0,0,0.1); /* Subtle border for all boxes */
-}
-
-/* Specific background colors for legend and seats */
-.bg-danger { background-color: #dc3545 !important; } /* Not Available */
-.bg-success { background-color: #28a745 !important; } /* Selected */
-.bg-light-green { background-color: #d4edda !important; } /* Available (lighter green for subtle contrast) */
-
-
-.seat-layout {
-    background-color: #f4f4f4; /* Light grey background for the overall seat layout block */
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 30px 20px; /* More padding inside the seat layout box */
-    display: inline-flex; /* Keep it compact */
-    flex-wrap: nowrap; /* Prevent sections from wrapping */
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.05); /* Inner shadow for depth */
-}
-
-.seat-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* Space between rows */
-}
-
-.seat-row {
-    display: flex;
-    align-items: center;
-}
-
-.row-label {
-    font-weight: bold;
-    color: #333;
-    width: 20px; /* Fixed width for labels to align seats */
-    text-align: right;
-    margin-right: 5px;
-}
-
-.seat-cluster {
-    display: flex;
-    gap: 5px; /* Space between individual seats */
-}
-
-.seat {
-    width: 25px; /* Size of individual seat squares */
-    height: 25px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.1s ease-in-out;
-}
-
-.seat-available {
-    background-color: #e9ecef; /* Light grey, or your preferred available color */
-    border-color: #ced4da;
-}
-.seat-available:hover {
-    background-color: #cce5ff; /* Light blue on hover */
-    border-color: #a3d9ff;
-}
-
-.seat-selected {
-    background-color: #28a745; /* Green for selected seats */
-    border-color: #218838;
-    color: white; /* If you add numbers/icons */
-}
-
-.seat-not-available {
-    background-color: #dc3545; /* Red for not available seats */
-    border-color: #c82333;
-    cursor: not-allowed;
-    opacity: 0.7; /* Slightly faded */
-}
-
-
 /* General button styling for Book now */
 
 
@@ -784,38 +646,6 @@ body {
 /* Book Now Button */
 /* General body background for the history page */
 
-.history-page-content {
-    background-color: #e0e0e0; /* A slightly darker grey for the section background */
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-    min-height: calc(100vh - var(--navbar-height) - var(--footer-height)); /* Adjust based on your nav/footer height */
-}
-
-/* Card styling for the table container */
-.history-table-card {
-    border: none;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    background-color: #fff; /* White card background */
-}
-
-/* Table styling */
-.history-table {
-    margin-bottom: 0; /* Remove default table bottom margin if within a card-body */
-}
-
-
-.history-table th {
-    background-color: #f0f0f0; /* Light grey background for table headers */
-    color: #343a40; /* Darker text for headers */
-    font-weight: bold;
-    border-bottom: 2px solid #dee2e6; /* Stronger bottom border for headers */
-}
-
-.history-table td {
-    vertical-align: middle; /* Vertically align cell content */
-    padding: 1rem 0.75rem; /* Adjust padding for cells */
-}
 
 /* Status Badges */
 .history-status-pending {

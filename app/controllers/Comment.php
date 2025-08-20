@@ -46,13 +46,14 @@ class Comment extends Controller
             if (empty($commentText)) {
                 throw new Exception('Comment cannot be empty.');
             }
-
+            // ✅ Use Yangon timezone
+            $dt = new DateTime('now', new DateTimeZone('Asia/Yangon'));
             $data = [
                 'movie_id' => $movieId,
                 'user_id' => $userId,
                 'message' => $commentText,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
+                'created_at' => $dt->format('Y-m-d H:i:s'),
+                'updated_at' => $dt->format('Y-m-d H:i:s'),
             ];
 
             if (!$this->db->create('comments', $data)) {

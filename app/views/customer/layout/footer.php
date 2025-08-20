@@ -24,8 +24,8 @@ if (empty($_SESSION['csrf_token'])) {
             <div class="col-md-6 meet-us-col">
                 <h4>Meet us</h4>
                 <p>Phone No : 0998765302</p>
-                <p>Email : aeindray@gmail.com</p>
-                <p>Location : Yangon</p>
+                <p>Email : aeindiasoemyint@gmail.com</p>
+                <p>Location : Meiktila</p>
             </div>
             <div class="col-md-6 contact-us-col">
                 <h4>Contact us</h4>

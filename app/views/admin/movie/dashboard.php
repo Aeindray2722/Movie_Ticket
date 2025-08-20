@@ -13,27 +13,25 @@ require_once __DIR__ . '/../layout/sidebar.php';
                 <div class="dashboard-card">
                     <h4><i class="fa-solid fa-video"></i> Best Seller </h4>
                     <h3><?= htmlspecialchars($data['report']['best_selling_movie']) ?></h3> 
-                    <!-- (<?= (int) $data['report']['best_selling_count'] ?>
-                    bookings) -->
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="dashboard-card">
+                <a class="nav-link dashboard-card" href="<?php echo URLROOT; ?>/booking/bookingHistory"> 
                     <h4><i class="fa-solid fa-ticket"></i>Total Bookings</h4>
                     <h3><?= (int) $data['report']['total_bookings'] ?></h3>
-                </div>
+                </a>
             </div>
-            <div class="col-md-3">
-                <div class="dashboard-card">
+            <div class="col-md-3">      
+                <a class="nav-link dashboard-card" href="<?php echo URLROOT; ?>/booking/bookingHistory"> 
                     <h4><i class="fa-solid fa-square-poll-vertical"></i> Revenue</h4>
                     <h3><?= number_format($data['report']['total_revenue']) ?></h3>
-                </div>
+                </a>
             </div>
             <div class="col-md-3">
-                <div class="dashboard-card">
+                <a class="nav-link dashboard-card" href="<?php echo URLROOT; ?>/user/userList"> 
                     <h4><i class="fa-solid fa-users"></i>Total Users</h4>
                     <h3><?= (int) $data['report']['total_customers'] ?></h3>
-                </div>
+                </a>
             </div>
         </div>
 

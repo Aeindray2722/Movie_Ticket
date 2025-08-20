@@ -69,7 +69,7 @@ class Type extends Controller
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
         }
-        redirect('type');
+        redirect('type/index');
     }
 
     public function update()
@@ -82,7 +82,7 @@ class Type extends Controller
                 exit;
             }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                redirect('type');
+                redirect('type/index');
                 return;
             }
 
@@ -95,7 +95,7 @@ class Type extends Controller
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
         }
-        redirect('type');
+        redirect('type/index');
     }
 
     public function editType($id)
@@ -124,6 +124,6 @@ class Type extends Controller
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
         }
-        redirect('type');
+        redirect('type/index');
     }
 }

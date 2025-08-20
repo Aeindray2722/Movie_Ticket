@@ -68,7 +68,7 @@ class Payment extends Controller
 
                 $this->paymentService->createPayment($paymentData);
                 setMessage('success', 'Payment added successfully!');
-                redirect('payment');
+                redirect('payment/index');
             }
         } catch (Exception $e) {
             setMessage('error', 'Failed to add payment: ' . $e->getMessage());
@@ -113,7 +113,7 @@ class Payment extends Controller
                 } else {
                     throw new Exception('Failed to update payment!');
                 }
-                redirect('payment');
+                redirect('payment/index');
             }
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
@@ -133,7 +133,7 @@ class Payment extends Controller
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
         }
-        redirect('payment');
+        redirect('payment/index');
     }
 
     public function payment()

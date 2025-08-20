@@ -87,7 +87,7 @@ class Trailer extends Controller
             $data = ['movie_id' => $_POST['movie_id']];
             $this->service->create($data, $_FILES);
             setMessage('success', 'Trailer added successfully!');
-            redirect('trailer');
+            redirect('trailer/create');
         } catch (Exception $e) {
             setMessage('error', 'Failed to add trailer: ' . $e->getMessage());
             redirect('trailer');
@@ -133,7 +133,7 @@ class Trailer extends Controller
             } else {
                 throw new Exception('Failed to update trailer!');
             }
-            redirect('trailer');
+            redirect('trailer/create');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
             redirect('trailer');
@@ -149,7 +149,7 @@ class Trailer extends Controller
             } else {
                 throw new Exception('Trailer not found!');
             }
-            redirect('trailer');
+            redirect('trailer/create');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
             redirect('trailer');

@@ -97,7 +97,7 @@ class Movie extends Controller
             redirect('movie');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
-            redirect('movie');
+            redirect('movie/index');
         }
     }
 
@@ -139,7 +139,7 @@ class Movie extends Controller
 
             $updated = $this->movieService->updateMovie($_POST, $_FILES);
             setMessage($updated ? 'success' : 'error', $updated ? 'Movie updated successfully!' : 'Failed to update movie.');
-            redirect('movie');
+            redirect('movie/index');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
             redirect('movie');
@@ -156,7 +156,7 @@ class Movie extends Controller
 
             $deleted = $this->movieService->deleteMovie((int) $id);
             setMessage($deleted ? 'success' : 'error', $deleted ? 'Movie and image deleted successfully!' : 'Failed to delete movie.');
-            redirect('movie');
+            redirect('movie/index');
         } catch (Exception $e) {
             setMessage('error', $e->getMessage());
             redirect('movie');

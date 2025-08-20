@@ -3,7 +3,7 @@
 
 // Generate CSRF token if not set
 if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
 
@@ -20,7 +20,24 @@ if (!isset($_SESSION['csrf_token'])) {
   <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/new.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  .header {
+    position: fixed;       /* Always visible */
+    top: 0;
+    left: 0;
+    width: 100%;           /* Stretch across screen */
+    z-index: 1000;         /* Stay above everything */
+    background-color: #f2e6f2; /* Your existing bg color */
+    height: 70px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
+/* Push page content below fixed header */
+body {
+    padding-top: 10px; /* same as header height */
+}
+
+</style>
 
 </head>
 
@@ -49,10 +66,11 @@ if (!isset($_SESSION['csrf_token'])) {
       <div class="form-side">
         <h2 class="text-center mb-4">Register</h2>
 
-        <form class="login100-form validate-form" name="contactForm" method="POST" action="<?php echo URLROOT; ?>/auth/register">
-           <!-- CSRF hidden input -->
+        <form class="login100-form validate-form" name="contactForm" method="POST"
+          action="<?php echo URLROOT; ?>/auth/register">
+          <!-- CSRF hidden input -->
           <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-
+          
           <?php require APPROOT . '/views/components/auth_message.php'; ?>
           <div class="wrap-input100 validate-input" data-validate="Valid Name is required:">
             <input class="input100" type="text" id="name" onfocus="this.value=''" name="name" placeholder="Username">
@@ -83,7 +101,7 @@ if (!isset($_SESSION['csrf_token'])) {
           </p>
 
           <div class="wrap-input100 validate-input" data-validate="Valid phone is required: ex@abc.xyz">
-            <input class="input100" type="phone" id="phone" name="phone" placeholder="phone">
+            <input class="input100" type="tel" id="phone" name="phone" placeholder="phone">
             <span class="focus-input100"></span>
             <span class="symbol-input100">
               <i class="fa fa-phone" aria-hidden="true"></i>
@@ -118,18 +136,22 @@ if (!isset($_SESSION['csrf_token'])) {
               name="btn_register">Register</button>
           </div>
 
-          <div class="text-center mt-2">
+          <div class="text-center mt-2 mb-3">
             Already have an account? <a href="<?php echo URLROOT; ?>/pages/login">Login</a>
           </div>
+          <!-- reCAPTCHA widget -->
+          <div class="g-recaptcha" data-sitekey="<?= GOOGLE_RECAPTCHA_SITE_KEY ?>"></div>
         </form>
         <!-- <div class="form-check mb-3">
           <input class="form-check-input" type="checkbox" required>
           <label class="form-check-label">I agree with the terms and conditions</label>
         </div> -->
+        
       </div>
     </div>
   </div>
   </div>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script>
     // Show Password
     function myFunction() {

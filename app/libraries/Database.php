@@ -375,14 +375,32 @@ class Database
 
         return $seatMap;
     }
+    // public function getBookingsByUser($user_id)
+    // {
+    //     $sql = "SELECT * FROM bookings WHERE user_id = :user_id ORDER BY created_at DESC";
+    //     $this->query($sql);
+    //     $this->bind(':user_id', $user_id);
+    //     $this->stmt->execute();
+    //     return $this->fetchAll();
+    // }
     public function getBookingsByUser($user_id)
     {
-        $sql = "SELECT * FROM bookings WHERE user_id = :user_id ORDER BY created_at DESC";
+        $sql = "SELECT 
+                b.*,
+                m.movie_name,
+                DATE_FORMAT(st.show_time, '%H:%i') AS show_time
+            FROM bookings b
+            JOIN movies m ON b.movie_id = m.id
+            JOIN show_times st ON b.show_time_id = st.id
+            WHERE b.user_id = :user_id
+            ORDER BY b.created_at DESC";
+
         $this->query($sql);
         $this->bind(':user_id', $user_id);
         $this->stmt->execute();
         return $this->fetchAll();
     }
+
     public function updateStatus($booking_id, $status)
     {
         $sql = "UPDATE bookings SET status = :status WHERE id = :id";
@@ -616,9 +634,7 @@ class Database
         return (int) $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC)['total'];
     }
 
-
-
-    function uploadImage($file, $relativeDir)
+    /*function uploadImage($file, $relativeDir)
     {
         $uploadDir = __DIR__ . $relativeDir;
         $filename = time() . '_' . basename($file['name']);
@@ -629,7 +645,40 @@ class Database
         }
 
         return null;
+    }*/
+    function uploadImage(array $file, string $relativeDir): ?string
+    {
+        $uploadDir = __DIR__ . $relativeDir;
+
+        // Ensure directory exists
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        // Allowed extensions & MIME types
+        $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $allowedMime = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $fileMime = mime_content_type($file['tmp_name']);
+
+        // Validate
+        if (!in_array($fileExt, $allowedExt) || !in_array($fileMime, $allowedMime)) {
+            return null; // ❌ invalid file
+        }
+
+        // Generate safe unique filename
+        $filename = uniqid("img_", true) . '.' . $fileExt;
+        $target = $uploadDir . DIRECTORY_SEPARATOR . $filename;
+
+        // Move safely
+        if (is_uploaded_file($file['tmp_name']) && move_uploaded_file($file['tmp_name'], $target)) {
+            return $filename;
+        }
+
+        return null;
     }
+
     public function getRatingByUserAndMovie($user_id, $movie_id)
     {
         $this->query("SELECT * FROM ratings WHERE user_id = :user_id AND movie_id = :movie_id");
@@ -664,5 +713,7 @@ class Database
         }
         return $user;
     }
+    
+
 }
 

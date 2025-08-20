@@ -85,9 +85,6 @@ $currentPage = $_SERVER['REQUEST_URI'];
           <i class="fas fa-history"></i> Booking History
         </a>
       </li>
-
-
-
     </ul>
   </div>
 

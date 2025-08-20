@@ -1,30 +1,67 @@
-<?php
-require_once __DIR__ . '/../layout/nav.php';
-?>
-<section class="history-page-content py-4">
-    <div class="container">
-        <h2 class="mb-4">History</h2>
+<!DOCTYPE html>
+<html lang="en">
 
-        <div class="card history-table-card">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped history-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Booking Date</th>
-                                <th scope="col">Movie Name</th>
-                                <th scope="col">Seats</th>
-                                <th scope="col">Total Amount</th>
-                                <th scope="col">Status</th>
-                            </tr>
-                        </thead>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Booking History</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo URLROOT; ?>/css/booking.css" />
+</head>
 
-                        <tbody>
+<body>
+    <?php
+    require_once __DIR__ . '/../layout/nav.php';
+    ?>
+    <section class="history-page-content mt-2 pt-0">
+        <div class="container">
+            <div class="page-header">
+                <h3 class="page-title">
+                    <i class="fas fa-history me-3"></i>
+                    Booking History
+                </h3>
+            </div>
+
+            <div class="card history-table-card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table history-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        Booking Date
+                                    </th>
+                                    <th scope="col">
+                                        <i class="fas fa-film me-2"></i>
+                                        Movie Name
+                                    </th>
+                                    <th scope="col">
+                                        <i class="fas fa-clock me-2"></i>
+                                        Show Time
+                                    </th>
+                                    <th scope="col">
+                                        <i class="fas fa-chair me-2"></i>
+                                        Seats
+                                    </th>
+                                    <th scope="col">
+                                        <i class="fas fa-dollar-sign me-2"></i>
+                                        Total Amount
+                                    </th>
+                                    <th scope="col">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
                             <?php if (!empty($data['bookings'])): ?>
                                 <?php foreach ($data['bookings'] as $booking): ?>
                                     <tr>
                                         <td><?= date('d.m.Y', strtotime($booking['booking_date'])) ?></td>
                                         <td><?= htmlspecialchars($booking['movie_name']) ?></td>
+                                        <td><?= date('h:i A', strtotime($booking['show_time'])) ?></td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
                                                 <?php foreach ($booking['seat_names'] as $seat): ?>
@@ -38,15 +75,15 @@ require_once __DIR__ . '/../layout/nav.php';
                                             // Map numeric status to text and class
                                             switch ($booking['status']) {
                                                 case 0:
-                                                    $statusText = 'Accept';
+                                                    $statusText = '<i class="fas fa-check-circle me-1"></i>Accept';
                                                     $statusClass = 'bg-success history-status-success';
                                                     break;
                                                 case 1:
-                                                    $statusText = 'Pending';
+                                                    $statusText = '<i class="fas fa-clock me-1"></i>Pending';
                                                     $statusClass = 'bg-warning text-dark history-status-pending';
                                                     break;
                                                 case 2:
-                                                    $statusText = 'Reject';
+                                                    $statusText = '<i class="fas fa-times-circle me-1"></i>Reject';
                                                     $statusClass = 'bg-danger history-status-reject';
                                                     break;
                                                 default:
@@ -65,49 +102,17 @@ require_once __DIR__ . '/../layout/nav.php';
                             </tr>
                              <?php endif; ?>
                         </tbody>
-
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<?php
-require_once __DIR__ . '/../layout/footer.php';
-?>
-<script>
-    function downloadTicket(bookingId) {
-        const printWindow = window.open('<?= URLROOT ?>/booking/downloadTicket?booking_id=' + bookingId, '_blank');
+    <?php
+    require_once __DIR__ . '/../layout/footer.php';
+    ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
 
-        printWindow.focus();
-
-        // Wait until the content loads and then trigger print
-        printWindow.onload = function () {
-            printWindow.print();
-        };
-    }
-</script>
-<script>
-    function printTicket(bookingId) {
-        const ticketContent = document.getElementById('ticket_' + bookingId).innerHTML;
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-        <html>
-        <head>
-            <title>Ticket - Central Cinema</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                h2 { color: #333; }
-                p { margin: 4px 0; }
-            </style>
-        </head>
-        <body onload="window.print(); window.close();">
-            ${ticketContent}
-        </body>
-        </html>
-    `);
-        printWindow.document.close();
-    }
-</script>
+</html>

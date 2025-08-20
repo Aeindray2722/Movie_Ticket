@@ -3,12 +3,12 @@ $search_query = trim($_GET['search'] ?? '');
 $start_date = $_GET['start_date'] ?? '';
 $end_date = $_GET['end_date'] ?? '';
 $bookings = isset($data['bookings']) && is_array($data['bookings']) ? $data['bookings'] : [];
-$bookings   = $data['bookings'] ?? [];
-$page       = $data['page'] ?? 1;
+$bookings = $data['bookings'] ?? [];
+$page = $data['page'] ?? 1;
 $totalPages = $data['totalPages'] ?? 1;
-$search     = $data['search'] ?? '';
+$search = $data['search'] ?? '';
 $start_date = $data['start_date'] ?? '';
-$end_date   = $data['end_date'] ?? '';
+$end_date = $data['end_date'] ?? '';
 // Filter bookings by search and/or date range
 if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
     $filtered = [];
@@ -67,6 +67,11 @@ if (!isset($_SESSION['csrf_token'])) {
                     </a>
                     <input type="hidden" name="start_date" id="startDate" value="<?= htmlspecialchars($start_date) ?>">
                     <input type="hidden" name="end_date" id="endDate" value="<?= htmlspecialchars($end_date) ?>">
+                    <a href="<?= URLROOT ?>/booking/export?search=<?= urlencode($search) ?>&start_date=<?= urlencode($start_date) ?>&end_date=<?= urlencode($end_date) ?>"
+                        class="btn btn-success ms-3">
+                        Export
+                    </a>
+
                 </form>
                 <?php if (
                     !empty($start_date) &&
@@ -184,49 +189,49 @@ if (!isset($_SESSION['csrf_token'])) {
 
     </script>
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const dateBtn = document.getElementById("dateRangeBtn");
-    const startDateInput = document.getElementById("startDate");
-    const endDateInput = document.getElementById("endDate");
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.querySelector("input[name='search']");
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateBtn = document.getElementById("dateRangeBtn");
+            const startDateInput = document.getElementById("startDate");
+            const endDateInput = document.getElementById("endDate");
+            const searchForm = document.getElementById("searchForm");
+            const searchInput = document.querySelector("input[name='search']");
 
-    // Format date in YYYY-MM-DD local
-    function formatDateLocal(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    // Create hidden input for flatpickr
-    const hiddenInput = document.createElement("input");
-    hiddenInput.type = "text";
-    hiddenInput.style.display = "none";
-    document.body.appendChild(hiddenInput);
-
-    // Initialize flatpickr for range
-    const picker = flatpickr(hiddenInput, {
-        mode: "range",
-        dateFormat: "Y-m-d",
-        onClose: function (selectedDates) {
-            if (selectedDates.length === 2) {
-                startDateInput.value = formatDateLocal(selectedDates[0]);
-                endDateInput.value = formatDateLocal(selectedDates[1]);
-                searchForm.submit();
+            // Format date in YYYY-MM-DD local
+            function formatDateLocal(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
-        }
-    });
 
-    // Clear date filter when typing in search
-    searchInput.addEventListener("input", () => {
-        if (searchInput.value.trim() !== "") {
-            startDateInput.value = "";
-            endDateInput.value = "";
-        }
-    });
+            // Create hidden input for flatpickr
+            const hiddenInput = document.createElement("input");
+            hiddenInput.type = "text";
+            hiddenInput.style.display = "none";
+            document.body.appendChild(hiddenInput);
 
-    // Open flatpickr on button click
-    dateBtn.addEventListener("click", () => picker.open());
-});
-</script>
+            // Initialize flatpickr for range
+            const picker = flatpickr(hiddenInput, {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                onClose: function (selectedDates) {
+                    if (selectedDates.length === 2) {
+                        startDateInput.value = formatDateLocal(selectedDates[0]);
+                        endDateInput.value = formatDateLocal(selectedDates[1]);
+                        searchForm.submit();
+                    }
+                }
+            });
+
+            // Clear date filter when typing in search
+            searchInput.addEventListener("input", () => {
+                if (searchInput.value.trim() !== "") {
+                    startDateInput.value = "";
+                    endDateInput.value = "";
+                }
+            });
+
+            // Open flatpickr on button click
+            dateBtn.addEventListener("click", () => picker.open());
+        });
+    </script>
