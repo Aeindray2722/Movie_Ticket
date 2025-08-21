@@ -195,9 +195,6 @@ class MovieService
         ];
     }
 
-
-
-
     public function getMovieDetail(int $id): ?array
     {
         $movie = $this->db->getById('view_movies_info', $id);

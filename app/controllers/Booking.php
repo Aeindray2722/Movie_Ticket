@@ -8,6 +8,8 @@ class Booking extends Controller
 
     public function __construct(?BookingService $bookingService = null)
     {
+        parent::__construct();
+        $this->requireAuth();
         // CSRF token generation
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -51,7 +53,6 @@ class Booking extends Controller
                 redirect('movie/nowShowing');
                 return;
             }
-
             $this->view('customer/booking/booking', $movieData);
         } catch (Exception $e) {
             error_log($e->getMessage());

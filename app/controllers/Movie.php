@@ -12,13 +12,13 @@ class Movie extends Controller
         try {
             $db = new Database();
             // Use the interface type hint but instantiate concrete class here
-            $repo = new MovieRepository($db); 
+            $repo = new MovieRepository($db);
             $this->movieService = new MovieService($repo, $db);
             $this->model('MovieModel');
             // CSRF token generation
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+            if (empty($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
         } catch (Exception $e) {
             setMessage('error', 'Failed to initialize Movie Controller: ' . $e->getMessage());
             redirect('pages/home');
@@ -39,7 +39,8 @@ class Movie extends Controller
     public function index()
     {
         try {
-            
+            parent::__construct();
+            $this->requireAuth();
             $search = trim($_GET['search'] ?? '');
             $page = max(1, (int) ($_GET['page'] ?? 1));
             $limit = 5;
@@ -65,6 +66,8 @@ class Movie extends Controller
     public function create()
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             $data = [
                 'movies' => $this->movieService->getAllMovies(),
                 'show_times' => $this->movieService->getShowTimes(),
@@ -82,6 +85,8 @@ class Movie extends Controller
     public function store()
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
@@ -104,6 +109,8 @@ class Movie extends Controller
     public function edit($id)
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             $movie = $this->movieService->getMovieById((int) $id);
 
             if (!$movie) {
@@ -128,6 +135,8 @@ class Movie extends Controller
     public function update()
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
                 redirect('movie/edit');
@@ -149,6 +158,8 @@ class Movie extends Controller
     public function destroy($id)
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             $id = base64_decode($id);
             if (!$id) {
                 throw new Exception('Invalid movie ID.');
@@ -166,6 +177,8 @@ class Movie extends Controller
     public function dashboard()
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             $recentBookings = $this->movieService->getRecentBookings();
             $report = $this->movieService->getMonthlySummary();
 
@@ -184,7 +197,7 @@ class Movie extends Controller
     public function nowShowing()
     {
         try {
-            
+
             $type = $_GET['type'] ?? null;
             $search = trim($_GET['search'] ?? '');
             $page = max(1, (int) ($_GET['page'] ?? 1));

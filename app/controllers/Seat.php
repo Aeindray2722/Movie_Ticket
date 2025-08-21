@@ -9,6 +9,8 @@ class Seat extends Controller
     public function __construct()
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             $db = new Database();
             $seatRepository = new SeatRepository($db);
             $this->seatService = new SeatService($seatRepository);

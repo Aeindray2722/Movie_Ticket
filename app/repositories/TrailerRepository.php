@@ -88,29 +88,56 @@ class TrailerRepository
         return $this->db->delete('trailers', $id);
     }
 
-    public function searchTrailers($type, $search, $limit, $page)
-    {
-        $offset = ($page - 1) * $limit;
-        $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
+public function searchTrailers($type, $search, $limit, $page)
+{
+    $offset = ($page - 1) * $limit;
+    $columnsToSearch = ['movie_name', 'type_name', 'actor_name'];
 
-        $result = $this->db->search(
-            'trailers JOIN view_movies_info ON trailers.movie_id = view_movies_info.id',
-            $columnsToSearch,
-            $search,
-            $limit,
-            $offset
-        );
-
-        $data = $result['data'];
-        if ($type) {
-            $data = array_filter($data, fn($t) => strtolower($t['type_name']) === strtolower($type));
-        }
-
-        return [
-            'data' => array_values($data),
-            'totalPages' => ceil(count($data) / $limit)
-        ];
+    // Build extra WHERE for type
+    $extraWhere = "";
+    $paramsExtra = [];
+    if ($type) {
+        $extraWhere = " AND LOWER(type_name) = ? ";
+        $paramsExtra[] = strtolower($type);
     }
+
+    // Modify search to include type filtering
+    $searchTerm = "%$search%";
+    $likeClauses = implode(' OR ', array_map(fn($col) => "$col LIKE ?", $columnsToSearch));
+
+    // 1️⃣ Fetch paged data
+    $sqlData = "SELECT * 
+                FROM trailers 
+                JOIN view_movies_info ON trailers.movie_id = view_movies_info.id 
+                WHERE ($likeClauses) $extraWhere 
+                LIMIT ? OFFSET ?";
+    $stmtData = $this->db->pdo->prepare($sqlData);
+
+    // bind search + type + limit/offset
+    $paramsData = array_fill(0, count($columnsToSearch), $searchTerm);
+    $paramsData = array_merge($paramsData, $paramsExtra, [$limit, $offset]);
+    $stmtData->execute($paramsData);
+    $data = $stmtData->fetchAll();
+
+    // 2️⃣ Fetch total count
+    $sqlCount = "SELECT COUNT(*) 
+                 FROM trailers 
+                 JOIN view_movies_info ON trailers.movie_id = view_movies_info.id 
+                 WHERE ($likeClauses) $extraWhere";
+    $stmtCount = $this->db->pdo->prepare($sqlCount);
+    $paramsCount = array_fill(0, count($columnsToSearch), $searchTerm);
+    $paramsCount = array_merge($paramsCount, $paramsExtra);
+    $stmtCount->execute($paramsCount);
+    $total = (int) $stmtCount->fetchColumn();
+
+    return [
+        'data' => $data,
+        'totalPages' => ceil($total / $limit)
+    ];
+}
+
+
+
 
     public function getMovieDetail($id)
     {

@@ -117,8 +117,5 @@ class BookingRepository implements BookingRepositoryInterface
     public function getShowTimeById(int $showTimeId)
     {
         return $this->db->getById('show_times', $showTimeId);
-    }
-    
-
-    
+    }    
 }

@@ -101,9 +101,14 @@ class MovieRepository implements MovieRepositoryInterface
 
     public function getRelatedMovies(string $typeName, int $excludeId, int $limit = 6): array
     {
+        $today = date('Y-m-d');
         return $this->db->readWithCondition(
             'view_movies_info',
-            "type_name = '{$typeName}' AND id != {$excludeId} LIMIT {$limit}"
+            "type_name = '{$typeName}' 
+         AND id != {$excludeId} 
+         AND '{$today}' BETWEEN start_date AND end_date
+         LIMIT {$limit}"
         );
     }
+
 }

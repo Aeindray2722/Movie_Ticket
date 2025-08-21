@@ -10,14 +10,16 @@ class User extends Controller
     public function __construct()
     {
         try {
+            parent::__construct();
+            $this->requireAuth();
             $db = new Database();
             $userRepository = new UserRepository($db);
             $this->userService = new UserService($userRepository);
             $this->model('UserModel');
             // CSRF token generation
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+            if (empty($_SESSION['csrf_token'])) {
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            }
         } catch (Exception $e) {
             setMessage('error', 'Initialization error: ' . $e->getMessage());
             redirect('error');
@@ -207,11 +209,11 @@ class User extends Controller
     public function storeUserOrStaff()
     {
         // 1️⃣ CSRF validation
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
-                redirect('user/addstaff');
-                exit;
-            }
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+            redirect('user/addstaff');
+            exit;
+        }
         try {
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 redirect('user');
@@ -221,10 +223,10 @@ class User extends Controller
             $created = $this->userService->create($_POST);
 
             if ($created) {
-                setMessage('success', ((int)$_POST['role'] === 1 ? 'User' : 'Staff') . ' created successfully!');
-                redirect((int)$_POST['role'] === 1 ? 'user/userList' : 'user/staffList');
+                setMessage('success', ((int) $_POST['role'] === 1 ? 'User' : 'Staff') . ' created successfully!');
+                redirect((int) $_POST['role'] === 1 ? 'user/userList' : 'user/staffList');
             } else {
-                redirect((int)($_POST['role'] ?? 1) === 1 ? 'user/addUser' : 'user/addStaff');
+                redirect((int) ($_POST['role'] ?? 1) === 1 ? 'user/addUser' : 'user/addStaff');
             }
         } catch (Exception $e) {
             setMessage('error', 'Failed to create user/staff: ' . $e->getMessage());
@@ -247,12 +249,12 @@ class User extends Controller
             $deleted = $this->userService->deleteUser($id);
 
             if ($deleted) {
-                setMessage('success', ((int)$user['role'] === 1 ? 'User' : 'Staff') . ' deleted successfully!');
+                setMessage('success', ((int) $user['role'] === 1 ? 'User' : 'Staff') . ' deleted successfully!');
             } else {
                 setMessage('error', 'Failed to delete user.');
             }
 
-            redirect((int)$user['role'] === 1 ? 'user/userList' : 'user/staffList');
+            redirect((int) $user['role'] === 1 ? 'user/userList' : 'user/staffList');
         } catch (Exception $e) {
             setMessage('error', 'Failed to delete user: ' . $e->getMessage());
             redirect('user');

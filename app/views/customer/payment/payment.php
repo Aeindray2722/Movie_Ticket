@@ -65,7 +65,7 @@ if (!isset($_SESSION['csrf_token'])) {
                                         <select class="form-select" id="choosePayment" name="payment_method" required>
                                             <option selected disabled>Choose Payment</option>
                                             <?php foreach ($data['payments'] as $payment): ?>
-                                                <option value="<?= htmlspecialchars($payment['payment_method']) ?>">
+                                                <option value="<?= htmlspecialchars($payment['payment_method']) ?>" >
                                                     <?= htmlspecialchars($payment['payment_method']) ?>
                                                 </option>
                                             <?php endforeach; ?>

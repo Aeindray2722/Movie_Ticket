@@ -67,7 +67,7 @@ require_once __DIR__ . '/../layout/nav.php';
 
         <?php if ($data['totalPages'] > 1): ?>
             <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-end">
+                <ul class="pagination justify-content-center">
                     <?php for ($p = 1; $p <= $data['totalPages']; $p++): ?>
                         <li class="page-item <?= ($p == $data['page']) ? 'active' : '' ?>">
                             <a class="page-link"

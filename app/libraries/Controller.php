@@ -3,6 +3,13 @@
 
 class Controller
 {
+    protected $session;
+
+    public function __construct()
+    {
+        require_once __DIR__ . "/../libraries/SessionManager.php";
+        $this->session = new SessionManager();
+    }
     // Load Model
     public function model($model) // Product
     {
@@ -18,4 +25,12 @@ class Controller
             die('View does not exist');
         }
     }
+    protected function requireAuth()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: /auth/login");
+            exit;
+        }
+    }
+
 }

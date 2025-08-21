@@ -7,7 +7,7 @@
     <title>Modern Booking History</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="<?php echo URLROOT; ?>/css/booking.css" />
+    <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/booking.css" />
 </head>
 
 <body>
@@ -56,52 +56,52 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php if (!empty($data['bookings'])): ?>
-                                <?php foreach ($data['bookings'] as $booking): ?>
-                                    <tr>
-                                        <td><?= date('d.m.Y', strtotime($booking['booking_date'])) ?></td>
-                                        <td><?= htmlspecialchars($booking['movie_name']) ?></td>
-                                        <td><?= date('h:i A', strtotime($booking['show_time'])) ?></td>
-                                        <td>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                <?php foreach ($booking['seat_names'] as $seat): ?>
-                                                    <span class="badge bg-secondary"><?= htmlspecialchars($seat) ?></span>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        </td>
-                                        <td>$<?= number_format($booking['total_amount'], 2) ?></td>
-                                        <td>
-                                            <?php
-                                            // Map numeric status to text and class
-                                            switch ($booking['status']) {
-                                                case 0:
-                                                    $statusText = '<i class="fas fa-check-circle me-1"></i>Accept';
-                                                    $statusClass = 'bg-success history-status-success';
-                                                    break;
-                                                case 1:
-                                                    $statusText = '<i class="fas fa-clock me-1"></i>Pending';
-                                                    $statusClass = 'bg-warning text-dark history-status-pending';
-                                                    break;
-                                                case 2:
-                                                    $statusText = '<i class="fas fa-times-circle me-1"></i>Reject';
-                                                    $statusClass = 'bg-danger history-status-reject';
-                                                    break;
-                                                default:
-                                                    $statusText = 'Unknown';
-                                                    $statusClass = 'bg-secondary';
-                                            }
-                                            ?>
-                                            <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
-                                        </td>
+                                <?php if (!empty($data['bookings'])): ?>
+                                    <?php foreach ($data['bookings'] as $booking): ?>
+                                        <tr>
+                                            <td><?= date('d.m.Y', strtotime($booking['booking_date'])) ?></td>
+                                            <td><?= htmlspecialchars($booking['movie_name']) ?></td>
+                                            <td><?= date('h:i A', strtotime($booking['show_time'])) ?></td>
+                                            <td>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <?php foreach ($booking['seat_names'] as $seat): ?>
+                                                        <span class="badge bg-secondary"><?= htmlspecialchars($seat) ?></span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </td>
+                                            <td>$<?= number_format($booking['total_amount'], 2) ?></td>
+                                            <td>
+                                                <?php
+                                                // Map numeric status to text and class
+                                                switch ($booking['status']) {
+                                                    case 0:
+                                                        $statusText = '<i class="fas fa-check-circle me-1"></i>Accept';
+                                                        $statusClass = 'bg-success history-status-success';
+                                                        break;
+                                                    case 1:
+                                                        $statusText = '<i class="fas fa-clock me-1"></i>Pending';
+                                                        $statusClass = 'bg-warning text-dark history-status-pending';
+                                                        break;
+                                                    case 2:
+                                                        $statusText = '<i class="fas fa-times-circle me-1"></i>Reject';
+                                                        $statusClass = 'bg-danger history-status-reject';
+                                                        break;
+                                                    default:
+                                                        $statusText = 'Unknown';
+                                                        $statusClass = 'bg-secondary';
+                                                }
+                                                ?>
+                                                <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
+                                            </td>
 
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="5" class="text-center">No booking history found.</td>
                                     </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                            <tr>
-                                <td colspan="5" class="text-center">No booking history found.</td>
-                            </tr>
-                             <?php endif; ?>
-                        </tbody>
+                                <?php endif; ?>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -113,6 +113,7 @@
     require_once __DIR__ . '/../layout/footer.php';
     ?>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>
