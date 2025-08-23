@@ -11,7 +11,7 @@ if (!isset($_SESSION['csrf_token'])) {
     ?>
     <div class="content-area">
         <div class="back-arrow-container">
-            <a href="add_payment.php" class="d-flex align-items-center">
+            <a href="<?php echo URLROOT; ?>/payment/index"  class="d-flex align-items-center">
                 <i class="fas fa-arrow-left me-2"></i>
             </a>
         </div>

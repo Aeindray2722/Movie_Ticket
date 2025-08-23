@@ -63,9 +63,10 @@ if (!isset($_SESSION['csrf_token'])) {
                                         <label for="choosePayment" class="form-label visually-hidden">Choose
                                             Payment</label>
                                         <select class="form-select" id="choosePayment" name="payment_method" required>
-                                            <option selected disabled>Choose Payment</option>
+                                            <!-- <option selected disabled>Choose Payment</option> -->
+                                            <option selected disabled value="">Choose Payment</option>
                                             <?php foreach ($data['payments'] as $payment): ?>
-                                                <option value="<?= htmlspecialchars($payment['payment_method']) ?>" >
+                                                <option value="<?= htmlspecialchars($payment['payment_method']) ?>">
                                                     <?= htmlspecialchars($payment['payment_method']) ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -106,3 +107,18 @@ if (!isset($_SESSION['csrf_token'])) {
 <?php
 require_once __DIR__ . '/../layout/footer.php';
 ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentForm = document.querySelector('form');
+    const paymentSelect = document.getElementById('choosePayment');
+
+    paymentForm.addEventListener('submit', function(e) {
+        if (paymentSelect.value === "") {  // explicitly check for empty string
+            e.preventDefault();            // stop form submission
+            alert('Please choose a payment method before booking.');
+            paymentSelect.focus();         // optional: focus the dropdown
+        }
+    });
+});
+</script>
+

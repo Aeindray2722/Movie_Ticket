@@ -9,6 +9,7 @@ $totalPages = $data['totalPages'] ?? 1;
 $search = $data['search'] ?? '';
 $start_date = $data['start_date'] ?? '';
 $end_date = $data['end_date'] ?? '';
+        // var_dump($data['bookings']); exit;
 // Filter bookings by search and/or date range
 if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
     $filtered = [];
@@ -16,7 +17,6 @@ if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
     foreach ($bookings as $booking) {
         $matchSearch = true;
         $matchDate = true;
-
         // Search filter
         if ($search_query !== '') {
             $matchSearch = stripos((string) ($booking['movie_name'] ?? ''), $search_query) !== false ||
@@ -51,14 +51,13 @@ if (!isset($_SESSION['csrf_token'])) {
         <?php require_once __DIR__ . '/../layout/nav.php'; ?>
         <div class="booking-list-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <form id="searchForm" class="d-flex me-3" action="" method="get">
+                <form id="searchForm" class="d-flex" action="" method="get">
                     <input class="form-control me-2" type="search" placeholder="Search" name="search"
                         value="<?= htmlspecialchars($search_query) ?>">
-
                     <button class="btn btn-outline-secondary" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
-
+                    
                     <button type="button" id="dateRangeBtn" class="btn btn-outline-secondary ms-3">
                         <i class="fas fa-calendar-alt"></i>
                     </button>

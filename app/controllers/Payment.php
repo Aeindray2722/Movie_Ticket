@@ -165,52 +165,64 @@ class Payment extends Controller
     }
 
     public function storePayment()
-    {
-        try {
-            // 1️⃣ CSRF validation
-            if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-                setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+{
+    try {
+        // 1️⃣ CSRF validation
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            setMessage('error', 'Invalid CSRF token. Please refresh the page.');
+            redirect('payment/payment');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $user_id = $_SESSION['user_id'] ?? null;
+            if (!$user_id) {
+                throw new Exception('Please login first.');
+            }
+
+            // 2️⃣ Get latest booking
+            $db = new Database();
+            $booking = $db->getLatestBookingByUserId($user_id);
+            if (!$booking) {
+                throw new Exception('No booking found for payment.');
+            }
+
+            // 3️⃣ Validate payment method BEFORE calling service
+            $payment_method = $_POST['payment_method'] ?? '';
+            if (empty($payment_method)) {
+                setMessage('error', 'Please choose a payment method before booking.');
                 redirect('payment/payment');
                 exit;
             }
 
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $user_id = $_SESSION['user_id'] ?? null;
-                if (!$user_id) {
-                    throw new Exception('Please login first.');
-                }
-
-                $db = new Database();
-                $booking = $db->getLatestBookingByUserId($user_id);
-                if (!$booking) {
-                    throw new Exception('No booking found for payment.');
-                }
-
-                $payment_method = $_POST['payment_method'] ?? null;
-                $paymentRow = $this->paymentService->getPaymentByMethod($payment_method);
-                if (!$paymentRow) {
-                    throw new Exception('Invalid payment method selected.');
-                }
-
-                $payslip_img = $this->paymentService->uploadPayslip($_FILES['payslip_img']);
-
-                $paymentHistoryData = [
-                    'booking_id' => $booking['id'],
-                    'payment_id' => $paymentRow['id'],
-                    'payslip_image' => $payslip_img,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ];
-
-                if ($db->create('payment_history', $paymentHistoryData)) {
-                    redirect('booking/history');
-                } else {
-                    throw new Exception('Failed to save payment history.');
-                }
+            // 4️⃣ Now it is safe to call service
+            $paymentRow = $this->paymentService->getPaymentByMethod($payment_method);
+            if (!$paymentRow) {
+                throw new Exception('Invalid payment method selected.');
             }
-        } catch (Exception $e) {
-            setMessage('error', $e->getMessage());
-            redirect('payment/payment');
+
+            // 5️⃣ Handle file upload
+            $payslip_img = $this->paymentService->uploadPayslip($_FILES['payslip_img']);
+
+            // 6️⃣ Save payment history
+            $paymentHistoryData = [
+                'booking_id' => $booking['id'],
+                'payment_id' => $paymentRow['id'],
+                'payslip_image' => $payslip_img,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+
+            if ($db->create('payment_history', $paymentHistoryData)) {
+                redirect('booking/history');
+            } else {
+                throw new Exception('Failed to save payment history.');
+            }
         }
+    } catch (Exception $e) {
+        setMessage('error', $e->getMessage());
+        redirect('payment/payment');
     }
+}
+
 }

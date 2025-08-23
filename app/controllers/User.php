@@ -10,8 +10,8 @@ class User extends Controller
     public function __construct()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $db = new Database();
             $userRepository = new UserRepository($db);
             $this->userService = new UserService($userRepository);

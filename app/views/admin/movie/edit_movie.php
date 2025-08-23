@@ -9,12 +9,14 @@ if (!isset($_SESSION['csrf_token'])) {
 
 <div class="main-content-wrapper">
     <?php require_once __DIR__ . '/../layout/nav.php'; ?>
-    <div class="back-arrow-container">
-            <a href="<?php echo URLROOT; ?>/movie/movie_list" class="d-flex align-items-center">
+    <div class="movie-content-area">
+        
+    <div class="form-card">
+        <div class="back-arrow-container">
+            <a href="<?php echo URLROOT; ?>/movie/index" class="d-flex align-items-center">
                 <i class="fas fa-arrow-left me-2"></i>
             </a>
         </div>
-    <div class="form-card">
         <form action="<?= URLROOT ?>/movie/update" method="post" enctype="multipart/form-data" id="movieForm" novalidate>
               <!-- CSRF hidden input -->
           <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
@@ -117,6 +119,7 @@ if (!isset($_SESSION['csrf_token'])) {
                 </div>
             </div>
         </form>
+    </div>
     </div>
 </div>
 

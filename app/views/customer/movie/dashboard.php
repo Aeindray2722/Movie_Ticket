@@ -13,7 +13,7 @@ require_once __DIR__ . '/../layout/nav.php';
                                 <div class="col-12 col-md-4 mb-3 mb-md-0 text-center">
                                     <div class="ratio ratio-1x1 mx-auto" style="max-width: 250px;">
                                         <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
-                                            class="img-fluid rounded object-fit-cover"
+                                            class="img-fluid rounded object-fit-cover shadow-sm"
                                             alt="<?= htmlspecialchars($movie['movie_name']) ?>">
                                     </div>
                                 </div>
@@ -57,7 +57,7 @@ require_once __DIR__ . '/../layout/nav.php';
             <?php foreach ($data['now_showing_movies'] as $movie): ?>
                 <div class="col-6 col-md-4 col-lg-2">
                     <a href="<?= URLROOT . '/movie/movieDetail/' . $movie['id'] ?>" class="text-decoration-none text-dark">
-                        <div class="card movie-card h-100">
+                        <div class="card movie-card shadow-lg h-100">
                             <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($movie['movie_img']) ?>"
                                 class="card-img-top" alt="<?= htmlspecialchars($movie['movie_name']) ?>">
                             <div class="card-body p-2">
@@ -79,7 +79,7 @@ require_once __DIR__ . '/../layout/nav.php';
                 <div class="col-6 col-md-4 col-lg-2">
                     <a href="<?= URLROOT . '/trailer/movieDetail/' . $trailer['movie_id'] ?>"
                         class="text-decoration-none text-dark">
-                        <div class="card movie-card h-100">
+                        <div class="card movie-card shadow-lg h-100">
                             <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"
                                 class="card-img-top" alt="<?= htmlspecialchars($trailer['movie_name']) ?>">
                             <div class="card-body p-2">

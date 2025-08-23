@@ -8,8 +8,8 @@ class Booking extends Controller
 
     public function __construct(?BookingService $bookingService = null)
     {
-        parent::__construct();
-        $this->requireAuth();
+        // parent::__construct();
+        // $this->requireAuth();
         // CSRF token generation
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

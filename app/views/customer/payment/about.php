@@ -6,24 +6,25 @@
 
 <style>
     :root {
+        --navbar-height: 60px;
+        --footer-height: 80px;
         --main-color: #c170cd;
-        /* nav color */
         --accent-color: #e50914;
-        /* Netflix red / cinema tone */
         --gold-color: #ffcc00;
         --text-color: #333;
-        --bg-light: #fff6f6;
+        --bg-light: #f0f0f0;
         --muted-color: #666;
     }
 
     body {
-        background-color: var(--bg-light);
-        color: var(--text-color);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
+
     }
 
     .about-section {
         padding: 90px 0;
-        background: linear-gradient(to right, #fff6f6, #fceaff);
+        background: #f8f9fa;
     }
 
     .about-text h2 {
@@ -83,7 +84,7 @@
 <section class="about-section">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6 about-text" data-aos="fade-right">
+            <div class="col-12 col-lg-6 about-text" data-aos="fade-right">
                 <h2>🎬 Our Story</h2>
                 <p>
                     We built this platform out of pure passion for movies. Whether you're a fan of heart-pounding
@@ -94,13 +95,15 @@
                     viewer deserves an experience they won’t forget.
                 </p>
             </div>
-            <div class="col-lg-6 text-center mt-4 mt-lg-0" data-aos="fade-left">
+            <div class="col-12 col-lg-6 text-center mt-4 mt-lg-0" data-aos="fade-left">
                 <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8bW92aWUlMjB0aGVhdGVyfGVufDB8fDB8fHww"
                     class="about-img w-100" alt="Movie Experience">
             </div>
         </div>
     </div>
 </section>
+
+---
 
 <section class="team-section">
     <div class="container text-center">
@@ -121,7 +124,6 @@
                     </div>
                 </div>
             <?php endforeach; ?>
-
         </div>
     </div>
 </section>

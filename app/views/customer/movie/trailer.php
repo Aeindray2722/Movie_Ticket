@@ -34,7 +34,7 @@ require_once __DIR__ . '/../layout/nav.php';
         <div class="row gy-5 mb-4">
             <?php foreach ($data['trailers'] as $trailer): ?>
                 <div class="col-12 col-md-6">
-                    <div class="card movie-card-lg shadow-sm h-100">
+                    <div class="card movie-card-lg shadow-lg h-100">
                         <div class="row g-0 flex-column flex-md-row">
                             <div class="col-12 col-md-4">
                                 <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($trailer['movie_img']) ?>"

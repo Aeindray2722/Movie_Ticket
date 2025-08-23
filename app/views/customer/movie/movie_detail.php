@@ -29,15 +29,15 @@ if (!isset($_SESSION['csrf_token'])) {
                         <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($data['movie']['movie_img']) ?>"
                             class="movie-poster" alt="<?= htmlspecialchars($data['movie']['movie_name']) ?>">
                     </div>
-                    <div class="col-12 col-md-8">
-                        <h1 class="movie-title"><?= htmlspecialchars($data['movie']['movie_name']) ?></h1>
+                    <div class="col-12 col-md-8 ">
+                        <h1 class="movie-title mb-3"><?= htmlspecialchars($data['movie']['movie_name']) ?></h1>
 
-                        <div class="movie-meta">
-                            <div class="meta-item">
+                        <div class="movie-meta mt-3">
+                            <div class="meta-item mt-3">
                                 <i class="fas fa-tag"></i>
                                 <?= htmlspecialchars($data['movie']['type_name']) ?>
                             </div>
-                            <div class="meta-item">
+                            <div class="meta-item mt-3">
                                 <i class="fas fa-user"></i>
                                 <?= htmlspecialchars($data['movie']['actor_name']) ?>
                             </div>
@@ -196,7 +196,7 @@ $unique_related_movies = array_values($unique_related_movies);
 ?>
 
 <?php if (!empty($unique_related_movies)): ?>
-    <section class="related-movies-section">
+    <section class="related-movies-section mb-3">
         <div class="container">
             <h3 class="section-title">
                 <i class="fas fa-film"></i>

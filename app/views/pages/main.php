@@ -12,7 +12,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Add this in your <head> before your custom CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+.header {
+    position: fixed;       /* Always visible */
+    top: 0;
+    left: 0;
+    width: 100%;           /* Stretch across screen */
+    z-index: 1000;         /* Stay above everything */
+    background-color: #f2e6f2; /* Your existing bg color */
+    height: 70px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 
+/* Push page content below fixed header */
+body {
+    padding-top: 70px; /* same as header height */
+}
+
+</style>
 </head>
 
 <body>

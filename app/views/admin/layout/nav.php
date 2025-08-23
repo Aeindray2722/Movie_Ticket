@@ -64,12 +64,18 @@ $userName = $_SESSION['user_name'] ?? 'Guest';
       font-size: 1.8rem;
       color: #555;
     }
+    .navbar-admin {
+    /* ... existing styles ... */
+    position: sticky; /* Make the navbar stick to its position */
+    top: 0; /* Stick it to the top of the scrolling container */
+    z-index: 999; /* A value less than the sidebar's z-index so it appears beneath it */
+}
   </style>
 </head>
 
 <body>
   <div class="main-content-wrapper">
-    <nav class="navbar navbar-expand-lg navbar-admin">
+    <nav class="navbar navbar-expand-lg navbar-admin ">
       <div class="container-fluid">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown-wrapper">

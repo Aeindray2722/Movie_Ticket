@@ -91,6 +91,7 @@ body {
     padding: 30px; /* Padding for the entire content area */
     flex-grow: 1; /* Allows dashboard content to fill remaining space below navbar */
     overflow-y: auto; /* Enable scrolling for dashboard content if it overflows */
+    margin-left: 280px;
 }
 
 
@@ -176,7 +177,7 @@ body {
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    margin-left: 20px;
+    margin-left: 280px;
     margin-right: 20px;
     margin-bottom: 20px;
     /* Add margin-left to push it further from the left edge */
@@ -369,7 +370,7 @@ body {
     color: #dc3545;
 }
 .movie-list-container {
-            margin-left: 20px;
+            margin-left: 280px;
             margin-top: 20px;
             background-color: #fff;
             padding: 30px;
@@ -425,9 +426,10 @@ body {
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             border: 1px solid #ced4da;
             height: fit-content;
-            width: 40%;
+            width: 30%;
             /* Adjust width as needed */
             min-width: 350px;
+            margin-left: 280px;
         }
         .trailer-content-section {
             display: flex;
@@ -506,10 +508,11 @@ body {
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
+            margin-left: 280px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             border: 1px solid #ced4da;
             height: fit-content;
-            width: 40%;
+            width: 30%;
             min-width: 350px;
         }
 
@@ -549,7 +552,8 @@ body {
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             border: 1px solid #ced4da;
             height: fit-content;
-            width: 40%;
+            width: 30%;
+            margin-left: 280px;
             min-width: 350px;
         }
 
@@ -566,7 +570,7 @@ body {
             color: white;
         }
         .booking-list-container {
-            margin-left: 20px;
+            margin-left: 280px;
             margin-top: 20px;
             background-color: #fff;
             padding: 30px;
@@ -615,8 +619,14 @@ body {
         /* Styles for the content-area based on the image */
         .content-area {
             padding: 20px;
+            margin-left: 280px;
             flex-grow: 1;
         }
+        /* .movie-content-area {
+            padding: 10px;
+            margin-left: 280px;
+            flex-grow: 1;
+        } */
 
         .back-arrow-container {
             margin-bottom: 20px;
@@ -716,6 +726,7 @@ body {
 
 .profile-content {
     display: flex;
+    
     align-items: flex-start; /* Changed to flex-start to align top, not center */
     margin-bottom: 0; /* Remove bottom margin here, it will be on the inner div */
 }

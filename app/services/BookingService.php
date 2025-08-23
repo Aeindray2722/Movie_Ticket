@@ -26,66 +26,60 @@ class BookingService
     // }
 
 
-    public function getMovieWithDetails(int $movieId, string $selectedDate = null, string $selectedTime = null)
-    {
-        $movie = $this->repo->findMovieWithDetails($movieId);
-        if (!$movie)
-            return null;
+public function getMovieWithDetails(int $movieId, string $selectedDate = null, string $selectedTime = null)
+{
+    $movie = $this->repo->findMovieWithDetails($movieId);
+    if (!$movie) return null;
 
-        $today = new DateTime('today');
+    $tz = new DateTimeZone('Asia/Yangon');
+    $today = new DateTime('today', $tz);
 
-        // Default: today
-        $selected_date = $selectedDate ?: $today->format('Y-m-d');
-        $selected_date_dt = DateTime::createFromFormat('Y-m-d', $selected_date);
+    // Always default selected date to today
+    $selected_date = $selectedDate ?: $today->format('Y-m-d');
 
-        // If date invalid or earlier than today, fix it
-        if (!$selected_date_dt || $selected_date_dt < $today) {
-            $selected_date = $today->format('Y-m-d');
-        }
+    // Showtimes for the movie
+    $show_times = explode(',', $movie['show_time_list']);
 
-        // 🚨 Check if today's showtimes are already over
-        if ($selected_date === $today->format('Y-m-d')) {
-            $allShowTimes = explode(',', $movie['show_time_list']);
-            $now = new DateTime();
+    // Determine selected time (pick first available if none selected)
+    $selected_time_str = $selectedTime ?: ($show_times[0] ?? '');
 
-            // Find if any showtime left today
-            $futureShowExists = false;
-            foreach ($allShowTimes as $showTime) {
-                $showDt = DateTime::createFromFormat('Y-m-d H:i', $today->format('Y-m-d') . ' ' . $showTime);
-                if ($showDt && $showDt > $now) {
-                    $futureShowExists = true;
-                    break;
-                }
+    // Get average rating
+    $avg_rating = $this->repo->getAvgRating($movieId);
+
+    // Generate full date range for movie availability
+    $start = new DateTime($movie['start_date'], $tz);
+    $end = (new DateTime($movie['end_date'], $tz))->modify('+1 day');
+    $dateRange = new DatePeriod($start, new DateInterval('P1D'), $end);
+
+    // Seat price map and grouped seats by row
+    $seats = $this->repo->getSeats();
+    $seat_price_map = [];
+    $seats_grouped_by_row = [];
+    foreach ($seats as $seat) {
+        $seat_price_map[$seat['seat_row']] = $seat['price'];
+        $seats_grouped_by_row[$seat['seat_row']][] = $seat['seat_number'];
+    }
+
+    // Check if today has any future showtimes
+    $futureShowExistsToday = true;
+    if ($selected_date === $today->format('Y-m-d')) {
+        $now = new DateTime('now', $tz);
+        $futureShowExistsToday = false;
+        foreach ($show_times as $showTime) {
+            $showDt = DateTime::createFromFormat('Y-m-d H:i', $today->format('Y-m-d') . ' ' . $showTime, $tz);
+            if ($showDt && $showDt > $now) {
+                $futureShowExistsToday = true;
+                break;
             }
-
-            // If no future showtime today, shift to tomorrow
-            if (!$futureShowExists) {
-                $selected_date = $today->modify('+1 day')->format('Y-m-d');
-            }
         }
+    }
 
-
-        $show_times = explode(',', $movie['show_time_list']);
-        $selected_time_str = $selectedTime ?: ($show_times[0] ?? '');
-
-        $avg_rating = $this->repo->getAvgRating($movieId);
-
-        $start = new DateTime($movie['start_date']);
-        $end = (new DateTime($movie['end_date']))->modify('+1 day');
-        $dateRange = new DatePeriod($start, new DateInterval('P1D'), $end);
-
-        $seats = $this->repo->getSeats();
-        $seat_price_map = [];
-        $seats_grouped_by_row = [];
-        foreach ($seats as $seat) {
-            $seat_price_map[$seat['seat_row']] = $seat['price'];
-            $seats_grouped_by_row[$seat['seat_row']][] = $seat['seat_number'];
-        }
-
+    // Always fetch booked seats for selected date & time
+    $booked_seat_ids = [];
+    if ($selected_time_str) {
         $show_time_id = $this->repo->getShowTimeId($selected_time_str);
         $bookings = $this->repo->getBookingsByMovieDateShowtime($movieId, $show_time_id, $selected_date);
 
-        $booked_seat_ids = [];
         foreach ($bookings as $booking) {
             $seats_arr = json_decode($booking['seat_id'], true);
             if (is_array($seats_arr)) {
@@ -93,20 +87,25 @@ class BookingService
             }
         }
         $booked_seat_ids = array_unique($booked_seat_ids);
-
-        return [
-            'movie' => $movie,
-            'avg_rating' => $avg_rating,
-            'date' => $dateRange,
-            'show_times' => $show_times,
-            'seat_price_map' => $seat_price_map,
-            'seats_grouped_by_row' => $seats_grouped_by_row,
-            'booked_seat_ids' => $booked_seat_ids,
-            'selected_date' => $selected_date,
-            'seats' => $seats,
-            'selected_time' => $selected_time_str,
-        ];
     }
+
+    return [
+        'movie' => $movie,
+        'avg_rating' => $avg_rating,
+        'date' => $dateRange,
+        'show_times' => $show_times,
+        'seat_price_map' => $seat_price_map,
+        'seats_grouped_by_row' => $seats_grouped_by_row,
+        'booked_seat_ids' => $booked_seat_ids,
+        'selected_date' => $selected_date,
+        'seats' => $seats,
+        'selected_time' => $selected_time_str,
+        'futureShowExistsToday' => $futureShowExistsToday
+    ];
+}
+
+
+
 
     public function createBooking(array $postData, int $userId): bool
     {

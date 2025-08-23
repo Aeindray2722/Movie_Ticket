@@ -9,52 +9,38 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(to right, #fff6f6, #fceaff);
-            color: var(--text-color);
-        }
+        background: #f8f9fa;
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
 
         /* Modern page styling */
         .movie-detail-page-content {
-            padding: 50px 0;
+            background: #f8f9fa;
+            padding: 30px 0;
             min-height: 100vh;
         }
 
-        /* Back button modern styling */
-        .btn-back-to-list {
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 50px;
-            padding: 12px 20px;
-            color: var(--main-color);
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .btn-back-to-list:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            color: var(--accent-color);
-        }
+       
 
         /* Modern movie card styling */
-        .movie-detail-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-        }
+        /* Update the existing CSS with these changes */
+.movie-detail-card {
+    height: 450px; /* Example fixed height */
+    max-height: 450px;
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    overflow: hidden; /* This is crucial to contain content within the fixed height */
+}
 
-        .movie-detail-poster {
-            border-radius: 20px 0 0 20px;
-            height: 450px;
-            object-fit: cover;
-        }
+.movie-detail-poster {
+    /* Retain the original poster styles */
+    height: 450px;
+    object-fit: cover;
+}
 
         .movie-detail-body {
             padding: 2.5rem;
@@ -424,29 +410,16 @@
         }
 /*booking history*/
 
-        :root {
-            --navbar-height: 60px;
-            --footer-height: 80px;
-            --main-color: #c170cd;
-            --accent-color: #e50914;
-            --gold-color: #ffcc00;
-            --text-color: #333;
-            --bg-light: #fff6f6;
-            --muted-color: #666;
-        }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-light);
-        }
 
         /* Modern page styling */
         .history-page-content {
-            background: linear-gradient(to right, #fff6f6, #fceaff);
+            background: #f8f9fa;
             padding-top: 90px;
             padding-bottom: 90px;
             min-height: calc(100vh - var(--navbar-height) - var(--footer-height));
         }
+        
 
         /* Modern card styling */
         .history-table-card {
@@ -531,15 +504,15 @@
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
             backdrop-filter: blur(10px);
             border-radius: 1rem;
-            padding: 2rem;
+            padding: 1rem;
             margin-bottom: 1rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .page-title {
-            color: var(--main-color);
+            color: #333;
             font-weight: 700;
-            font-size: 2.5rem;
+            font-size: 2.0rem;
             margin: 0;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }

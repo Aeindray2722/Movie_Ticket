@@ -9,7 +9,7 @@ body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
     color: #333;
-    background-color: #fcfcfc; /* Very light background */
+    background-color: #f8f9fa; /* Very light background */
     overflow-x: hidden; /* Prevent horizontal scroll from absolute positioning */
 }
 
@@ -393,7 +393,6 @@ h1 {
             padding: 10px 15px; /* Comfortable padding */
         }
         
-       
 
         /* Login Box (formerly register-box) - Placed directly here */
         .register-box { /* Renamed from .register-box for clarity as it's a login form */

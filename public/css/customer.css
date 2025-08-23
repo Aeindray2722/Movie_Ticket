@@ -2,7 +2,7 @@
 body {
      overflow-y: scroll;
     font-family: "Arial", "Helvetica Neue", Helvetica, sans-serif;
-    background-color: #f0f0f0; /* Very light grey background */
+    background-color: #f8f9fa; /* Very light grey background */
 }
 
 /* --- Enhance Active Nav Link Visibility --- */
@@ -46,7 +46,8 @@ body {
 
 /* Main Movie Carousel Section */
 .main-movie-carousel {
-    background-color: #fff; /* Light grey background for this section */
+    background-color: #f8f9fa; 
+    /* background-color: #fff; Light grey background for this section */
     min-height: 300px; /* Adjust as needed */
     display: flex;
     align-items: center;
@@ -83,7 +84,7 @@ body {
 
 /* Movie Sections (Now Showing, Coming Soon, Movie Trailer) */
 .movie-section {
-    background-color: #f8f8f8; /* Slightly darker grey for content sections */
+    background-color: #f8f9fa; /* Slightly darker grey for content sections */
     padding: 30px 0;
 }
 
@@ -247,7 +248,7 @@ body {
 /* --- New Styles for "Now Showing" Page Content (Screenshot 242) --- */
 
 .now-showing-page-content {
-    background-color: #f8f8f8; /* A consistent background for the main content area */
+    background-color: #f8f9fa; /* A consistent background for the main content area */
     padding-top: 20px;
     padding-bottom: 40px; /* More padding at the bottom before footer */
 }
@@ -315,7 +316,7 @@ body {
 .movie-card-lg {
     border: none;
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(3, 3, 3, 0.1);
     overflow: hidden;
     transition: transform 0.2s ease-in-out;
     /* Ensure the entire card's row is a flex container for consistent height distribution */
@@ -426,6 +427,21 @@ body {
     object-fit: cover;
 }
 /* --- Movie Detail Page Styles (inspired by Screenshot 245.png) --- */
+
+
+.btn-book-now {
+    background-color: #8c72cf; /* Your purple color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+.btn-book-now:hover {
+    background-color: #7a60b9;
+}
 
 /* General body background for the payment page */
 

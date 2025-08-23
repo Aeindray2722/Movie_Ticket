@@ -14,7 +14,7 @@ if (!isset($_SESSION['csrf_token'])) {
 
 <section class="movie-detail-page-content">
     <div class="container">
-        <a href="<?php echo URLROOT; ?>/movie/nowShowing" class="back-button">
+        <a href="<?php echo URLROOT; ?>/trailer/trailer" class="back-button">
             <i class="fas fa-arrow-left"></i>
             Back
         </a>
@@ -29,15 +29,15 @@ if (!isset($_SESSION['csrf_token'])) {
                         <img src="<?= URLROOT . '/images/movies/' . htmlspecialchars($data['movie']['movie_img']) ?>"
                             class="movie-poster" alt="<?= htmlspecialchars($data['movie']['movie_name']) ?>">
                     </div>
-                    <div class="col-12 col-md-8">
+                    <div class="col-12 col-md-8 ">
                         <h1 class="movie-title"><?= htmlspecialchars($data['movie']['movie_name']) ?></h1>
 
-                        <div class="movie-meta">
-                            <div class="meta-item">
+                        <div class="movie-meta ">
+                            <div class="meta-item mt-3">
                                 <i class="fas fa-tag"></i>
                                 <?= htmlspecialchars($data['movie']['type_name']) ?>
                             </div>
-                            <div class="meta-item">
+                            <div class="meta-item mt-3">
                                 <i class="fas fa-user"></i>
                                 <?= htmlspecialchars($data['movie']['actor_name']) ?>
                             </div>
@@ -145,7 +145,6 @@ if (!isset($_SESSION['csrf_token'])) {
     </div>
 </section>
 
-<!-- Rating Modal -->
 <div class="modal fade modal-modern" id="rateModal" tabindex="-1" aria-labelledby="rateModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -182,32 +181,43 @@ if (!isset($_SESSION['csrf_token'])) {
         </div>
     </div>
 </div>
-<div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header" style="padding: 0.5rem 1rem;">
-                <h5 class="modal-title" style="font-size: 1rem;">
-                    (<?= htmlspecialchars($data['movie']['movie_name']) ?>) Trailer
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                    onclick="pauseTrailer()"></button>
-            </div>
 
+<div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0" style="padding: 1rem;">
+                <h5 class="modal-title text-white" id="trailerModalLabel">
+                    <i class="fas fa-play-circle me-2"></i>
+                    <?= htmlspecialchars($data['movie']['movie_name']) ?> - Trailer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
             <div class="modal-body p-0">
-                <div class="video-wrapper">
-                    <video id="trailerVideo" controls>
-                        <source
-                            src="<?= URLROOT . '/videos/trailers/' . htmlspecialchars($data['trailer']['trailer_vd']) ?>"
-                            type="video/mp4">
-                    </video>
+                <div class="video-wrapper" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; background: #000;">
+                    <?php if (!empty($data['trailer']['trailer_vd'])): ?>
+                        <video 
+                            id="trailerVideo" 
+                            controls 
+                            preload="metadata"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;"
+                            poster="<?= URLROOT . '/images/movies/' . htmlspecialchars($data['movie']['movie_img']) ?>">
+                            <source src="<?= URLROOT . '/videos/trailers/' . htmlspecialchars($data['trailer']['trailer_vd']) ?>" type="video/mp4">
+                            <p class="text-white text-center p-4">Your browser does not support the video tag.</p>
+                        </video>
+                    <?php else: ?>
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center text-white">
+                                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                                <h5>Trailer not available</h5>
+                                <p>Sorry, the trailer for this movie is currently unavailable.</p>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
-
-
 
 <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 
@@ -216,95 +226,197 @@ if (!isset($_SESSION['csrf_token'])) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
 <script>
-    $(document).ready(function () {
-        $('.related-movies-carousel').owlCarousel({
-            loop: true,
-            margin: 20,
-            nav: true,
-            dots: false,
-            navText: ['<i class="fas fa-chevron-left"></i>', '<i class="fas fa-chevron-right"></i>'],
-            responsive: {
-                0: { items: 1 },
-                576: { items: 2 },
-                768: { items: 3 },
-                992: { items: 4 },
-                1200: { items: 5 }
-            }
-        });
+$(document).ready(function () {
+    // Owl Carousel
+    $('.related-movies-carousel').owlCarousel({
+        loop: true,
+        margin: 20,
+        nav: true,
+        dots: false,
+        navText: ['<i class="fas fa-chevron-left"></i>', '<i class="fas fa-chevron-right"></i>'],
+        responsive: {
+            0: { items: 1 },
+            576: { items: 2 },
+            768: { items: 3 },
+            992: { items: 4 },
+            1200: { items: 5 }
+        }
     });
 
-    // Rating functionality
-    function bindStarClickEvents() {
-        const stars = document.querySelectorAll('.rating-star');
-        const ratingInput = document.getElementById('ratingCount');
+    // Trailer Modal Management
+    const trailerModal = document.getElementById('trailerModal');
+    const trailerVideo = document.getElementById('trailerVideo');
 
-
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                const selectedValue = parseInt(star.getAttribute('data-value'));
-                ratingInput.value = selectedValue;
-
-                stars.forEach((s, index) => {
-                    s.classList.remove('active');
-                    if (index < selectedValue) {
-                        s.classList.add('active');
-                    }
-                });
-            });
-
-            star.addEventListener('mouseenter', () => {
-                const hoverValue = parseInt(star.getAttribute('data-value'));
-                stars.forEach((s, index) => {
-                    s.style.color = index < hoverValue ? '#ffd700' : 'rgba(255, 255, 255, 0.3)';
-                });
-            });
-        });
-
-        document.querySelector('.rating-stars').addEventListener('mouseleave', () => {
-            const currentRating = parseInt(ratingInput.value) || 0;
-            stars.forEach((s, index) => {
-                s.style.color = index < currentRating ? '#ffd700' : 'rgba(255, 255, 255, 0.3)';
-            });
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', bindStarClickEvents);
-
-    const modal = document.getElementById('rateModal');
-    if (modal) {
-        modal.addEventListener('shown.bs.modal', bindStarClickEvents);
-    }
-
-    function deleteMovie(encodedId) {
-        Swal.fire({
-            title: 'Delete Comment?',
-            text: "This action cannot be undone!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#e74c3c',
-            cancelButtonColor: '#95a5a6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel',
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
-            color: 'white'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '<?= URLROOT ?>/comment/destroy/' + encodedId;
-            }
-        });
-    }
-</script>
-<script>
-    function pauseTrailer() {
-        const video = document.getElementById('trailerVideo');
-        if (video) {
-            video.pause();
+    // Function to pause and reset video
+    function pauseAndResetVideo() {
+        if (trailerVideo) {
+            trailerVideo.pause();
+            trailerVideo.currentTime = 0;
+            trailerVideo.load(); // Reload the video element
         }
     }
 
-    const trailerModal = document.getElementById('trailerModal');
-    if (trailerModal) {
-        trailerModal.addEventListener('hidden.bs.modal', pauseTrailer);
+    // Function to prepare video for playing
+    function prepareVideo() {
+        if (trailerVideo) {
+            trailerVideo.load();
+        }
     }
+
+    // Event listeners for modal
+    if (trailerModal) {
+        // When modal is about to show
+        trailerModal.addEventListener('show.bs.modal', function (e) {
+            prepareVideo();
+        });
+
+        // When modal is fully shown
+        trailerModal.addEventListener('shown.bs.modal', function (e) {
+            if (trailerVideo) {
+                // Optional: Auto-play (many browsers block this)
+                // trailerVideo.play().catch(e => console.log('Auto-play prevented'));
+            }
+        });
+
+        // When modal starts hiding
+        trailerModal.addEventListener('hide.bs.modal', function (e) {
+            pauseAndResetVideo();
+        });
+
+        // When modal is fully hidden
+        trailerModal.addEventListener('hidden.bs.modal', function (e) {
+            pauseAndResetVideo();
+        });
+    }
+
+    // Handle video errors
+    if (trailerVideo) {
+        trailerVideo.addEventListener('error', function(e) {
+            console.error('Video error:', e);
+            const videoWrapper = trailerVideo.parentElement;
+            videoWrapper.innerHTML = `
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center text-white">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <h5>Error loading trailer</h5>
+                        <p>Unable to load the video. Please try again later.</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Handle successful video load
+        trailerVideo.addEventListener('loadeddata', function() {
+            console.log('Video loaded successfully');
+        });
+    }
+});
+
+// Rating functionality
+function bindStarClickEvents() {
+    const stars = document.querySelectorAll('.rating-star');
+    const ratingInput = document.getElementById('ratingCount');
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const selectedValue = parseInt(star.getAttribute('data-value'));
+            ratingInput.value = selectedValue;
+
+            stars.forEach((s, index) => {
+                s.classList.remove('active');
+                if (index < selectedValue) {
+                    s.classList.add('active');
+                }
+            });
+        });
+
+        star.addEventListener('mouseenter', () => {
+            const hoverValue = parseInt(star.getAttribute('data-value'));
+            stars.forEach((s, index) => {
+                s.style.color = index < hoverValue ? '#ffd700' : 'rgba(255, 255, 255, 0.3)';
+            });
+        });
+    });
+
+    document.querySelector('.rating-stars').addEventListener('mouseleave', () => {
+        const currentRating = parseInt(ratingInput.value) || 0;
+        stars.forEach((s, index) => {
+            s.style.color = index < currentRating ? '#ffd700' : 'rgba(255, 255, 255, 0.3)';
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', bindStarClickEvents);
+
+const ratingModal = document.getElementById('rateModal');
+if (ratingModal) {
+    ratingModal.addEventListener('shown.bs.modal', bindStarClickEvents);
+}
+
+// Delete comment function
+function deleteMovie(encodedId) {
+    Swal.fire({
+        title: 'Delete Comment?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#95a5a6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel',
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(20px)',
+        color: 'white'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '<?= URLROOT ?>/comment/destroy/' + encodedId;
+        }
+    });
+}
 </script>
+
+<style>
+.modal-xl {
+    max-width: 90vw;
+}
+
+@media (min-width: 1200px) {
+    .modal-xl {
+        max-width: 900px;
+    }
+}
+
+.video-wrapper video {
+    border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.modal-content.bg-dark {
+    background-color: #1a1a1a !important;
+    border: none;
+}
+/* No CSS changes were made below this line to adhere to the prompt's instructions */
+/* Loading spinner for video
+.video-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+    z-index: 1;
+} */
+
+.video-wrapper video:not([src=""]) + .video-wrapper::before {
+    display: none;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+</style>

@@ -18,6 +18,11 @@
         min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
+    /* body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(to right, #fff6f6, #fceaff);
+            color: var(--text-color);
+        } */
 
     .movie-detail-page-content {
         padding: 2rem 0;

@@ -16,11 +16,21 @@ $currentPage = $_SERVER['REQUEST_URI'];
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/admin.css">
+  <style>
+  #sidebar {
+    /* ... existing styles ... */
+    position: fixed; /* Make the sidebar stick to the viewport */
+    height: 100vh; /* Ensure it takes up the full height of the viewport */
+    top: 0; /* Align it to the top of the viewport */
+    left: 0; /* Align it to the left side */
+    /* You may also want to add a z-index to ensure it's on top of other content */
+    z-index: 1000;
+}</style>
 </head>
 
 <body>
   <div id="sidebar">
-    <h3 class="text-center mb-4">Dashboard</h3>
+    <h3 class="text-center mb-4 mt-2">Dashboard</h3>
     <ul class="nav flex-column">
 
       <li class="nav-item">
