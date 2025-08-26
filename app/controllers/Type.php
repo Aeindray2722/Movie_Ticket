@@ -10,8 +10,8 @@ class Type extends Controller
     public function __construct()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $db = new Database();
             $repo = new TypeRepository($db);
             $this->typeService = new TypeService($repo);

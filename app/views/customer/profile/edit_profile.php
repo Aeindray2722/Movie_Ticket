@@ -57,7 +57,7 @@ if (!isset($_SESSION['csrf_token'])) {
                                     </div>
                                     <div class="col-12 col-sm-6 mb-3">
                                         <input type="email" name="email" class="form-control" placeholder="Email"
-                                            value="<?php echo htmlspecialchars($data['users']['email']); ?>">
+                                            value="<?php echo htmlspecialchars($data['users']['email']); ?>" >
                                     </div>
                                 </div>
                                 <div class="form-group mb-3">

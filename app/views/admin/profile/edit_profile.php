@@ -55,7 +55,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
                             <input type="text" class="form-control" name="name" placeholder="Name"
                                 value="<?php echo htmlspecialchars($data['users']['name']); ?>">
                             <input type="email" class="form-control" name="email" placeholder="Email"
-                                value="<?php echo htmlspecialchars($data['users']['email']); ?>">
+                                value="<?php echo htmlspecialchars($data['users']['email']); ?>" >
                         </div>
                         <div class="form-group">
                             <input type="tel" class="form-control" name="phone" placeholder="Phone"

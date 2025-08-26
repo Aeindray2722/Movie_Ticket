@@ -256,11 +256,13 @@ public function getMovieWithDetails(int $movieId, string $selectedDate = null, s
             $movie = $this->repo->getMovieById($booking['movie_id']);
             $user = $this->repo->getUserById($booking['user_id']);
             $showTime = $this->repo->getShowTimeById($booking['show_time_id']);
-
+            // ✅ Fetch payment method
+            // $booking['payment_method'] = $this->repo->getPaymentMethodByBookingId($booking['id']);
             $booking['movie_name'] = $movie['movie_name'] ?? 'Unknown';
             $booking['user_name'] = $user['name'] ?? 'Unknown';
             $booking['seat_names'] = implode(', ', $this->repo->getReadableSeatNames($booking));
             $booking['show_time'] = $showTime['show_time'] ?? 'Unknown';
+            
         }
         unset($booking);
 
@@ -342,5 +344,5 @@ public function getMovieWithDetails(int $movieId, string $selectedDate = null, s
         return $bookings;
     }
 
-
+    
 }

@@ -20,40 +20,52 @@ if (!isset($_SESSION['csrf_token'])) {
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/new.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1000;
-        background-color: #f2e6f2;
-        height: 70px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    body {
-        padding-top: 10px; /* Adjusting padding-top to match header height */
-    }
-    .register-box {
-        display: flex;
-        flex-direction: column; /* Stacks image and form on small screens */
-        width: 90%;
-        max-width: 900px;
-    }
-    .image-side,
-    .form-side {
-        width: 100%; /* Take full width on small screens */
-    }
-    @media (min-width: 768px) {
-        .register-box {
-            flex-direction: row; /* Side-by-side layout on larger screens */
+    <style>
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            /* your header height */
+            background-color: #f2e6f2;
+            display: flex;
+            /* flex container */
+            align-items: center;
+            /* vertical centering */
+            justify-content: center;
+            /* optional, for horizontal center of entire content */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
         }
-        .image-side,
-        .form-side {
-            width: 50%; /* Each takes up half the space */
+
+        .header .container {
+            display: flex;
+            align-items: center;
+            /* vertical center of logo + nav */
+            justify-content: space-between;
+            /* logo left, nav right */
+            height: 100%;
+            /* full header height */
         }
-    }
-</style>
+
+        .nav ul {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            /* vertical center nav links */
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #000;
+            line-height: 1;
+            /* ensures vertical centering inside li */
+        }
+    </style>
 
 </head>
 
@@ -73,26 +85,30 @@ if (!isset($_SESSION['csrf_token'])) {
         </div>
     </header>
 
-    <div class="dashboard-content-area d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 70px);">
+    <div class="dashboard-content-area d-flex justify-content-center align-items-center"
+        style="min-height: calc(100vh - 70px);">
         <div class="background-overlay"></div>
         <div class="register-box shadow-lg">
             <div class="image-side"></div>
             <div class="form-side p-4">
                 <h2 class="text-center mt-3 mb-4">Register</h2>
-                <form class="login100-form validate-form" name="contactForm" method="POST" action="<?php echo URLROOT; ?>/auth/register">
+                <form class="login100-form validate-form" name="contactForm" method="POST"
+                    action="<?php echo URLROOT; ?>/auth/register">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                    
+
                     <?php require APPROOT . '/views/components/auth_message.php'; ?>
 
                     <div class="wrap-input100 validate-input" data-validate="Valid Name is required:">
-                        <input class="input100" type="text" id="name" onfocus="this.value=''" name="name" placeholder="Username">
+                        <input class="input100" type="text" id="name" onfocus="this.value=''" name="name"
+                            placeholder="Username">
                         <span class="focus-input100"></span>
                         <span class="symbol-input100">
                             <i class="fa fa-user" aria-hidden="true"></i>
                         </span>
                     </div>
                     <p class="text-danger">
-                        <?php if (isset($data['name-err'])) echo $data['name-err']; ?>
+                        <?php if (isset($data['name-err']))
+                            echo $data['name-err']; ?>
                     </p>
 
                     <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
@@ -103,7 +119,8 @@ if (!isset($_SESSION['csrf_token'])) {
                         </span>
                     </div>
                     <p class="text-danger">
-                        <?php if (isset($data['email-err'])) echo $data['email-err']; ?>
+                        <?php if (isset($data['email-err']))
+                            echo $data['email-err']; ?>
                     </p>
 
                     <div class="wrap-input100 validate-input" data-validate="Valid phone is required: ex@abc.xyz">
@@ -114,7 +131,8 @@ if (!isset($_SESSION['csrf_token'])) {
                         </span>
                     </div>
                     <p class="text-danger">
-                        <?php if (isset($data['phone-err'])) echo $data['phone-err']; ?>
+                        <?php if (isset($data['phone-err']))
+                            echo $data['phone-err']; ?>
                     </p>
 
                     <div class="wrap-input100 validate-input" data-validate="Password is required">
@@ -129,19 +147,18 @@ if (!isset($_SESSION['csrf_token'])) {
                         <label class="ms-2">Show Password</label>
                     </div>
                     <p class="text-danger">
-                        <?php if (isset($data['password-err'])) echo $data['password-err']; ?>
+                        <?php if (isset($data['password-err']))
+                            echo $data['password-err']; ?>
                     </p>
-
+                    <div class="d-flex mb-3">
+                        <div class="g-recaptcha" data-sitekey="<?= GOOGLE_RECAPTCHA_SITE_KEY ?>"></div>
+                    </div>
                     <div class="d-grid gap-2 col-6 mx-auto">
                         <button type="submit" class="btn btn-register w-100" name="btn_register">Register</button>
                     </div>
 
                     <div class="text-center mt-2 mb-3">
                         Already have an account? <a href="<?php echo URLROOT; ?>/pages/login">Login</a>
-                    </div>
-                    
-                    <div class="d-flex justify-content-center">
-                         <div class="g-recaptcha" data-sitekey="<?= GOOGLE_RECAPTCHA_SITE_KEY ?>"></div>
                     </div>
                 </form>
             </div>
@@ -293,4 +310,5 @@ if (!isset($_SESSION['csrf_token'])) {
         });
     </script>
 </body>
+
 </html>

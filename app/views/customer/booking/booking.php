@@ -331,10 +331,10 @@
                     alert('Please select at least one seat.');
                     return;
                 }
-                if (selectedSeats.length > 4) {
+                /*if (selectedSeats.length > 4) {
                     alert('You can select a maximum of 4 seats at a time.');
                     return;
-                }
+                }*/
                 document.getElementById('selectedSeatsInput').value = JSON.stringify(selectedSeats);
                 document.getElementById('bookingForm').submit();
             });

@@ -84,8 +84,9 @@ class BookingRepository implements BookingRepositoryInterface
 
     public function getPaymentByBookingId(int $bookingId)
     {
-        return $this->db->columnFilter('payment_history', 'booking_id', $bookingId);
+        return $this->db->columnFilter('view_bookinghistory_info', 'booking_id', $bookingId);
     }
+    
 
     public function deletePaymentByBookingId(int $bookingId)
     {

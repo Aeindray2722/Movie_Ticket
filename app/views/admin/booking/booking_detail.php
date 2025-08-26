@@ -21,6 +21,10 @@ require_once __DIR__ . '/../layout/sidebar.php';
                 <p><strong>Showtime: </strong> <?php echo htmlspecialchars($data['movie']['show_time_list']); ?></p>
                 <p><strong>Date: </strong> <?php echo htmlspecialchars($data['booking']['booking_date']); ?></p>
                 <p><strong>Seat: </strong> <?php echo htmlspecialchars(implode(', ', $data['seats'])); ?></p>
+ <p><strong>Payment Method: </strong>
+    <?php echo htmlspecialchars($data['payment']['payment_method'] ?? 'N/A'); ?>
+</p>
+
                 <p><strong>Total price: </strong> <?php echo htmlspecialchars($data['booking']['total_amount']); ?></p>
             </div>
 

@@ -9,8 +9,8 @@ class Payment extends Controller
     public function __construct()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $db = new Database();
             $paymentRepository = new PaymentRepository($db);
             $this->paymentService = new PaymentService($paymentRepository);

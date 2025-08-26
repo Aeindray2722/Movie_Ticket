@@ -54,7 +54,7 @@ require_once __DIR__ . '/../layout/sidebar.php';
                         <?php if (!empty($data['recentBookings'])): ?>
                             <?php foreach ($data['recentBookings'] as $booking): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($booking['name']) ?></td>
+                                    <td><?= htmlspecialchars($booking['name']??'Unknown') ?></td>
                                     <td><?= htmlspecialchars($booking['movie_name']) ?></td>
                                     <td><?= htmlspecialchars($booking['show_time_list']) ?></td>
                                     <td><?= htmlspecialchars($booking['seats']) ?></td>

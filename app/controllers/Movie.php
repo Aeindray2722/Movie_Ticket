@@ -39,8 +39,8 @@ class Movie extends Controller
     public function index()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $search = trim($_GET['search'] ?? '');
             $page = max(1, (int) ($_GET['page'] ?? 1));
             $limit = 5;
@@ -66,8 +66,8 @@ class Movie extends Controller
     public function create()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $data = [
                 'movies' => $this->movieService->getAllMovies(),
                 'show_times' => $this->movieService->getShowTimes(),
@@ -85,8 +85,8 @@ class Movie extends Controller
     public function store()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
@@ -109,8 +109,8 @@ class Movie extends Controller
     public function edit($id)
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $movie = $this->movieService->getMovieById((int) $id);
 
             if (!$movie) {
@@ -135,8 +135,8 @@ class Movie extends Controller
     public function update()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
                 redirect('movie/edit');
@@ -158,8 +158,8 @@ class Movie extends Controller
     public function destroy($id)
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $id = base64_decode($id);
             if (!$id) {
                 throw new Exception('Invalid movie ID.');
@@ -177,8 +177,8 @@ class Movie extends Controller
     public function dashboard()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $recentBookings = $this->movieService->getRecentBookings();
             $report = $this->movieService->getMonthlySummary();
 

@@ -19,7 +19,7 @@
                 <table class="table table-bordered align-middle">
                     <thead>
                         <tr>
-                            <th>User ID</th>
+                            <th class="text-center">User ID</th>
                             <th>Email</th>
                             <th>Message</th>
                             <th>Date</th>
@@ -34,11 +34,10 @@
                         <?php else: ?>
                             <?php foreach ($data['contacts'] as $contact): ?>
                                 <tr>
-                                    <td class=""><?php echo htmlspecialchars($contact['user_id'] ?? ''); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($contact['user_id'] ?? ''); ?></td>
                                     <td><?php echo htmlspecialchars($contact['email']); ?></td>
                                     <td><?php echo htmlspecialchars($contact['message']); ?></td>
-                                    <td><?php echo htmlspecialchars($contact['created_at']); ?></td>
-
+                                    <td><?php echo date('j F Y', strtotime($contact['created_at'])); ?></td>
                                     <td class="d-flex text-center">
                                         
                                         <button class="btn btn-sm btn-outline-danger btn-action"

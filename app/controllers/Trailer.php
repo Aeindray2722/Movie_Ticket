@@ -37,8 +37,8 @@ class Trailer extends Controller
     {
 
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $page = max((int) ($_GET['page'] ?? 1), 1);
             $limit = 3;
 
@@ -59,8 +59,8 @@ class Trailer extends Controller
     public function create()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $this->view('admin/trailer/add_trailer', [
                 'trailers' => $this->service->getAllPaged(100, 1)['data'],
                 'types' => $this->service->getTypes(),
@@ -76,8 +76,8 @@ class Trailer extends Controller
     public function store()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
                     // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
@@ -102,8 +102,8 @@ class Trailer extends Controller
     public function edit($id)
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $trailer = $this->service->findById($id);
             if (!$trailer) {
                 throw new Exception('Trailer not found!');
@@ -122,8 +122,8 @@ class Trailer extends Controller
     public function update()
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             // 1️⃣ CSRF validation
             if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
                 setMessage('error', 'Invalid CSRF token. Please refresh the page.');
@@ -152,8 +152,8 @@ class Trailer extends Controller
     public function destroy($id)
     {
         try {
-            parent::__construct();
-            $this->requireAuth();
+            // parent::__construct();
+            // $this->requireAuth();
             $id = base64_decode($id);
             if ($this->service->delete($id)) {
                 setMessage('success', 'Trailer deleted successfully!');

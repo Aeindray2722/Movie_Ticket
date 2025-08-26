@@ -9,8 +9,8 @@ $totalPages = $data['totalPages'] ?? 1;
 $search = $data['search'] ?? '';
 $start_date = $data['start_date'] ?? '';
 $end_date = $data['end_date'] ?? '';
-        // var_dump($data['bookings']); exit;
 // Filter bookings by search and/or date range
+//  var_dump($data['bookings']); exit;
 if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
     $filtered = [];
 
@@ -19,6 +19,7 @@ if ($search_query !== '' || (!empty($start_date) && !empty($end_date))) {
         $matchDate = true;
         // Search filter
         if ($search_query !== '') {
+            
             $matchSearch = stripos((string) ($booking['movie_name'] ?? ''), $search_query) !== false ||
                 stripos((string) ($booking['user_name'] ?? ''), $search_query) !== false ||
                 stripos((string) ($booking['seat_names'] ?? ''), $search_query) !== false ||
@@ -54,10 +55,11 @@ if (!isset($_SESSION['csrf_token'])) {
                 <form id="searchForm" class="d-flex" action="" method="get">
                     <input class="form-control me-2" type="search" placeholder="Search" name="search"
                         value="<?= htmlspecialchars($search_query) ?>">
+
                     <button class="btn btn-outline-secondary" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
-                    
+
                     <button type="button" id="dateRangeBtn" class="btn btn-outline-secondary ms-3">
                         <i class="fas fa-calendar-alt"></i>
                     </button>
@@ -104,12 +106,12 @@ if (!isset($_SESSION['csrf_token'])) {
                         <?php else: ?>
                             <?php foreach ($bookings as $booking): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($booking['user_name'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($booking['movie_name'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($booking['show_time'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($booking['booking_date'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($booking['seat_names'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($booking['total_amount'] ?? '') ?></td>
+                                    <td><?= htmlspecialchars($booking['user_name'] ?? 'Unknown') ?></td>
+                                    <td><?= htmlspecialchars($booking['movie_name'] ?? 'N/A') ?></td>
+                                    <td><?= htmlspecialchars($booking['show_time'] ?? 'N/A') ?></td>
+                                    <td><?= htmlspecialchars($booking['booking_date'] ?? 'N/A') ?></td>
+                                    <td><?= htmlspecialchars($booking['seat_names'] ?? 'N/A') ?></td>
+                                    <td><?= htmlspecialchars($booking['total_amount'] ?? 'N/A') ?></td>
                                     <td>
                                         <select class="form-select form-select-sm"
                                             onchange="updateBookingStatus(this.value, <?= $booking['id'] ?>)">

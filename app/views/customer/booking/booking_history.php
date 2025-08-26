@@ -53,6 +53,7 @@
                                         <i class="fas fa-info-circle me-2"></i>
                                         Status
                                     </th>
+                                    <th scope="col"><i class="fas fa-download me-2"></i>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,6 +94,17 @@
                                                 ?>
                                                 <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
                                             </td>
+                                                <td>
+    <?php if ((int)$booking['status'] === 0): ?>
+        <a class="btn btn-sm btn-primary"
+           href="<?= URLROOT ?>/booking/download/<?= base64_encode($booking['id']) ?>"
+           target="_blank" rel="noopener">
+           <i class="fas fa-ticket-alt me-1"></i> Download Ticket
+        </a>
+    <?php else: ?>
+        <span class="text-muted">—</span>
+    <?php endif; ?>
+</td>
 
                                         </tr>
                                     <?php endforeach; ?>

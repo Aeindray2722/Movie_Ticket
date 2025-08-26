@@ -101,7 +101,8 @@ $customer_type = $_SESSION['customer_type'] ?? 'Normal';
   <?php require_once APPROOT . '/views/inc/header.php'; ?>
   <nav class="navbar navbar-expand-lg sticky-top navbar-custom">
     <div class="container-fluid">
-      <a class="navbar-brand me-6 ms-3" href="#">
+      <a class="navbar-brand me-6 ms-5<?php echo (strpos($currentPage, '/pages/home') !== false ? 'active' : ''); ?>"
+              href="<?php echo URLROOT; ?>/pages/home">
         <img src="<?php echo URLROOT; ?>/images/layout/logo.png" alt="Logo" class="d-inline-block align-text-top">
       </a>
 
@@ -217,6 +218,7 @@ $customer_type = $_SESSION['customer_type'] ?? 'Normal';
         menu.classList.remove('show');
       }
     });
+    
     
   </script>
 </body>
