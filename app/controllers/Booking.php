@@ -326,57 +326,65 @@ class Booking extends Controller
             $token = base64_encode($bookingId . '|' . hash_hmac('sha256', $bookingId, $secretKey));
             $qrData = URLROOT . '/ticket/verify?token=' . $token;
             // Define custom ticket size (width=80mm, height=150mm for example)
-$pageWidth = 80;
-$pageHeight = 150;
+            $pageWidth = 100;
+            $pageHeight = 150;
 
-$pdf = new \TCPDF('P', 'mm', [$pageWidth, $pageHeight], true, 'UTF-8', false);
-$pdf->SetCreator('Central Cinema');
-$pdf->SetAuthor('Central Cinema');
-$pdf->SetTitle('Movie Ticket');
+            $pdf = new \TCPDF('P', 'mm', [$pageWidth, $pageHeight], true, 'UTF-8', false);
+            $pdf->SetCreator('Central Cinema');
+            $pdf->SetAuthor('Central Cinema');
+            $pdf->SetTitle('Movie Ticket');
 
-// Small margins for compact ticket
-$pdf->SetMargins(8, 8, 8);
-$pdf->SetAutoPageBreak(false); // Prevent extra space pushing
-$pdf->AddPage();
+            // Small margins for compact ticket
+            $pdf->SetMargins(8, 8, 8);
+            $pdf->SetAutoPageBreak(false); // Prevent extra space pushing
+// $pdf->AddPage();
 
-$booking = $detail['booking'];
-$movie   = $detail['movie'];
-$seats   = implode(', ', $detail['seats']);
+            $booking = $detail['booking'];
+            $movie = $detail['movie'];
+            $seats = implode(', ', $detail['seats']);
+            // Add page and set Unicode font
+            $pdf->AddPage();
+            // Set fonts
+            $pdf->SetFont('notosansmyanmar', '', 12); // register it once
+            $pdf->SetFont('dejavusans', '', 12);      // back to default
 
-$html = <<<HTML
+            // Ensure UTF-8 encoding
+            $movieName = mb_convert_encoding($movie['movie_name'], 'UTF-8', 'auto');
+            // $seats = implode(', ', $detail['seats']);
+            $html = <<<HTML
 <h3 style="text-align:center; margin:0;">Central Cinema</h3>
 <h4 style="text-align:center; margin:0;">Movie Ticket</h4>
 <hr/>
 <p><strong>Booking ID:</strong> {$booking['id']}</p>
-<p><strong>User:</strong> {$_SESSION['user_name']}</p>
-<p><strong>Movie:</strong> {$movie['movie_name']}</p>
+<p><strong>Name:</strong> {$_SESSION['user_name']}</p>
+<p><strong>Movie:</strong> <span style="font-family: notosansmyanmar;">{$movieName}</span></p>
 <p><strong>Showtime:</strong> {$movie['show_time_list']}</p>
 <p><strong>Date:</strong> {$booking['booking_date']}</p>
 <p><strong>Seats:</strong> {$seats}</p>
 <p><strong>Total:</strong> {$booking['total_amount']} MMK</p>
-<h4 style="text-align:center; font-size:10px; margin:0;">
-⚠ Please arrive at least 30 minutes before showtime
-</h4>
+<p style="text-center">Arrive 30 minutes before show time.</p>
 HTML;
 
-$pdf->writeHTML($html, true, false, true, false, '');
+            $pdf->writeHTML($html, true, false, true, false, '');
 
-// Draw QR code at the bottom
-$style = [
-    'border' => 1,
-    'vpadding' => 'auto',
-    'hpadding' => 'auto',
-    'fgcolor' => [0, 0, 0],
-    'bgcolor' => false,
-    'module_width' => 1,
-    'module_height' => 1
-];
+            // Draw QR code at the bottom
+            $style = [
+                'border' => 1,
+                'vpadding' => 'auto',
+                'hpadding' => 'auto',
+                'fgcolor' => [0, 0, 0],
+                'bgcolor' => false,
+                'module_width' => 1,
+                'module_height' => 1
+            ];
 
-// Place barcode at fixed Y position (near bottom)
-$pdf->write2DBarcode($qrData, 'QRCODE,H', 25, 120, 30, 30, $style, 'N');
+            // Place barcode at fixed Y position (near bottom)
+            $pdf->write2DBarcode($qrData, 'QRCODE,H', 25, 115, 30, 30, $style, 'N');
 
-$pdfFileName = 'ticket_' . $booking['id'] . '.pdf';
-$pdf->Output($pdfFileName, 'I');
+            $pdfFileName = 'ticket_' . $booking['id'] . '.pdf';
+            $pdf->Output($pdfFileName, 'I');
+            // $pdf->Output($pdfFileName, 'D'); // Browser download
+
 
 
             exit;

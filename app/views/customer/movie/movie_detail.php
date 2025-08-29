@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/../layout/nav.php';
+$user_id = $_SESSION['user_id'] ?? null;
+$user_role = $_SESSION['role'] ?? null;
 
+$is_logged_in = $user_id !== null && $user_role == 1; // Only customer
+$is_guest = $user_id === null; // Not logged in
 // Generate CSRF token if not set
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -65,11 +69,13 @@ if (!isset($_SESSION['csrf_token'])) {
                                 <i class="fas fa-ticket-alt"></i>
                                 Book Now
                             </a>
+                            <?php if ($is_logged_in): ?>
                             <button class="btn-modern btn-secondary-modern" data-bs-toggle="modal"
                                 data-bs-target="#rateModal">
                                 <i class="fas fa-star"></i>
                                 Rate Movie
                             </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -125,7 +131,7 @@ if (!isset($_SESSION['csrf_token'])) {
                     <p style="color: #6c757d; font-size: 1.2rem;">No comments yet. Be the first to share your thoughts!</p>
                 </div>
             <?php endif; ?>
-
+            <?php if ($is_logged_in): ?>
             <div class="comment-form">
                 <h4 style="color: #212529; margin-bottom: 1.5rem;">
                     <i class="fas fa-pen me-2"></i>
@@ -143,6 +149,7 @@ if (!isset($_SESSION['csrf_token'])) {
                     </button>
                 </form>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
